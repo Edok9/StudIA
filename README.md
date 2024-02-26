@@ -18,7 +18,7 @@ Para comenzar a ejecutar el proyecto, seguir los siguientes pasos:
   docker-compose up
 ```
 
-- Realizar las migraciones de las bases de datos de proyectos compartidos.
+- Realizar las migraciones de los modelos de proyectos compartidos.
 
 ```bash
   py manage.py makemigrations clientManager
@@ -27,10 +27,23 @@ Para comenzar a ejecutar el proyecto, seguir los siguientes pasos:
 
 ```
 
-- Con la base de datos en pie, migrar los modelos
+- Con la base de datos en pie, migrar los modelos a la base de datos.
 
 ```bash
   py manage.py migrate_schemas --shared
   py manage.py migrate_schemas
 
 ```
+
+## Creación de Tenants
+
+Para la creación de tenants se utiliza
+
+```bash
+  py manage.py create_tenant
+
+```
+
+En este se ejecutara el proceso de creación de tenant siguiendo el modelo alojado en `clientManager/models.py` con los campos que se puedan rellenar, así como la asignación de dominio con el formato `[subdominio].[dominio]`.
+
+Durante el proceso de creación se genera la base de datos correspondiente al tenant, con el nombre del campo `schema name`.
