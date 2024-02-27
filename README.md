@@ -18,15 +18,6 @@ Para comenzar a ejecutar el proyecto, seguir los siguientes pasos:
   docker-compose up
 ```
 
-- Realizar las migraciones de los modelos de proyectos compartidos.
-
-```bash
-  py manage.py makemigrations clientManager
-  py manage.py makemigrations loginApp
-  py manage.py makemigrations solicitudesManager
-
-```
-
 - Con la base de datos en pie, migrar los modelos a la base de datos.
 
 ```bash
