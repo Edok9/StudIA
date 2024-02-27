@@ -26,7 +26,7 @@ SECRET_KEY = 'django-insecure-w+*cbtuky&ghmcctne!wlo24-5+839qm$takon9w3a25^*@i)^
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['127.0.0.1','localhost']
 
 
 # Application definition
@@ -95,9 +95,9 @@ WSGI_APPLICATION = 'portalAutoatencion.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django_tenants.postgresql_backend',
-        'NAME': 'postgres',
+        'NAME': 'postgresql_backend',
         'USER': 'postgres',
-        'PASSWORD': 'postgres',
+        'PASSWORD': 'admin',
         'HOST': 'localhost',
         'PORT': 5432
     }
