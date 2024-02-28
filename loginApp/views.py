@@ -1,5 +1,7 @@
 from django.shortcuts import render, redirect
-from django.contrib.auth import authenticate, login
+from django.http import HttpResponse
+from django.contrib.auth import authenticate, login, logout
+from django.contrib.auth.decorators import login_required
 from loginApp.models import Usuario
 
 
@@ -13,7 +15,12 @@ def index(request):
         usuario = authenticate(request, email=email, clave=clave)
         if usuario is not None:
             login(request, usuario)
-            return redirect("logged")
+            # Parche para redirecciones del decorador login_required, revisar si hay una mejor solucion
+            next_url = request.GET.get('next', '')
+            if next_url:
+                return HttpResponse(status=302, headers={'Location': next_url})
+            else:
+                return redirect("home")
         else:
             try:
                 user = Usuario.objects.get(email=email)
@@ -24,13 +31,16 @@ def index(request):
     else:
         return render(request, "login.html")
 
-def logged(request):
-    if request.user.is_authenticated: # Check de la cookie llamada sessionid para ver si hay un usuario ingresado
-        return render(request, "correct_login.html")
-    else:
-        return redirect("unauthorized")
+@login_required
+def home(request):
+    return render(request, "home.html")
 
-def unauthorized(request):
-    return render(request, "unauthorized.html")
+@login_required
+def test(request):
+    return render(request, "test.html")
+
+def logoutProcess(request):
+    logout(request)
+    return render(request, "logout.html")
 
 # Create your views here.
