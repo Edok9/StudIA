@@ -6,6 +6,10 @@ class Tipo_Solicitud(models.Model):
     descripcion_t_sol = models.CharField(max_length=70)
     nombre_t_sol = models.CharField(max_length=25)
     estado_sol = models.CharField(max_length=1)
+
+    class Meta:
+        verbose_name = "Tipo de Solicitud"
+        verbose_name_plural = "Tipos de Solicitudes"
    
 class Solicitud(models.Model):
     id_sol = models.AutoField(primary_key=True)
@@ -15,6 +19,10 @@ class Solicitud(models.Model):
     created_at = models.DateTimeField()
     id_usuario = models.ForeignKey(Usuario, on_delete=models.CASCADE)
     id_tipo_sol = models.OneToOneField(Tipo_Solicitud, on_delete=models.CASCADE)
+
+    class Meta:
+        verbose_name = "Solicitud"
+        verbose_name_plural = "Solicitudes"
     
 class Dato_Entrada(models.Model):
     id_datos_ent = models.AutoField(primary_key=True)
@@ -24,11 +32,19 @@ class Dato_Entrada(models.Model):
     adjunto = models.FileField(upload_to='archivos/')
     notas = models.CharField(max_length=30)
     id_tipo_sol = models.OneToOneField(Tipo_Solicitud, on_delete=models.CASCADE)
+
+    class Meta:
+        verbose_name = "Dato de Entrada"
+        verbose_name_plural = "Datos de Entrada"
     
 class Dato_Salida(models.Model):
     id_datos_sal = models.AutoField(primary_key=True)
     estado_sal = models.CharField(max_length=40)
     fecha_resol = models.DateTimeField()
     id_tipo_sol = models.OneToOneField(Tipo_Solicitud, on_delete=models.CASCADE)
+
+    class Meta:
+        verbose_name = "Dato de Salida"
+        verbose_name_plural = "Datos de Salida"
 
 # Create your models here.
