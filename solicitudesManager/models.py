@@ -10,6 +10,9 @@ class Tipo_Solicitud(models.Model):
     class Meta:
         verbose_name = "Tipo de Solicitud"
         verbose_name_plural = "Tipos de Solicitudes"
+        
+    def __str__(self):
+        return self.nombre_t_sol
    
 class Solicitud(models.Model):
     id_sol = models.AutoField(primary_key=True)
@@ -23,6 +26,9 @@ class Solicitud(models.Model):
     class Meta:
         verbose_name = "Solicitud"
         verbose_name_plural = "Solicitudes"
+    
+    def __str__(self):
+        return self.nombre_sol
     
 class Dato_Entrada(models.Model):
     id_datos_ent = models.AutoField(primary_key=True)
