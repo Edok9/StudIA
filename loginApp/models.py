@@ -9,7 +9,7 @@ class Tipo_Usuario(models.Model):
     descripcion = models.CharField(max_length=25)
     
     def __str__(self):
-        return self.role
+        return self.rol
 
 
 class Usuario(models.Model):

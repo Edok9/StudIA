@@ -17,7 +17,7 @@ class Migration(migrations.Migration):
             name='Tipo_Usuario',
             fields=[
                 ('id_t_usuario', models.AutoField(primary_key=True, serialize=False)),
-                ('role', models.CharField(max_length=25)),
+                ('rol', models.CharField(max_length=25)),
                 ('estado_activacion', models.CharField(max_length=25)),
                 ('descripcion', models.CharField(max_length=25)),
             ],
