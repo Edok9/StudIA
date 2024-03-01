@@ -21,7 +21,7 @@ class Solicitud(models.Model):
     descripcion_sol = models.CharField(max_length=70, verbose_name = "Descripción")
     created_at = models.DateTimeField(verbose_name = "Fecha de Creación")
     id_usuario = models.ForeignKey(Usuario, on_delete=models.CASCADE, verbose_name = "Usuario")
-    id_tipo_sol = models.OneToOneField(Tipo_Solicitud, on_delete=models.CASCADE, verbose_name = "Tipo de Solicitud")
+    id_tipo_sol = models.ForeignKey(Tipo_Solicitud, on_delete=models.CASCADE, verbose_name = "Tipo de Solicitud")
 
     class Meta:
         verbose_name = "Solicitud"

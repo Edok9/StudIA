@@ -9,24 +9,58 @@
 </head>
 
 <body>
-    <div class="flex justify-center m-4 py-4">
-        <img src="/static/logo_entel.svg" alt="">
+    <div class="grid grid-cols-2 justify-center m-4 py-4">
+        <div>
+            <img src="../static/logo_entel.svg" alt="">
+        </div>
+        <form class="place-self-end" action="{% url 'logout' %}" method="post">
+            {% csrf_token %}
+            <button
+                class="inline-flex items-center justify-center text-sm font-medium h-10 px-4 py-2 bg-[#FF3D00] text-white rounded-full"
+                type="submit">Virar de aca</button>
+        </form>
     </div>
     <!--
 // v0 by Vercel.
 // https://v0.dev/t/qeujZ1tYEtT
 -->
-    <div class="flex flex-col items-center justify-center w-full min-h-[400px] gap-2 text-center">
-        <div class="space-y-4 text-center mx-2">
-            <h1 class="text-3xl font-bold tracking-tighter text-[#005CFF] sm:text-4xl">Home</h1>
-            <p class="text-gray-500 dark:text-gray-400">
-                Imagina que esto es la pantalla de home, si llegaste, bienvenido {{request.user}}.
-            </p>
-            <form action="{% url 'logout' %}" method="post">
-                {% csrf_token %}
-                <button class="inline-flex items-center justify-center text-sm font-medium h-10 px-4 py-2 w-full bg-[#FF3D00] text-white rounded-full"
-                type="submit">Virar de aca</button>
-              </form>
+    <div class="grid grid-cols-[max-content_1fr] justify-center m-4 px-8 py-4">
+        <div class="space-y-4 text-center mx-2 max-w-xs">
+            <h1 class="text-2xl font-bold text-[#005CFF]">Bienvenido Usuario</h1>
+            <h2 class="text-xl font-bold text-[#005CFF]">Tu Empresa</h2>
+            <ul class="text-gray-500 space-y-4">
+                {% if solicitudes %}
+                    {% for solicitud in solicitudes%}
+                        <li>{{solicitud.nombre_sol}} - {{solicitud.descripcion_sol }}</li>
+                    {%endfor%}
+                {% else %}
+                {% endif %}
+            </ul>
+        </div>
+        <div class="flex flex-col justify-center items-center space-y-4">
+            <h1 class="text-2xl font-bold text-[#005CFF]">Datos de Usuario</h1>
+            <ul>
+                <li>
+                    <label class="text-sm font-medium" for="email">Email</label>
+                        <input class="flex rounded-md border border-input px-3 py-2 text-sm"
+                            id="email" name="email" value="{{request.user.email}}" placeholder="jperez@entel.cl" disabled="" type="email">
+                </li>
+                <li>
+                    <label class="text-sm font-medium" for="nombre">Nombre</label>
+                        <input class="flex rounded-md border border-input px-3 py-2 text-sm"
+                            id="nombre" name="nombre" value="{{request.user}}" placeholder="Jorge Perez" disabled="" type="text">
+                </li>
+                <li>
+                    <label class="text-sm font-medium" for="adjunto">Adjunto</label>
+                        <input class="flex rounded-md border border-input px-3 py-2 text-sm"
+                            id="adjunto" name="adjunto" placeholder="ni idea que va aca" disabled="" type="text">
+                </li>
+                <li>
+                    <label class="text-sm font-medium" for="notas">Notas</label>
+                        <input class="flex rounded-md border border-input px-3 py-2 text-sm"
+                            id="notas" name="notas" placeholder="aca tampoco" disabled="" type="text">
+                </li>
+            </ul>
         </div>
     </div>
 </body>

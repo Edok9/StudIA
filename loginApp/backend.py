@@ -1,7 +1,7 @@
 from django.contrib.auth.backends import ModelBackend
 from loginApp.models import Usuario
 
-class TenantAwareBackend(ModelBackend): #  Gracias Chatgpt
+class UsuarioBackend(ModelBackend): # Gracias Chatgpt
     def authenticate(self, request, email=None, clave=None, **kwargs):
         try:
             user = Usuario.objects.get(email=email)

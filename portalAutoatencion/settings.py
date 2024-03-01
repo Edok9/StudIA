@@ -32,7 +32,7 @@ ALLOWED_HOSTS = []
 # Application definition
 
 AUTHENTICATION_BACKENDS = [
-    'loginApp.backend.TenantAwareBackend',
+    'loginApp.backend.UsuarioBackend',
     'django.contrib.auth.backends.ModelBackend'
 ]
 

@@ -3,6 +3,7 @@ from django.http import HttpResponse
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
 from loginApp.models import Usuario
+from solicitudesManager.models import Solicitud
 
 
 def index(request):
@@ -33,7 +34,9 @@ def index(request):
 
 @login_required
 def home(request):
-    return render(request, "home.html")
+    solicitudes = Solicitud.objects.filter(id_usuario = request.user.id_usuario)
+    datos_solicitudes = {"solicitudes": solicitudes}
+    return render(request, "home.html", datos_solicitudes)
 
 @login_required
 def test(request):
