@@ -32,12 +32,10 @@ class Solicitud(models.Model):
     
 class Dato_Entrada(models.Model):
     id_datos_ent = models.AutoField(primary_key=True)
-    email_usuario = models.CharField(max_length=30)
-    nombre_cuenta = models.CharField(max_length=30)
-    created_at = models.DateTimeField()
+    created_at = models.DateTimeField(auto_now_add=True)
     adjunto = models.FileField(upload_to='archivos/')
     notas = models.CharField(max_length=30)
-    id_tipo_sol = models.OneToOneField(Tipo_Solicitud, on_delete=models.CASCADE)
+    id_sol = models.OneToOneField(Solicitud, on_delete=models.CASCADE, null=True)
 
     class Meta:
         verbose_name = "Dato de Entrada"
@@ -47,7 +45,7 @@ class Dato_Salida(models.Model):
     id_datos_sal = models.AutoField(primary_key=True)
     estado_sal = models.CharField(max_length=40)
     fecha_resol = models.DateTimeField()
-    id_tipo_sol = models.OneToOneField(Tipo_Solicitud, on_delete=models.CASCADE)
+    id_sol = models.OneToOneField(Solicitud, on_delete=models.CASCADE, null=True)
 
     class Meta:
         verbose_name = "Dato de Salida"

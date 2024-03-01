@@ -38,27 +38,27 @@
             </ul>
         </div>
         <div class="flex flex-col justify-center items-center space-y-4">
-            <h1 class="text-2xl font-bold text-[#005CFF]">Datos de Usuario</h1>
+            <h1 class="text-2xl font-bold text-[#005CFF]">Datos de Solicitud</h1>
             <ul>
-                <li>
-                    <label class="text-sm font-medium" for="email">Email</label>
-                        <input class="flex rounded-md border border-input px-3 py-2 text-sm"
-                            id="email" name="email" value="{{request.user.email}}" placeholder="jperez@entel.cl" disabled="" type="email">
-                </li>
                 <li>
                     <label class="text-sm font-medium" for="nombre">Nombre</label>
                         <input class="flex rounded-md border border-input px-3 py-2 text-sm"
-                            id="nombre" name="nombre" value="{{request.user}}" placeholder="Jorge Perez" disabled="" type="text">
+                            id="nombre" name="nombre" value="{{solicitudUsuario.nombre_sol}}" disabled="" type="text">
                 </li>
                 <li>
-                    <label class="text-sm font-medium" for="telefono">Telefono</label>
+                    <label class="text-sm font-medium" for="tipo">Tipo</label>
                         <input class="flex rounded-md border border-input px-3 py-2 text-sm"
-                            id="telefono" name="telefono" value="{{request.user.telefono}}" disabled="" type="text">
+                            id="tipo" name="tipo" value="{{solicitudUsuario.tipo_sol}}" placeholder="Jorge Perez" disabled="" type="text">
                 </li>
                 <li>
-                    <label class="text-sm font-medium" for="notas">Cargo</label>
+                    <label class="text-sm font-medium" for="desc">Descripción</label>
                         <input class="flex rounded-md border border-input px-3 py-2 text-sm"
-                            id="notas" name="notas" value="{{request.user.cargo}}" disabled="" type="text">
+                            id="desc" name="desc" value="{{solicitudUsuario.descripcion_sol}}" disabled="" type="text">
+                </li>
+                <li>
+                    <label class="text-sm font-medium" for="fecha">Fecha de Creación</label>
+                        <input class="flex rounded-md border border-input px-3 py-2 text-sm"
+                            id="fecha" name="fecha" value="{{solicitudUsuario.created_at}}" disabled="" type="text">
                 </li>
             </ul>
         </div>

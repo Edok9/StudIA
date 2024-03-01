@@ -39,6 +39,19 @@ def home(request):
     return render(request, "home.html", datos_solicitudes)
 
 @login_required
+def infoSolicitud(request, pk):
+    try:
+        solicitud = Solicitud.objects.get(id_sol = pk, id_usuario = request.user.id_usuario)
+        solicitudes = Solicitud.objects.filter(id_usuario = request.user.id_usuario)
+        datos_solicitudes = {
+            "solicitudes": solicitudes,
+            "solicitudUsuario": solicitud
+            }
+        return render(request, "infoSolicitud.html", datos_solicitudes)
+    except Solicitud.DoesNotExist:
+        return redirect('home')
+
+@login_required
 def test(request):
     return render(request, "test.html")
 
