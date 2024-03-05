@@ -39,6 +39,37 @@ def home(request):
     return render(request, "home.html", datos_solicitudes)
 
 @login_required
+def usuarios(request):
+    solicitudes = Solicitud.objects.filter(id_usuario = request.user.id_usuario)
+    usuarios = Usuario.objects.all().order_by('id_usuario')
+    datos = {"solicitudes": solicitudes,
+             "usuarios": usuarios}
+    return render(request, "usuarios.html", datos)
+
+@login_required
+def nuevoUsuario(request):
+    if request.method == "POST":
+        nombreUsuario = request.POST["nombre"]
+        emailUsuario = request.POST["email"]
+        telefonoUsuario = request.POST["telefono"]
+        claveUsuario = request.POST["clave"]
+        # cargo = request.POST["cargo"]
+        # horario_atencion = request.POST["horario_atencion"]
+        usuario = Usuario.objects.create_user(
+            nombre = nombreUsuario,
+            email = emailUsuario,
+            telefono = telefonoUsuario,
+            clave = claveUsuario
+        )
+        solicitudes = Solicitud.objects.filter(id_usuario = request.user.id_usuario)
+        datos_solicitudes = {"solicitudes": solicitudes}
+        return render(request, "crear_usuario.html", datos_solicitudes)
+    else:
+        solicitudes = Solicitud.objects.filter(id_usuario = request.user.id_usuario)
+        datos_solicitudes = {"solicitudes": solicitudes}
+        return render(request, "crear_usuario.html", datos_solicitudes)
+
+@login_required
 def infoSolicitud(request, pk):
     try:
         solicitud = Solicitud.objects.get(id_sol = pk, id_usuario = request.user.id_usuario)

@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Usuarios</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+
+<body>
+    <div class="grid grid-cols-2 justify-center m-4 py-4">
+        <div>
+            <img src="../static/logo_entel.svg" alt="">
+        </div>
+        <form class="place-self-end" action="{% url 'logout' %}" method="post">
+            {% csrf_token %}
+            <button
+                class="inline-flex items-center justify-center text-sm font-medium h-10 px-4 py-2 bg-[#FF3D00] text-white rounded-full"
+                type="submit">Virar de aca</button>
+        </form>
+    </div>
+    <!--
+// v0 by Vercel.
+// https://v0.dev/t/qeujZ1tYEtT
+-->
+    <div class="grid grid-cols-[max-content_1fr] justify-center m-4 px-8 py-4">
+        <div class="space-y-4 text-center mx-2 max-w-xs">
+            <h1 class="text-2xl font-bold text-[#005CFF]">Bienvenido {{request.user}}</h1>
+            <h2 class="text-xl font-bold text-[#005CFF]">{{request.tenant.nombre_empresa}}</h2>
+            <ul class="text-gray-500 space-y-4">
+                {% if solicitudes %}
+                {% for solicitud in solicitudes %}
+                <li><a href="{% url 'infoSolicitud' pk=solicitud.id_sol %}"
+                        class="hover:bg-gray-100">{{solicitud.nombre_sol}} - {{solicitud.descripcion_sol }}</a></li>
+                {%endfor%}
+                {% endif %}
+            </ul>
+        </div>
+        <div class="flex flex-col justify-center items-center space-y-4">
+            <h1 class="text-2xl font-bold text-[#005CFF]">Usuarios</h1>
+<!--
+// v0 by Vercel.
+// https://v0.dev/t/5NcWwZWEvFJ
+-->
+            <div class="flex flex-col w-full gap-4">
+                <div class="border rounded-lg">
+                    <div class="relative w-full overflow-auto">
+                        <table class="w-full caption-bottom text-sm">
+                            <thead class="[&amp;_tr]:border-b">
+                                <tr class="border-b transition-colors hover:bg-muted/50 data-[state=selected]:bg-muted">
+                                    <th
+                                        class="h-12 px-4 text-left align-middle font-medium w-[100px]">
+                                        ID</th>
+                                    <th
+                                        class="h-12 px-4 text-left align-middle font-medium">
+                                        Nombre</th>
+                                    <th
+                                        class="h-12 px-4 text-left align-middle font-medium">
+                                        Email</th>
+                                    <th
+                                        class="h-12 px-4 text-left align-middle font-medium">
+                                        Rol</th>
+                                    <th
+                                        class="h-12 px-4 align-middle font-medium w-[120px] text-right">
+                                        Acciones
+                                    </th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% if usuarios %}
+                                {% for usuario in usuarios %}                           
+                                <tr>
+                                    <td class="p-4 align-middle font-medium">{{usuario.id_usuario}}</td>
+                                    <td class="p-4 align-middle">{{usuario.nombre_usuario}}</td>
+                                    <td class="p-4 align-middle">{{usuario.email}}</td>
+                                    <td class="p-4 align-middle">{{usuario.id_t_usuario}}</td>
+                                    <td class="p-4 align-middle text-right"><button
+                                            class="inline-flex items-center justify-center whitespace-nowrap text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 hover:bg-accent hover:text-accent-foreground h-10 w-10 rounded-full"><svg
+                                                xmlns="http://www.w3.org/2000/svg" width="24" height="24"
+                                                viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                                                stroke-linecap="round" stroke-linejoin="round" class="w-4 h-4">
+                                                <path d="M4 13.5V4a2 2 0 0 1 2-2h8.5L20 7.5V20a2 2 0 0 1-2 2h-5.5">
+                                                </path>
+                                                <polyline points="14 2 14 8 20 8"></polyline>
+                                                <path
+                                                    d="M10.42 12.61a2.1 2.1 0 1 1 2.97 2.97L7.95 21 4 22l.99-3.95 5.43-5.44Z">
+                                                </path>
+                                            </svg><span class="sr-only">Editar</span></button><button
+                                            class="inline-flex items-center justify-center whitespace-nowrap text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 hover:bg-accent hover:text-accent-foreground h-10 w-10 rounded-full"><svg
+                                                xmlns="http://www.w3.org/2000/svg" width="24" height="24"
+                                                viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                                                stroke-linecap="round" stroke-linejoin="round" class="w-4 h-4">
+                                                <path d="M3 6h18"></path>
+                                                <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"></path>
+                                                <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"></path>
+                                            </svg><span class="sr-only">Borrar</span></button></td>
+                                </tr>
+                                {% endfor %}
+                                {% endif %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <div class="flex w-full justify-end"><a href="{% url 'nuevoUsuario' %}"
+                        class="inline-flex items-center justify-center text-sm font-medium bg-primary h-9 rounded-md px-3">
+                        Crear usuario</a></div>
+            </div>
+        </div>
+    </div>
+</body>
+
+</html>

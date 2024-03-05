@@ -33,7 +33,6 @@
                     {% for solicitud in solicitudes %}
                         <li><a href="{% url 'infoSolicitud' pk=solicitud.id_sol %}" class="hover:bg-gray-100">{{solicitud.nombre_sol}} - {{solicitud.descripcion_sol }}</a></li>
                     {%endfor%}
-                {% else %}
                 {% endif %}
             </ul>
         </div>
