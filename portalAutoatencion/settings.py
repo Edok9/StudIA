@@ -125,6 +125,8 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
+AUTH_USER_MODEL= "loginApp.Usuario"
+
 LOGIN_URL = "/"
 
 # Internationalization

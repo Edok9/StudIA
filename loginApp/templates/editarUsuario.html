@@ -1,0 +1,63 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Usuarios</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+
+<body>
+    <div class="grid grid-cols-2 justify-center m-4 py-4">
+        <div>
+            <img src="{% static "logo_entel.svg" %}" alt="">
+        </div>
+        <form class="place-self-end" action="{% url 'logout' %}" method="post">
+            {% csrf_token %}
+            <button
+                class="inline-flex items-center justify-center text-sm font-medium h-10 px-4 py-2 bg-[#FF3D00] text-white rounded-full"
+                type="submit">Virar de aca</button>
+        </form>
+    </div>
+    <!--
+// v0 by Vercel.
+// https://v0.dev/t/qeujZ1tYEtT
+-->
+    <div class="grid grid-cols-[max-content_1fr] justify-center m-4 px-8 py-4">
+        <div class="space-y-4 text-center mx-2 max-w-xs">
+            <h1 class="text-2xl font-bold text-[#005CFF]">Bienvenido {{request.user}}</h1>
+            <h2 class="text-xl font-bold text-[#005CFF]">{{request.tenant.nombre_empresa}}</h2>
+            <ul class="text-gray-500 space-y-4">
+                {% if solicitudes %}
+                {% for solicitud in solicitudes %}
+                <li><a href="{% url 'infoSolicitud' pk=solicitud.id_sol %}"
+                        class="hover:bg-gray-100">{{solicitud.nombre_sol}} - {{solicitud.descripcion_sol }}</a></li>
+                {%endfor%}
+                {% endif %}
+            </ul>
+        </div>
+        <div class="flex flex-col justify-center items-center space-y-4">
+            <h1 class="text-2xl font-bold text-[#005CFF]">Editar Usuario</h1>
+            <form method="post"> {% csrf_token %}
+                {% for campo in formulario %}
+                <div class="space-y-2">
+                    <label class="text-sm font-medium" for="{{campo.id_for_label}}">
+                        {{campo.label}}
+                    </label>
+                    {{campo}}
+                </div>
+                {% endfor %}
+                <button
+                    class="inline-flex items-center justify-center text-sm font-medium h-10 px-4 py-2 my-4 bg-[#FF3D00] text-white rounded-full"
+                    type="submit">
+                    Guardar Cambios
+                </button>
+            </form>
+        </div>
+        
+    </div>
+</body>
+
+</html>

@@ -1,6 +1,6 @@
+{% load static %}
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -11,7 +11,7 @@
 <body>
     <div class="grid grid-cols-2 justify-center m-4 py-4">
         <div>
-            <img src="../static/logo_entel.svg" alt="">
+            <img src="{% static "logo_entel.svg" %}" alt="">
         </div>
         <form class="place-self-end" action="{% url 'logout' %}" method="post">
             {% csrf_token %}
