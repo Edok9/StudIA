@@ -120,7 +120,14 @@ def editarClaveAdmin(request, pk):
 
 @staff_member_required(redirect_field_name=None, login_url=reverse_lazy("home"))
 def borrarUsuario(request, pk):
-    pass
+    usuario = Usuario.objects.get(id_usuario = pk)
+    
+    # Impedir que el usuario se elimine a si mismo a la fuerza
+    if request.user.id_usuario == usuario.id_usuario:
+        return redirect("usuarios")
+    
+    usuario.delete()
+    return redirect("usuarios")
 
 def logoutProcess(request):
     logout(request)
