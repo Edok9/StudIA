@@ -1,0 +1,65 @@
+{% extends "base.html" %}
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mostrar Vehiculos</title>
+</head>
+<body>
+    {% block content %}
+    <br><br><br><br>
+    <div class="container-fluid">
+        <div class="row justify-content-center">
+            <div class="col-md-4 bg-dark text-light p-4 rounded">
+                <div class="nueva-solicitud-container">
+                    <h3>Nueva Solicitud: (Selección del menú)</h3>
+                    <form id="nuevaSolicitudForm">
+                        <div class="mb-3">
+                            <label for="correo" class="form-label">Correo de usuario:</label>
+                            <input type="email" class="form-control" id="correo" name="correo" required
+                                   placeholder="edo@gmail.com">
+                            <div id="correoError" class="text-danger"></div>
+                        </div>
+                        <div class="input-group">
+                            <label>Adjunto (si se requiere):</label>
+                            <input type="file" id="adjunto" name="adjunto">
+                        </div>
+                        <div class="form-group">
+                            <label for="comentarios">Notas:</label>
+                            <textarea rows="5" id="comentarios" class="form-control"></textarea>
+                        </div>
+                        <div class="form-group">
+                            <br>
+                            <input type="submit" value="Enviar" id="enviar" class="btn btn-primary">
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endblock %}
+    
+    <script>
+        document.getElementById('nuevaSolicitudForm').addEventListener('submit', function(event) {
+            var correoInput = document.getElementById('correo');
+            var adjuntoInput = document.getElementById('adjunto');
+
+            // Validación del correo electrónico
+            if (!correoInput.validity.valid) {
+                event.preventDefault();
+                document.getElementById('correoError').innerText = 'Por favor, ingrese un correo electrónico válido.';
+            } else {
+                document.getElementById('correoError').innerText = '';
+            }
+
+            // Validación del adjunto
+            if (adjuntoInput.value.trim() === '') {
+                event.preventDefault();
+                alert('Por favor, adjunte un archivo.');
+            }
+        });
+    </script>
+</body>
+</html>

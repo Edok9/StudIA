@@ -1,0 +1,68 @@
+{% extends 'base.html'%}
+
+
+    <title>{% block title %}Reportería{% endblock %}</title>
+    
+<body>
+    {% block content %}
+    <br><br><br><br>
+    <div class="container-fluid">
+        <div class="row justify-content-center">
+            <div class="col-md-6 bg-dark text-light p-4 rounded">
+                <div class="solicitudes-container">
+                    <h3>Administración</h3>
+                    <hr class="bg-light">
+                    <h3>Reportería</h3>
+                    <hr class="bg-light">
+                    <div class="reporteria-container">
+                        <h4>Extraer Total Solicitudes</h4>
+                        <select class="form-select mb-3">
+                            <option value="24_horas">24 Horas</option>
+                            <option value="7_dias">7 Días</option>
+                            <option value="1_mes">1 Mes</option>
+                        </select>
+                        <br>
+                        <h4>Extraer Total Usuarios</h4>
+                        <button class="btn btn-primary">Extraer Reporte</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- Fin del contenedor principal -->
+    
+    
+    <script>
+        function toggleSubMenu(submenuId) {
+            var submenu = document.getElementById(submenuId);
+            submenu.style.display = (submenu.style.display === 'block') ? 'none' : 'block';
+        }
+
+        function showSolicitud(num) {
+            // Aquí puedes realizar alguna acción al hacer clic en una solicitud específica
+            console.log("Mostrar solicitud " + num);
+        }
+
+        function showAdministracion(num) {
+            // Aquí puedes realizar alguna acción al hacer clic en una solicitud específica
+            console.log("Mostrar solicitud " + num);
+        }
+
+        function showEstadoSolicitudes() {
+            // Aquí puedes realizar alguna acción al hacer clic en "Estado Solicitudes"
+            console.log("Mostrar estado de solicitudes");
+        }
+
+        function showInformacionSolicitudes() {
+            // Aquí puedes realizar alguna acción al hacer clic en "Información Solicitudes"
+            console.log("Mostrar información de solicitudes");
+        }
+
+        function showReportería() {
+            var reporteriaContainer = document.querySelector('.reporteria-container');
+            reporteriaContainer.style.display = 'block';
+        }
+    </script>
+    {% endblock %}
+</body>
+</html>

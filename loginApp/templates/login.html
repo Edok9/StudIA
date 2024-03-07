@@ -1,17 +1,13 @@
+{% extends 'fondo.html' %}
 {% load static %}
-<!doctype html>
-<html lang="en">
 
-<head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Login</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-</head>
+    <title>{% block title %}Login{% endblock %}</title>
+
 
 <body>
+    {% block content %}
     <div class="flex justify-center m-4 py-4">
-        <img src="{% static '/logo_entel.svg' %}" alt="">
+        <img src="{% static '/logo_entel.svg' %}" alt="" width="100" height="75">
     </div>
 
     <!--
@@ -20,10 +16,10 @@
 -->
     <div class="flex items-center m-4 justify-center">
         <div class="w-full max-w-md space-y-4">
-            <div class="rounded-lg border bg-card text-card-foreground py-6 px-6" data-v0-t="card">
+            <div class="rounded-lg border bg-card bg-blue-100 text-card-foreground py-6 px-6" data-v0-t="card">
                 <div class="flex flex-col space-y-1.5 py-6 px-8 text-center">
-                    <h3 class="text-4xl font-bold text-[#005CFF]">Acceso API</h3>
-                    <h3 class="text-4xl font-bold text-[#005CFF]">{{request.tenant.nombre_empresa}}</h3>
+                    <h3 class="text-4xl font-bold text-black">Acceso API</h3>
+                    <h3 class="text-4xl font-bold text-black">{{request.tenant.nombre_empresa}}</h3>
                 </div>
                 <form method="post" class="py-6 px-6 space-y-4"> {% csrf_token %}
                     <div class="space-y-2">
@@ -52,6 +48,7 @@
             </div>
         </div>
     </div>
+    {% endblock %}
 </body>
 
 </html>

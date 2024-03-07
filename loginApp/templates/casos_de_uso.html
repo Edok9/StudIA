@@ -1,0 +1,131 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Casos de Uso{% endblock %}
+
+{% block content %}
+<br><br><br><br>
+<div class="container-fluid">
+    <div class="row justify-content-center">
+        <div class="col-md-4 bg-dark text-light p-4 rounded">
+            <div class="solicitudes-container">
+                <h3>Administración</h3>
+                <hr class="bg-light">
+                <h3>Editar casos de uso</h3>
+                <hr class="bg-light">
+                <div class="formulario-container">
+                    <form id="mi-formulario" method="post">
+                        <div class="form-group">
+                            <label for="nom">Nombre</label>
+                            <input type="text" id="nom" name="nom" minlength="3" required
+                                   placeholder="Victor Monsalves" class="form-control">
+                            <div id="nomError" class="text-danger"></div>
+                        </div>
+                        <div class="form-group">
+                            <br>
+                            <label for="genero">Tipo de Solicitud:</label>
+                            <select name="genero" id="genero" class="form-control">
+                                <option value="1">A</option>
+                                <option value="2">B</option>
+                                <option value="3">Otro Tipo</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <br>
+                            <label for="descripcion">Descripción</label>
+                            <input type="text" id="descripcion" name="descripcion" minlength="3" required
+                                   placeholder="Descripción" class="form-control">
+                            <div id="descripcionError" class="text-danger"></div>
+                        </div>
+                        <div class="form-group">
+                            <br>
+                            <label for="estado">Estado</label>
+                            <input type="text" id="estado" name="estado" minlength="3" required
+                                   placeholder="Estado" class="form-control">
+                            <div id="estadoError" class="text-danger"></div>
+                        </div>  
+                        <div class="buttons-container">
+                            <br>
+                            <button id="enviarBtn" type="submit" class="btn btn-primary">Crear</button>
+                            <button id="editarBtn" type="button" class="btn btn-secondary">Editar</button>
+                            <button id="eliminarBtn" type="button" class="btn btn-danger">Eliminar</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-validate/1.19.3/jquery.validate.min.js"></script>
+<script>
+    $(document).ready(function() {
+        $("#mi-formulario").validate({
+            rules: {
+                nom: {
+                    required: true,
+                    minlength: 3
+                },
+                correo: {
+                    required: true,
+                    email: true
+                }
+            },
+            messages: {
+                nom: {
+                    required: 'Ingrese el nombre de usuario',
+                    minlength: 'Ingrese al menos 3 caracteres'
+                },
+                correo: {
+                    required: 'Ingrese el correo de usuario',
+                    email: 'Ingrese un correo electrónico válido'
+                }
+            },
+            errorPlacement: function(error, element) {
+                if (element.attr("name") === "nom") {
+                    error.appendTo("#nomError");
+                } else if (element.attr("name") === "correo") {
+                    error.appendTo("#correoError");
+                } else if (element.attr("name") === "descripcion") {
+                    error.appendTo("#descripcionError");
+                } else if (element.attr("name") === "estado") {
+                    error.appendTo("#estadoError");
+                } else {
+                    error.insertAfter(element);
+                }
+            }
+        });
+        
+        // Cambiar el color de fondo al enfocar y desenfocar los campos de entrada
+        $("input, textarea").focus(function() {
+            $(this).css("background-color", "#cceeff");
+        }).blur(function() {
+            $(this).css("background-color", "");
+        });
+        
+        // Confirmación antes de editar
+        $("#editarBtn").click(function() {
+            if ($("#nom").val() === "" || $("#descripcion").val() === "" || $("#estado").val() === "") {
+                alert("Por favor complete todos los campos antes de editar.");
+            } else {
+                if (confirm("¿Está seguro de que desea editar?")) {
+                    // Lógica para editar
+                    console.log('Botón "Editar" presionado');
+                }
+            }
+        });
+        
+        // Confirmación antes de eliminar
+        $("#eliminarBtn").click(function() {
+            if ($("#nom").val() === "" || $("#descripcion").val() === "" || $("#estado").val() === "") {
+                alert("Por favor complete todos los campos antes de eliminar.");
+            } else {
+                if (confirm("¿Está seguro de que desea eliminar?")) {
+                    // Lógica para eliminar
+                    console.log('Botón "Eliminar" presionado');
+                }
+            }
+        });
+    });
+</script>
+{% endblock %}
