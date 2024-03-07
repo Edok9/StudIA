@@ -56,6 +56,8 @@
                                         Nombre</th>
                                     <th class="h-12 px-4 text-left align-middle font-medium">
                                         Email</th>
+                                    <th class="h-12 px-4 text-left align-middle font-medium">
+                                        Rol</th>
                                     <th class="h-12 px-4 align-middle font-medium w-[160px] text-middle">
                                         Acciones
                                     </th>
@@ -68,6 +70,11 @@
                                     <td class="p-4 align-middle font-medium">{{usuario.id_usuario}}</td>
                                     <td class="p-4 align-middle">{{usuario.nombre_usuario}}</td>
                                     <td class="p-4 align-middle">{{usuario.email}}</td>
+                                    {% if usuario.is_staff %}
+                                    <td class="p-4 align-middle">Administrador</td>
+                                    {% else %}
+                                    <td class="p-4 align-middle">Usuario</td>
+                                    {% endif %}
                                     <td class="p-4 align-middle text-right">
                                         <button
                                             class="inline-flex items-center justify-center whitespace-nowrap text-sm font-medium h-10 w-10 rounded-full"
