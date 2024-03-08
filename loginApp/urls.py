@@ -7,7 +7,9 @@ urlpatterns = [
     path('logout', views.logoutProcess, name='logout'),
     path('home', views.home, name='home'),
     # URLs para usuarios
-    path('solicitud/<int:pk>', views.infoSolicitud, name="infoSolicitud"),
+    path('solicitudes', views.infoSolicitudes, name="solicitudes"),
+    path('estadoSolicitudes', views.infoSolicitudes, name="estadoSolicitudes"),
+    path('infoSolicitudes', views.infoSolicitudes, name="infoSolicitudes"),
     
     
     # URLs para admins
@@ -16,4 +18,5 @@ urlpatterns = [
     path('editar/usuario/<int:pk>', views.editarUsuario, name="editarUsuario"),
     path('editar/clave/<int:pk>', views.editarClaveAdmin, name='editarClaveAdmin'),
     path('borrar/<int:pk>', views.borrarUsuario, name='borrarUsuario'),
+    path('reportes', views.usuarios, name='reporteria'),
 ]

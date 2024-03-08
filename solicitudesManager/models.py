@@ -14,28 +14,12 @@ class Tipo_Solicitud(models.Model):
     def __str__(self):
         return self.nombre_t_sol
    
-class Solicitud(models.Model):
-    id_sol = models.AutoField(primary_key=True)
-    nombre_sol = models.CharField(max_length=30, verbose_name = "Nombre")
-    tipo_sol = models.CharField(max_length=30, verbose_name = "Tipo")
-    descripcion_sol = models.CharField(max_length=70, verbose_name = "Descripción")
-    created_at = models.DateTimeField(verbose_name = "Fecha de Creación")
-    id_usuario = models.ForeignKey(Usuario, on_delete=models.CASCADE, verbose_name = "Usuario")
-    id_tipo_sol = models.ForeignKey(Tipo_Solicitud, on_delete=models.CASCADE, verbose_name = "Tipo de Solicitud")
-
-    class Meta:
-        verbose_name = "Solicitud"
-        verbose_name_plural = "Solicitudes"
-    
-    def __str__(self):
-        return self.nombre_sol
     
 class Dato_Entrada(models.Model):
     id_datos_ent = models.AutoField(primary_key=True)
     created_at = models.DateTimeField(auto_now_add=True)
     adjunto = models.FileField(upload_to='archivos/')
     notas = models.CharField(max_length=30)
-    id_sol = models.OneToOneField(Solicitud, on_delete=models.CASCADE, null=True)
 
     class Meta:
         verbose_name = "Dato de Entrada"
@@ -45,10 +29,26 @@ class Dato_Salida(models.Model):
     id_datos_sal = models.AutoField(primary_key=True)
     estado_sal = models.CharField(max_length=40)
     fecha_resol = models.DateTimeField()
-    id_sol = models.OneToOneField(Solicitud, on_delete=models.CASCADE, null=True)
 
     class Meta:
         verbose_name = "Dato de Salida"
         verbose_name_plural = "Datos de Salida"
 
+class Solicitud(models.Model):
+    id_sol = models.AutoField(primary_key=True)
+    nombre_sol = models.CharField(max_length=30, verbose_name = "Nombre")
+    tipo_sol = models.CharField(max_length=30, verbose_name = "Tipo")
+    descripcion_sol = models.CharField(max_length=70, verbose_name = "Descripción")
+    created_at = models.DateTimeField(verbose_name = "Fecha de Creación")
+    id_usuario = models.ForeignKey(Usuario, on_delete=models.CASCADE, verbose_name = "Usuario")
+    id_tipo_sol = models.ForeignKey(Tipo_Solicitud, on_delete=models.CASCADE, verbose_name = "Tipo de Solicitud")
+    id_datos_ent = models.OneToOneField(Dato_Entrada, on_delete=models.CASCADE, null=True)
+    id_datos_sal = models.OneToOneField(Dato_Salida, on_delete=models.CASCADE, null=True)
+
+    class Meta:
+        verbose_name = "Solicitud"
+        verbose_name_plural = "Solicitudes"
+    
+    def __str__(self):
+        return self.nombre_sol
 # Create your models here.

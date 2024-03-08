@@ -40,7 +40,6 @@ AUTHENTICATION_BACKENDS = [
 SHARED_APPS = [
     'django_tenants',
     'clientManager',
-    'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
