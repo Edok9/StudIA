@@ -1,14 +1,18 @@
 from django.contrib.auth.backends import ModelBackend
-from django.contrib.auth import get_user_model
+from loginApp.models import Usuario
 
-class TenantAwareBackend(ModelBackend):
+class UsuarioBackend(ModelBackend): # Gracias Chatgpt
     def authenticate(self, request, email=None, clave=None, **kwargs):
         try:
-            tenant = request.tenant
-            Usuario_Model = get_user_model()
-            user = Usuario_Model.objects.get(email=email)
-        except Usuario_Model.DoesNotExist:
+            user = Usuario.objects.get(email=email)
+        except Usuario.DoesNotExist:
             return None
         else:
             if user.check_password(clave):
                 return user
+    
+    def get_user(self, id_usuario): # Gracias documentacion de django
+        try:
+            return Usuario.objects.get(pk=id_usuario)
+        except Usuario.DoesNotExist:
+            return None
