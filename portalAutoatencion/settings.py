@@ -95,13 +95,14 @@ WSGI_APPLICATION = 'portalAutoatencion.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django_tenants.postgresql_backend',
-        'NAME': 'postgresql_backend',
+        'NAME': 'postgres',
         'USER': 'postgres',
-        'PASSWORD': 'vale1819',
+        'PASSWORD': 'postgres',
         'HOST': 'localhost',
-        'PORT': 5432
+        'PORT': 15432
     }
 }
+
 
 DATABASE_ROUTERS = (
     'django_tenants.routers.TenantSyncRouter',

@@ -29,7 +29,7 @@
             <div class="container-fluid container">
                 <div>
                     <div style="width: 100%">
-                        <span class="navbar-text text-light">Bienvenido: Eduardo Álvarez {{ username }}</span>
+                        <span class="navbar-text text-light">Bienvenido: {{request.user}}</span>
                         <br> <!-- Agregar un salto de línea -->
                         <span class="navbar-text text-light">Rol: Administrador {{ rol }}</span>
                     </div>

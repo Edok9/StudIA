@@ -33,7 +33,7 @@ def administrar(request):
 
 def index(request):
     if request.user.is_authenticated:
-        return redirect("home")
+        return redirect("solicitudes")
     if request.method == "POST":
         email = request.POST["email"]
         clave = request.POST["clave"]
@@ -48,7 +48,7 @@ def index(request):
             if next_url:
                 return HttpResponse(status=302, headers={'Location': next_url})
             else:
-                return redirect("home")
+                return redirect("solicitudes")
         else:
             try:
                 user = Usuario.objects.get(email=email)
