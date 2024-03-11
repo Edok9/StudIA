@@ -30,7 +30,7 @@ class Usuario(AbstractBaseUser, PermissionsMixin):
     cargo = models.CharField(max_length=25)
     horario_atencion = models.IntegerField(verbose_name="Horario de Atención")
     password = models.CharField(max_length=128, verbose_name="Contraseña")
-    last_login = models.DateTimeField(blank=True, null=True, verbose_name="Ultimo Ingreso")
+    last_login = models.DateTimeField(null=True, verbose_name="Ultimo Ingreso")
     is_active=models.BooleanField(default=True, verbose_name="Cuenta activada")
     is_staff=models.BooleanField(default=False, verbose_name="Cuenta de administrador")
 

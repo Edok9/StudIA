@@ -5,7 +5,6 @@ class Tipo_Solicitud(models.Model):
     id_tipo_sol = models.AutoField(primary_key=True)
     descripcion_t_sol = models.CharField(max_length=70, verbose_name = "Descripción")
     nombre_t_sol = models.CharField(max_length=25, verbose_name = "Nombre")
-    estado_sol = models.CharField(max_length=1, verbose_name = "Estado")
 
     class Meta:
         verbose_name = "Tipo de Solicitud"
@@ -14,16 +13,6 @@ class Tipo_Solicitud(models.Model):
     def __str__(self):
         return self.nombre_t_sol
    
-    
-class Dato_Entrada(models.Model):
-    id_datos_ent = models.AutoField(primary_key=True)
-    created_at = models.DateTimeField(auto_now_add=True)
-    adjunto = models.FileField(upload_to='archivos/')
-    notas = models.CharField(max_length=30)
-
-    class Meta:
-        verbose_name = "Dato de Entrada"
-        verbose_name_plural = "Datos de Entrada"
     
 class Dato_Salida(models.Model):
     id_datos_sal = models.AutoField(primary_key=True)
@@ -37,12 +26,13 @@ class Dato_Salida(models.Model):
 class Solicitud(models.Model):
     id_sol = models.AutoField(primary_key=True)
     nombre_sol = models.CharField(max_length=30, verbose_name = "Nombre")
-    tipo_sol = models.CharField(max_length=30, verbose_name = "Tipo")
     descripcion_sol = models.CharField(max_length=70, verbose_name = "Descripción")
-    created_at = models.DateTimeField(verbose_name = "Fecha de Creación")
+    estado_sol = models.CharField(max_length=1, verbose_name = "Estado", default="s")
+    adjunto = models.FileField(upload_to='archivos/', blank=True, null=True)
+    notas = models.CharField(max_length=30)
+    created_at = models.DateTimeField(verbose_name = "Fecha de Creación", auto_now_add=True)
     id_usuario = models.ForeignKey(Usuario, on_delete=models.CASCADE, verbose_name = "Usuario")
     id_tipo_sol = models.ForeignKey(Tipo_Solicitud, on_delete=models.CASCADE, verbose_name = "Tipo de Solicitud")
-    id_datos_ent = models.OneToOneField(Dato_Entrada, on_delete=models.CASCADE, null=True)
     id_datos_sal = models.OneToOneField(Dato_Salida, on_delete=models.CASCADE, null=True)
 
     class Meta:

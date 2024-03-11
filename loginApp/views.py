@@ -1,11 +1,11 @@
 from django.shortcuts import render, redirect
 from django.http import HttpResponse
 from django.contrib.auth import authenticate, login, logout, update_session_auth_hash
-from django.contrib.auth.decorators import login_required, user_passes_test
+from django.contrib.auth.decorators import login_required
 from django.contrib.admin.views.decorators import staff_member_required
 from django.urls import reverse_lazy
 from clientManager.models import Empresa
-from loginApp.forms import CrearUsuarioForm, EditarUsuarioForm, CambioClaveAdminForm
+from loginApp.forms import CrearUsuarioForm, EditarUsuarioForm, CambioClaveAdminForm, SolicitudForm
 from loginApp.models import Usuario
 from solicitudesManager.models import Solicitud
 
@@ -40,9 +40,16 @@ def index(request):
 
 @login_required
 def home(request):
-    solicitudes = Solicitud.objects.filter(id_usuario = request.user.id_usuario)
-    datos_solicitudes = {"solicitudes": solicitudes}
-    return render(request, "home.html", datos_solicitudes)
+    if request.method == "POST":
+        data = request.POST
+        sol_form = SolicitudForm(data, request.FILES)
+        usuario = Usuario.objects.get(pk=request.user.id_usuario)
+        if sol_form.is_valid():
+            sol = sol_form.save(commit=False)
+            sol.id_usuario = usuario
+            sol.save()
+    formulario = SolicitudForm()
+    return render(request, "home.html", {"formulario": formulario})
 
 @login_required
 def infoSolicitudes(request):
@@ -51,6 +58,12 @@ def infoSolicitudes(request):
         return render(request, "listaSolicitudes.html", {"solicitudes": solicitudes})
     except Solicitud.DoesNotExist:
         return redirect('home')
+    
+@login_required
+def borrarSolicitud(request, pk):
+    solicitud = Solicitud.objects.get(id_sol = pk)
+    solicitud.delete()
+    return redirect("estadoSolicitudes")
 
 @staff_member_required(redirect_field_name=None, login_url=reverse_lazy("home"))
 def usuarios(request):
@@ -101,7 +114,6 @@ def editarClaveAdmin(request, pk):
             nueva_contraseña = form.cleaned_data['nueva_contraseña']
             usuario.set_password(nueva_contraseña)
             usuario.save()
-            print(usuario.check_password(nueva_contraseña))
             update_session_auth_hash(request, usuario)
             return redirect('usuarios')
     try:
@@ -123,6 +135,29 @@ def borrarUsuario(request, pk):
     
     usuario.delete()
     return redirect("usuarios")
+
+@staff_member_required(redirect_field_name=None, login_url=reverse_lazy("home"))
+def editarSolicitud(request, pk):
+    if request.method == "POST":
+        form = SolicitudForm(request.POST)
+        if form.is_valid():
+            datos_formulario = form.cleaned_data
+            '''
+            Por alguna razon si actualizo sin esto, se borra los datos del campo "adjunto"
+            Pero no creo que sea necesario modificar este campo por parte del admin
+            Igual lo dejo en caso que sea necesario
+            '''
+            if not request.FILES:
+                solicitud = Solicitud.objects.get(id_sol = pk)
+                datos_formulario["adjunto"] = solicitud.adjunto
+            Solicitud.objects.filter(id_sol = pk).update(**datos_formulario)
+            return redirect("estadoSolicitudes")
+    try:
+        solicitud = Solicitud.objects.get(id_sol = pk)
+        formulario = SolicitudForm(instance=solicitud)
+        return render(request, "editarSolicitud.html", {"formulario": formulario})
+    except Solicitud.DoesNotExist:
+        return redirect("estadoSolicitudes")     
 
 def logoutProcess(request):
     logout(request)
