@@ -5,9 +5,9 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.admin.views.decorators import staff_member_required
 from django.urls import reverse_lazy
 from clientManager.models import Empresa
-from loginApp.forms import CrearUsuarioForm, EditarUsuarioForm, CambioClaveAdminForm, SolicitudForm
+from loginApp.forms import CrearUsuarioForm, EditarUsuarioForm, CambioClaveAdminForm, SolicitudForm, CasoDeUsoForm, ReporteriaForm
 from loginApp.models import Usuario
-from solicitudesManager.models import Solicitud
+from solicitudesManager.models import Solicitud, Tipo_Solicitud
 
 
 def index(request):
@@ -74,6 +74,11 @@ def usuarios(request):
     return render(request, "listaUsuarios.html", datos)
 
 @staff_member_required(redirect_field_name=None, login_url=reverse_lazy("home"))
+def casosDeUso(request):
+    casos = Tipo_Solicitud.objects.all().order_by('id_tipo_sol')
+    return render(request, "listaCasosDeUso.html", {"casos": casos})
+
+@staff_member_required(redirect_field_name=None, login_url=reverse_lazy("home"))
 def crearUsuario(request):
     if request.method == "POST":
         form = CrearUsuarioForm(request.POST)
@@ -91,6 +96,17 @@ def crearUsuario(request):
     return render(request, "crearUsuario.html", datos_solicitudes)
 
 @staff_member_required(redirect_field_name=None, login_url=reverse_lazy("home"))
+def crearCaso(request):
+    if request.method == "POST":
+        form = CasoDeUsoForm(request.POST)
+        if form.is_valid():
+            caso = form.save(commit=False)
+            caso.save()
+            return redirect("casosDeUso")
+    formulario = CasoDeUsoForm()
+    return render(request, "crearCasoDeUso.html", {"formulario": formulario})
+
+@staff_member_required(redirect_field_name=None, login_url=reverse_lazy("home"))
 def editarUsuario(request, pk):
     if request.method == "POST":
         form = EditarUsuarioForm(request.POST)
@@ -105,6 +121,21 @@ def editarUsuario(request, pk):
     except Usuario.DoesNotExist:
         return redirect("usuarios")        
 
+@staff_member_required(redirect_field_name=None, login_url=reverse_lazy("home"))
+def editarCaso(request, pk):
+    if request.method == "POST":
+        form = CasoDeUsoForm(request.POST)
+        if form.is_valid():
+            datos_formulario = form.cleaned_data
+            Tipo_Solicitud.objects.filter(id_tipo_sol = pk).update(**datos_formulario)
+            return redirect("casosDeUso")
+    try:
+        caso = Tipo_Solicitud.objects.get(id_tipo_sol = pk)
+        formulario = CasoDeUsoForm(instance=caso)
+        return render(request, "editarCasodeUso.html", {"formulario": formulario})
+    except Tipo_Solicitud.DoesNotExist:
+        return redirect("casosDeUso")
+    
 @staff_member_required(redirect_field_name=None, login_url=reverse_lazy("home"))
 def editarClaveAdmin(request, pk):
     if request.method == "POST":
@@ -137,6 +168,12 @@ def borrarUsuario(request, pk):
     return redirect("usuarios")
 
 @staff_member_required(redirect_field_name=None, login_url=reverse_lazy("home"))
+def borrarCaso(request, pk):
+    caso = Tipo_Solicitud.objects.get(id_tipo_sol = pk)
+    caso.delete()
+    return redirect("casosDeUso")
+
+@staff_member_required(redirect_field_name=None, login_url=reverse_lazy("home"))
 def editarSolicitud(request, pk):
     if request.method == "POST":
         form = SolicitudForm(request.POST)
@@ -158,6 +195,16 @@ def editarSolicitud(request, pk):
         return render(request, "editarSolicitud.html", {"formulario": formulario})
     except Solicitud.DoesNotExist:
         return redirect("estadoSolicitudes")     
+
+@staff_member_required(redirect_field_name=None, login_url=reverse_lazy("home"))
+def reportes(request):
+    if request.method == "POST":
+        form = request.POST
+        print(form)
+        return redirect("reporteria")
+    
+    formulario = ReporteriaForm()
+    return render(request, "reporteria.html", {"formulario":formulario})
 
 def logoutProcess(request):
     logout(request)
