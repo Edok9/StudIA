@@ -1,65 +1,81 @@
 {% extends "base.html" %}
 {% load static %}
-<!DOCTYPE html>
-<html lang="es">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mostrar Vehiculos</title>
-</head>
-<body>
-    {% block content %}
-    <br><br><br><br>
-    <div class="container-fluid">
-        <div class="row justify-content-center">
-            <div class="col-md-4 bg-dark text-light p-4 rounded">
-                <div class="nueva-solicitud-container">
-                    <h3>Nueva Solicitud: (Selección del menú)</h3>
-                    <form id="nuevaSolicitudForm">
-                        <div class="mb-3">
-                            <label for="correo" class="form-label">Correo de usuario:</label>
-                            <input type="email" class="form-control" id="correo" name="correo" required
-                                   placeholder="edo@gmail.com">
-                            <div id="correoError" class="text-danger"></div>
-                        </div>
-                        <div class="input-group">
-                            <label>Adjunto (si se requiere):</label>
-                            <input type="file" id="adjunto" name="adjunto">
-                        </div>
-                        <div class="form-group">
-                            <label for="comentarios">Notas:</label>
-                            <textarea rows="5" id="comentarios" class="form-control"></textarea>
-                        </div>
-                        <div class="form-group">
-                            <br>
-                            <input type="submit" value="Enviar" id="enviar" class="btn btn-primary">
-                        </div>
-                    </form>
-                </div>
+{% block content %}
+<br><br><br><br>
+<div class="container-fluid">
+    <div class="row justify-content-center">
+        <div class="col-md-4 bg-dark text-light p-4 rounded">
+            <div class="nueva-solicitud-container">
+                <h3>Nueva Solicitud:</h3>
+                <form id="nuevaSolicitudForm">
+                    <div class="mb-3">
+                        <label for="correo" class="form-label">Correo de usuario:</label>
+                        <input type="email" class="form-control" id="correo" name="correo" required
+                               placeholder="edo@gmail.com">
+                        <div id="correoError" class="text-danger"></div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="tipo-solicitud" class="form-label">Tipo de Solicitud:</label>
+                        <select class="form-control" id="tipo-solicitud" name="tipo-solicitud" required>
+                            <option value="">-- Seleccione --</option>
+                            <option value="A">A</option>
+                            <option value="B">B</option>
+                            <option value="C">C</option>
+                            <option value="D">D</option>
+                        </select>
+                    </div>
+                    <div id="campos-dinamicos" class="mb-3">
+                        <!-- Aquí se cargarán los campos dinámicos -->
+                    </div>
+                    <div class="form-group">
+                        <br>
+                        <input type="submit" value="Enviar" id="enviar" class="btn btn-primary">
+                    </div>
+                </form>
             </div>
         </div>
     </div>
-    {% endblock %}
-    
-    <script>
-        document.getElementById('nuevaSolicitudForm').addEventListener('submit', function(event) {
-            var correoInput = document.getElementById('correo');
-            var adjuntoInput = document.getElementById('adjunto');
+</div>
 
-            // Validación del correo electrónico
-            if (!correoInput.validity.valid) {
-                event.preventDefault();
-                document.getElementById('correoError').innerText = 'Por favor, ingrese un correo electrónico válido.';
-            } else {
-                document.getElementById('correoError').innerText = '';
-            }
 
-            // Validación del adjunto
-            if (adjuntoInput.value.trim() === '') {
-                event.preventDefault();
-                alert('Por favor, adjunte un archivo.');
-            }
-        });
-    </script>
-</body>
-</html>
+<script>
+    // Event listener para el cambio en el tipo de solicitud
+    document.getElementById('tipo-solicitud').addEventListener('change', function() {
+        var tipoSeleccionado = this.value;
+        mostrarCamposDinamicos(tipoSeleccionado);
+    });
+
+    // Función para mostrar los campos dinámicos según el tipo de solicitud seleccionado
+    function mostrarCamposDinamicos(tipo) {
+        var camposDinamicos = document.getElementById('campos-dinamicos');
+        camposDinamicos.innerHTML = ''; // Limpiar campos dinámicos anteriores
+        
+        if (tipo === 'A') {
+            camposDinamicos.innerHTML += `
+                <div class="mb-3">
+                    <label for="descripcion" class="form-label">Descripción:</label>
+                    <input type="text" class="form-control" id="descripcion" name="descripcion" required>
+                </div>
+                <div class="mb-3">
+                    <label for="telefono" class="form-label">Número de Teléfono:</label>
+                    <input type="text" class="form-control" id="telefono" name="telefono" required>
+                </div>
+                <div class="mb-3">
+                    <label for="direccion" class="form-label">Dirección:</label>
+                    <input type="text" class="form-control" id="direccion" name="direccion" required>
+                </div>`;
+        } else if (tipo === 'B') {
+            camposDinamicos.innerHTML += `
+                <div class="mb-3">
+                    <label for="nombre" class="form-label">Nombre:</label>
+                    <input type="text" class="form-control" id="nombre" name="nombre" required>
+                </div>
+                <div class="mb-3">
+                    <label for="edad" class="form-label">Edad:</label>
+                    <input type="number" class="form-control" id="edad" name="edad" required>
+                </div>`;
+        }
+        // Puedes agregar más condiciones para otros tipos de solicitud aquí
+    }
+</script>
+{% endblock %}

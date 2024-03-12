@@ -26,7 +26,7 @@ SECRET_KEY = 'django-insecure-w+*cbtuky&ghmcctne!wlo24-5+839qm$takon9w3a25^*@i)^
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['127.0.0.1','localhost']
+ALLOWED_HOSTS = ['*']
 
 
 # Application definition
@@ -40,7 +40,6 @@ AUTHENTICATION_BACKENDS = [
 SHARED_APPS = [
     'django_tenants',
     'clientManager',
-    'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',

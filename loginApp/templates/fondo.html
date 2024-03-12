@@ -12,16 +12,17 @@
     <title>{% block title %} Nombre de tu página {% endblock %}</title>
 </head>
 <style>
-    body {
-  margin: 0;
-  padding: 0;
-  font-family: Arial, sans-serif;
-  background-image: url('{% static "img/new_background_desktop.png" %}'); /* Cambia la ruta por la imagen que desees usar */
-  background-repeat: no-repeat;
-  background-size: 100% auto;
-  background-position: center top; /* Alinea el fondo en la parte superior del header */
-  min-height: 100vh; /* Para que el footer esté siempre en la parte inferior */
-}
+   body {
+        margin: 0;
+        position: relative;
+        padding-bottom: 4em;
+        font-family: Arial, sans-serif;
+        background-image: url('{% static "img/new_background_desktop.png" %}');
+        background-repeat: no-repeat;
+        background-size: 100% auto;
+        background-position: center top;
+        min-height: 100vh;
+    }
 </style>
 <body>
     {% block content %}

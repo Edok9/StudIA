@@ -7,7 +7,9 @@ urlpatterns = [
     path('logout', views.logoutProcess, name='logout'),
     path('home', views.home, name='home'),
     # URLs para usuarios
-    path('solicitud/<int:pk>', views.infoSolicitud, name="infoSolicitud"),
+    path('solicitudes', views.infoSolicitudes, name="solicitudes"),
+    path('estadoSolicitudes', views.infoSolicitudes, name="estadoSolicitudes"),
+    path('infoSolicitudes', views.infoSolicitudes, name="infoSolicitudes"),
     
     
     # URLs para admins
@@ -20,7 +22,7 @@ urlpatterns = [
     path('home', views.home, name='home'),
     path('usuarios', views.usuarios, name='usuarios'),
     path('crear/usuario', views.crearUsuario, name='nuevoUsuario'),
-    path('solicitud/<int:pk>', views.infoSolicitud, name="infoSolicitud"),
+    path('solicitud/<int:pk>', views.infoSolicitudes, name="infoSolicitud"),
     path('casos_de_uso/', casos_de_uso, name='casos_de_uso'),
     path('entel/', entel, name='entel'),
     path('estado/', estado, name='estado'),

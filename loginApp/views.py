@@ -66,15 +66,10 @@ def home(request):
     return render(request, "home.html", datos_solicitudes)
 
 @login_required
-def infoSolicitud(request, pk):
+def infoSolicitudes(request):
     try:
-        solicitud = Solicitud.objects.get(id_sol = pk, id_usuario = request.user.id_usuario)
-        solicitudes = Solicitud.objects.filter(id_usuario = request.user.id_usuario)
-        datos_solicitudes = {
-            "solicitudes": solicitudes,
-            "solicitudUsuario": solicitud
-            }
-        return render(request, "infoSolicitud.html", datos_solicitudes)
+        solicitudes = Solicitud.objects.all().filter(id_usuario = request.user.id_usuario)
+        return render(request, "listaSolicitudes.html", {"solicitudes": solicitudes})
     except Solicitud.DoesNotExist:
         return redirect('home')
 
@@ -153,5 +148,6 @@ def borrarUsuario(request, pk):
 def logoutProcess(request):
     logout(request)
     return render(request, "logout.html")
+
 
 # Create your views here.
