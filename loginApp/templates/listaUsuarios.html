@@ -21,6 +21,8 @@
                                 Email</th>
                             <th class="h-12 px-4 text-left align-middle font-medium">
                                 Rol</th>
+                            <th class="h-12 px-4 text-left align-middle font-medium">
+                                Estado</th>
                             <th class="h-12 px-4 align-middle font-medium w-[160px] text-middle">
                                 Acciones
                             </th>
@@ -38,6 +40,13 @@
                             {% else %}
                             <td class="p-4 align-middle">Usuario</td>
                             {% endif %}
+
+                            {% if usuario.is_active %}
+                            <td class="p-4 align-middle">Activo</td>
+                            {% else %}
+                            <td class="p-4 align-middle">Inactivo</td>
+                            {% endif %}
+                            
                             <td class="p-4 align-middle text-center">
                                 <button
                                     class="inline-flex items-center justify-center whitespace-nowrap text-sm font-medium h-10 w-10 rounded-full"
