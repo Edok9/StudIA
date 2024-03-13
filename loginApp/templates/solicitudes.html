@@ -1,6 +1,59 @@
 {% extends "base.html" %}
 {% load static %}
 {% block content %}
+<script>
+    $(document).ready(function(){
+
+        $("#nuevaSolicitudForm").validate({
+            rules:{
+                "tipo-solicitud": {
+                    required: true
+                },
+                accion: {
+                    required: true
+                },
+                correo: {
+                    required: true,
+                    email: true
+                },
+                correo_sol: {
+                    required: true,
+                    email: true
+                },
+                fecha: {
+                    required: true
+                }
+            },
+            messages:{
+                "tipo-solicitud": {
+                    required: 'Seleccione un tipo de solicitud'
+                },
+                accion: {
+                    required: 'Ingrese una acción'
+                },
+                correo: {
+                    required: 'Ingrese un correo',
+                    email: 'Ingrese un correo válido'
+                },
+                correo_sol: {
+                    required: 'Ingrese un correo de solicitante',
+                    email: 'Ingrese un correo válido'
+                },
+                fecha: {
+                    required: 'Seleccione una fecha'
+                }
+            },
+            errorPlacement: function(error, element) {
+                if (element.attr("name") == "tipo-solicitud") {
+                    error.appendTo("#tipo-solicitud-error");
+                } else {
+                    error.appendTo(element.parent().next());
+                }
+            }
+        });
+
+    });
+</script>
 <br><br><br><br>
 <div class="container-fluid">
     <div class="row justify-content-center">
@@ -9,19 +62,12 @@
                 <h3>Nueva Solicitud:</h3>
                 <form id="nuevaSolicitudForm">
                     <div class="mb-3">
-                        <label for="correo" class="form-label">Correo de usuario:</label>
-                        <input type="email" class="form-control" id="correo" name="correo" required
-                               placeholder="edo@gmail.com">
-                        <div id="correoError" class="text-danger"></div>
-                    </div>
-                    <div class="mb-3">
                         <label for="tipo-solicitud" class="form-label">Tipo de Solicitud:</label>
                         <select class="form-control" id="tipo-solicitud" name="tipo-solicitud" required>
                             <option value="">-- Seleccione --</option>
-                            <option value="A">A</option>
-                            <option value="B">B</option>
-                            <option value="C">C</option>
-                            <option value="D">D</option>
+                            <option value="ISE VPN">ISE VPN</option>
+                            <option value="IOC AUTOMATICO">IOC AUTOMATICO</option>
+                            <option value="CAMBIO DE RUTA">CAMBIO DE RUTA</option>
                         </select>
                     </div>
                     <div id="campos-dinamicos" class="mb-3">
@@ -50,29 +96,54 @@
         var camposDinamicos = document.getElementById('campos-dinamicos');
         camposDinamicos.innerHTML = ''; // Limpiar campos dinámicos anteriores
         
-        if (tipo === 'A') {
+        if (tipo === 'ISE VPN') {
             camposDinamicos.innerHTML += `
                 <div class="mb-3">
-                    <label for="descripcion" class="form-label">Descripción:</label>
-                    <input type="text" class="form-control" id="descripcion" name="descripcion" required>
+                    <label for="descripcion" class="form-label">Acción:</label>
+                    <input type="text" class="form-control" id="accion" name="accion" required>
                 </div>
                 <div class="mb-3">
-                    <label for="telefono" class="form-label">Número de Teléfono:</label>
-                    <input type="text" class="form-control" id="telefono" name="telefono" required>
+                        <label for="correo" class="form-label">Correo de usuario:</label>
+                        <input type="email" class="form-control" id="correo" name="correo" required
+                               placeholder="edo@gmail.com">
+                        <div id="correoError" class="text-danger"></div>
                 </div>
                 <div class="mb-3">
-                    <label for="direccion" class="form-label">Dirección:</label>
-                    <input type="text" class="form-control" id="direccion" name="direccion" required>
+                    <label for="fecha" class="form-label">Fecha de solicitud:</label>
+                    <input type="date" class="form-control" id="fecha" name="fecha" required>
+                    <div id="fechaError" class="text-danger"></div>
                 </div>`;
-        } else if (tipo === 'B') {
+        } else if (tipo === 'IOC AUTOMATICO') {
             camposDinamicos.innerHTML += `
+                <div class="input-group mb-3">
+                            <label>Adjunto (si se requiere):</label>
+                            <input type="file" id="adjunto" name="adjunto">
+                        </div>
                 <div class="mb-3">
-                    <label for="nombre" class="form-label">Nombre:</label>
-                    <input type="text" class="form-control" id="nombre" name="nombre" required>
+                        <label for="correo" class="form-label">Correo de solicitante:</label>
+                        <input type="email" class="form-control" id="correo_sol" name="correo_sol" required
+                               placeholder="edo@gmail.com">
+                        <div id="correoError" class="text-danger"></div>
                 </div>
                 <div class="mb-3">
-                    <label for="edad" class="form-label">Edad:</label>
-                    <input type="number" class="form-control" id="edad" name="edad" required>
+                    <label for="fecha" class="form-label">Fecha de solicitud:</label>
+                    <input type="date" class="form-control" id="fecha" name="fecha" required>
+                    <div id="fechaError" class="text-danger"></div>
+                </div>`;
+        } else if (tipo === 'CAMBIO DE RUTA') {
+            camposDinamicos.innerHTML += `
+            <div class="mb-3">
+                    <label for="descripcion" class="form-label">Gateway:</label>
+                    <input type="text" class="form-control" id="gateway" name="gateway" required>
+                </div>
+                <div class="mb-3">
+                    <label for="descripcion" class="form-label">Interfaz de salida:</label>
+                    <input type="text" class="form-control" id="interfaz" name="interfaz" required>
+                </div>
+                <div class="mb-3">
+                    <label for="fecha" class="form-label">Fecha de solicitud:</label>
+                    <input type="date" class="form-control" id="fecha" name="fecha" required>
+                    <div id="fechaError" class="text-danger"></div>
                 </div>`;
         }
         // Puedes agregar más condiciones para otros tipos de solicitud aquí
