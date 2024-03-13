@@ -85,6 +85,7 @@ class EditarUsuarioForm(forms.ModelForm):
             "telefono",
             "cargo",
             "horario_atencion",
+            "is_active",
             "is_staff"
         ]
         widgets = {
