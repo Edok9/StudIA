@@ -1,59 +1,7 @@
 {% extends "base.html" %}
 {% load static %}
 {% block content %}
-<script>
-    $(document).ready(function(){
 
-        $("#nuevaSolicitudForm").validate({
-            rules:{
-                "tipo-solicitud": {
-                    required: true
-                },
-                accion: {
-                    required: true
-                },
-                correo: {
-                    required: true,
-                    email: true
-                },
-                correo_sol: {
-                    required: true,
-                    email: true
-                },
-                fecha: {
-                    required: true
-                }
-            },
-            messages:{
-                "tipo-solicitud": {
-                    required: 'Seleccione un tipo de solicitud'
-                },
-                accion: {
-                    required: 'Ingrese una acción'
-                },
-                correo: {
-                    required: 'Ingrese un correo',
-                    email: 'Ingrese un correo válido'
-                },
-                correo_sol: {
-                    required: 'Ingrese un correo de solicitante',
-                    email: 'Ingrese un correo válido'
-                },
-                fecha: {
-                    required: 'Seleccione una fecha'
-                }
-            },
-            errorPlacement: function(error, element) {
-                if (element.attr("name") == "tipo-solicitud") {
-                    error.appendTo("#tipo-solicitud-error");
-                } else {
-                    error.appendTo(element.parent().next());
-                }
-            }
-        });
-
-    });
-</script>
 <br><br><br><br>
 <div class="container-fluid">
     <div class="row justify-content-center">
@@ -75,7 +23,7 @@
                     </div>
                     <div class="form-group">
                         <br>
-                        <input type="submit" value="Enviar" id="enviar" class="btn btn-primary">
+                        <button type="button" id="validarEnviar" class="btn btn-primary">Enviar</button>
                     </div>
                 </form>
             </div>
@@ -95,58 +43,111 @@
     function mostrarCamposDinamicos(tipo) {
         var camposDinamicos = document.getElementById('campos-dinamicos');
         camposDinamicos.innerHTML = ''; // Limpiar campos dinámicos anteriores
-        
+
         if (tipo === 'ISE VPN') {
             camposDinamicos.innerHTML += `
                 <div class="mb-3">
-                    <label for="descripcion" class="form-label">Acción:</label>
-                    <input type="text" class="form-control" id="accion" name="accion" required>
+                    <label for="accion" class="form-label">Acción:</label>
+                    <select class="form-control" id="accion" name="accion" required>
+                        <option value="">-- Seleccione --</option>
+                        <option value="Extensión de cuenta">Extensión de cuenta</option>
+                        <option value="Cambio de contraseña">Cambio de contraseña</option>
+                        <option value="Deshabilitación de cuenta">Deshabilitación de cuenta</option>
+                    </select>
                 </div>
-                <div class="mb-3">
-                        <label for="correo" class="form-label">Correo de usuario:</label>
-                        <input type="email" class="form-control" id="correo" name="correo" required
-                               placeholder="edo@gmail.com">
-                        <div id="correoError" class="text-danger"></div>
+                <div class="mb-3" id="usuario-correo-container" style="display: none;">
+                    <label for="usuario" class="form-label">Usuario:</label>
+                    <input type="text" class="form-control" id="usuario" name="usuario" required>
                 </div>
-                <div class="mb-3">
-                    <label for="fecha" class="form-label">Fecha de solicitud:</label>
-                    <input type="date" class="form-control" id="fecha" name="fecha" required>
-                    <div id="fechaError" class="text-danger"></div>
+                <div class="mb-3" id="correo-container" style="display: none;">
+                    <label for="correo" class="form-label">Correo de usuario:</label>
+                    <input type="email" class="form-control" id="correo" name="correo" required>
+                    <div id="correoError" class="text-danger"></div>
+                </div>
+                <div class="mb-3" id="fecha-expiracion-container" style="display: none;">
+                    <label for="fecha-expiracion" class="form-label">Fecha de expiración:</label>
+                    <input type="date" class="form-control" id="fecha" name="fecha-expiracion">
                 </div>`;
+
+            // Asignar evento change al campo de selección de acción
+            document.getElementById('accion').addEventListener('change', function() {
+                var accionSeleccionada = this.value;
+                mostrarCamposUsuarioCorreo(accionSeleccionada);
+            });
         } else if (tipo === 'IOC AUTOMATICO') {
             camposDinamicos.innerHTML += `
                 <div class="input-group mb-3">
-                            <label>Adjunto (si se requiere):</label>
-                            <input type="file" id="adjunto" name="adjunto">
-                        </div>
-                <div class="mb-3">
-                        <label for="correo" class="form-label">Correo de solicitante:</label>
-                        <input type="email" class="form-control" id="correo_sol" name="correo_sol" required
-                               placeholder="edo@gmail.com">
-                        <div id="correoError" class="text-danger"></div>
+                    <label>Adjunto (si se requiere):</label>
+                    <input type="file" id="adjunto" name="adjunto">
                 </div>
-                <div class="mb-3">
-                    <label for="fecha" class="form-label">Fecha de solicitud:</label>
-                    <input type="date" class="form-control" id="fecha" name="fecha" required>
-                    <div id="fechaError" class="text-danger"></div>
+                <div class="input-group mb-3">
+                    <label>Notas:</label>
+                    <textarea id="notas" name="notas" rows="4" cols="50"></textarea>
                 </div>`;
         } else if (tipo === 'CAMBIO DE RUTA') {
             camposDinamicos.innerHTML += `
-            <div class="mb-3">
+                <div class="mb-3">
                     <label for="descripcion" class="form-label">Gateway:</label>
                     <input type="text" class="form-control" id="gateway" name="gateway" required>
                 </div>
                 <div class="mb-3">
                     <label for="descripcion" class="form-label">Interfaz de salida:</label>
                     <input type="text" class="form-control" id="interfaz" name="interfaz" required>
-                </div>
-                <div class="mb-3">
-                    <label for="fecha" class="form-label">Fecha de solicitud:</label>
-                    <input type="date" class="form-control" id="fecha" name="fecha" required>
-                    <div id="fechaError" class="text-danger"></div>
                 </div>`;
         }
-        // Puedes agregar más condiciones para otros tipos de solicitud aquí
+
+        // Mostrar u ocultar los campos de usuario, correo y fecha de expiración según la acción seleccionada
+        mostrarCamposUsuarioCorreo(document.getElementById('accion').value);
     }
+
+    // Función para mostrar u ocultar los campos de usuario, correo y fecha de expiración según la acción seleccionada
+    function mostrarCamposUsuarioCorreo(accion) {
+        var usuarioCorreoContainer = document.getElementById('usuario-correo-container');
+        var correoContainer = document.getElementById('correo-container');
+        var fechaExpiracionContainer = document.getElementById('fecha-expiracion-container');
+
+        if (accion === 'Extensión de cuenta' || accion === 'Cambio de contraseña' || accion === 'Deshabilitación de cuenta') {
+            usuarioCorreoContainer.style.display = 'block';
+            correoContainer.style.display = 'block';
+            fechaExpiracionContainer.style.display = (accion === 'Extensión de cuenta') ? 'block' : 'none';
+        } else {
+            usuarioCorreoContainer.style.display = 'none';
+            correoContainer.style.display = 'none';
+            fechaExpiracionContainer.style.display = 'none';
+        }
+    }
+
+    // Validación del formulario antes de enviarlo
+    document.getElementById('validarEnviar').addEventListener('click', function(event) {
+        var tipoSolicitud = document.getElementById('tipo-solicitud').value;
+        var accion = document.getElementById('accion').value;
+        var usuario = document.getElementById('usuario').value;
+        var correo = document.getElementById('correo').value;
+
+        if (tipoSolicitud === "") {
+            alert("Por favor, seleccione un tipo de solicitud.");
+            return;
+        }
+
+        if (tipoSolicitud === "ISE VPN") {
+            if (accion === "") {
+                alert("Por favor, seleccione una acción.");
+                return;
+            }
+
+            if ((accion === "Extensión de cuenta" || accion === "Cambio de contraseña" || accion === "Deshabilitación de cuenta") && usuario === "") {
+                alert("Por favor, ingrese el usuario.");
+                return;
+            }
+
+            if ((accion === "Extensión de cuenta" || accion === "Cambio de contraseña" || accion === "Deshabilitación de cuenta") && correo === "") {
+                alert("Por favor, ingrese el correo.");
+                return;
+            }
+        }
+
+        // Si todas las validaciones pasan, enviar el formulario
+        document.getElementById('nuevaSolicitudForm').submit();
+    });
 </script>
 {% endblock %}
