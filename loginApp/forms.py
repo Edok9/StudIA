@@ -28,21 +28,6 @@ class CasoDeUsoForm(forms.ModelForm):
             "descripcion_t_sol": forms.TextInput(attrs={"class": design}),
         }
 
-class SolicitudForm(forms.ModelForm):
-    class Meta:
-        model = Solicitud
-        fields = [
-            "nombre_sol",
-            "id_tipo_sol",
-            "descripcion_sol",
-            "adjunto",
-            "notas",
-        ]
-        widgets = {
-            "nombre_sol": forms.TextInput(attrs={"class": design}),
-            "descripcion_sol": forms.TextInput(attrs={"class": design}),
-            "notas": forms.TextInput(attrs={"class": design}),
-        }
 
 class CambioClaveAdminForm(forms.Form):
     nueva_contraseña = forms.CharField(widget=forms.PasswordInput(attrs={"class": design}))

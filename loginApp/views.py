@@ -5,7 +5,7 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.admin.views.decorators import staff_member_required
 from django.urls import reverse_lazy
 from clientManager.models import Empresa
-from loginApp.forms import CrearUsuarioForm, EditarUsuarioForm, CambioClaveAdminForm, SolicitudForm, CasoDeUsoForm, ReporteriaForm
+from loginApp.forms import CrearUsuarioForm, EditarUsuarioForm, CambioClaveAdminForm, CasoDeUsoForm, ReporteriaForm
 from loginApp.models import Usuario
 from solicitudesManager.models import Solicitud, Tipo_Solicitud
 
@@ -40,16 +40,7 @@ def index(request):
 
 @login_required
 def home(request):
-    if request.method == "POST":
-        data = request.POST
-        sol_form = SolicitudForm(data, request.FILES)
-        usuario = Usuario.objects.get(pk=request.user.id_usuario)
-        if sol_form.is_valid():
-            sol = sol_form.save(commit=False)
-            sol.id_usuario = usuario
-            sol.save()
-    formulario = SolicitudForm()
-    return render(request, "home.html", {"formulario": formulario})
+    return render(request, "home.html")
 
 @login_required
 def infoSolicitudes(request):
@@ -173,17 +164,16 @@ def borrarCaso(request, pk):
     caso.delete()
     return redirect("casosDeUso")
 
+'''
 @staff_member_required(redirect_field_name=None, login_url=reverse_lazy("home"))
 def editarSolicitud(request, pk):
     if request.method == "POST":
         form = SolicitudForm(request.POST)
         if form.is_valid():
             datos_formulario = form.cleaned_data
-            '''
             Por alguna razon si actualizo sin esto, se borra los datos del campo "adjunto"
             Pero no creo que sea necesario modificar este campo por parte del admin
             Igual lo dejo en caso que sea necesario
-            '''
             if not request.FILES:
                 solicitud = Solicitud.objects.get(id_sol = pk)
                 datos_formulario["adjunto"] = solicitud.adjunto
@@ -195,7 +185,7 @@ def editarSolicitud(request, pk):
         return render(request, "editarSolicitud.html", {"formulario": formulario})
     except Solicitud.DoesNotExist:
         return redirect("estadoSolicitudes")     
-
+'''
 @staff_member_required(redirect_field_name=None, login_url=reverse_lazy("home"))
 def reportes(request):
     if request.method == "POST":
