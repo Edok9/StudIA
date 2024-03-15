@@ -23,15 +23,16 @@
             {% if solicitudes %}
             {% for solicitud in solicitudes %}
             <tr>
-                <td class="p-4 align-middle font-medium">a</td>
+                <td class="p-4 align-middle font-medium">{{solicitud.estado_sol}}</td>
                 <td class="p-4 align-middle">{{solicitud.nombre_sol}}</td>
                 <td class="p-4 align-middle">{{solicitud.created_at }}</td>
-                <td class="p-4 align-middle">{{solicitud.id_datos_ent.notas}}</td>
+                <td class="p-4 align-middle">{{solicitud.notas}}</td>
                 <td class="p-4 align-middle text-center">
+                    {% if request.user.is_staff %}
                     <button
                                     class="inline-flex items-center justify-center h-10 w-10 rounded-full"
                                     title="Editar" type="button"
-                                    onclick="location.href='{% url 'home'%}'">
+                                    onclick="location.href='{% url 'editarSolicitud' pk=solicitud.id_sol %}'">
                                     <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24"
                                         viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
                                         stroke-linecap="round" stroke-linejoin="round" class="w-4 h-4">
@@ -43,10 +44,11 @@
                                         </path>
                                     </svg>
                                 </button>
-                                  <button
+                                {% endif %}
+                                <button
                                     class="inline-flex items-center justify-center h-10 w-10 rounded-full"
                                     title="Borrar" type="button"
-                                    onclick="location.href='{% url 'home' %}'"
+                                    onclick="location.href='{% url 'borrarSolicitud' pk=solicitud.id_sol %}'"
                                     >
                                     <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24"
                                         viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
