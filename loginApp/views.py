@@ -80,6 +80,15 @@ def infoSolicitudes(request):
     except Solicitud.DoesNotExist:
         return redirect('home')
     
+#HAY QUE QUITAR ESTO, ESTA ES MEDIDA TEMPORAL E IMPLEMENTARLA EN CODE DE SEBA
+def administrar(request):
+    try:
+        usuarios = Usuario.objects.all()  # Obtener todos los usuarios
+        return render(request, "administrar.html", {"usuarios": usuarios})
+    except Usuario.DoesNotExist:
+        # Si no se encuentra ningún usuario, maneja el caso según sea necesario
+        return render(request, "administrar.html", {"usuarios": []})
+    
 @login_required
 def borrarSolicitud(request, pk):
     solicitud = Solicitud.objects.get(id_sol = pk)

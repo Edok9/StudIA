@@ -1,23 +1,26 @@
 {% extends "base.html" %}
 
 {% block content %}
-<div class="flex flex-col justify-center items-center space-y-4">
-    <h1 class="text-2xl font-bold text-[#005CFF]">Nuevo Usuario</h1>
-    <form method="post"> {% csrf_token %}
-        {% for campo in formulario %}
-        <div class="space-y-2">
-            <label class="text-sm font-medium" for="{{campo.id_for_label}}">
-                {{campo.label}}
-            </label>
-            {{campo}}
+<br><br><br><br>
+<div class="container-fluid">
+    <div class="row justify-content-center">
+        <div class="col-md-8 bg-dark text-light p-4 rounded">
+            <div class="flex flex-col justify-center items-center space-y-4">
+                <h1 class="text-2xl font-bold text-[#005CFF]">Nuevo Usuario</h1>
+                <form method="post" class="w-full max-w-sm">
+                    {% csrf_token %}
+                    {% for campo in formulario %}
+                    <div class="space-y-2">
+                        <label class="block text-sm font-medium text-gray-400" for="{{campo.id_for_label}}">
+                            {{campo.label}}
+                        </label>
+                        {{campo}}
+                    </div>
+                    {% endfor %}
+                    <button class="w-full bg-[#FF3D00] text-black py-2 px-4 rounded-full text-sm font-medium" type="submit">Crear Usuario</button>
+                </form>
+            </div>
         </div>
-        {% endfor %}
-        <button
-            class="inline-flex items-center justify-center text-sm font-medium h-10 px-4 py-2 my-4 bg-[#FF3D00] text-white rounded-full"
-            type="submit">
-            Crear Usuario
-        </button>
-    </form>
-</div>
+    </div>
 </div>
 {% endblock %}
