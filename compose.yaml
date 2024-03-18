@@ -1,6 +1,10 @@
 services:
   postgres:
+    container_name: pruebas
+    hostname: portalAutoatencion
     image: postgres
+    volumes:
+      - C:/postgres/db_test:/var/lib/postgresql/data
     ports:
       - 5432:5432
     environment:

@@ -4,6 +4,7 @@
 <div class="flex flex-col justify-center items-center space-y-4">
     <h1 class="text-2xl font-bold text-[#005CFF]">Editar Solicitud</h1>
     <form method="post"  enctype="multipart/form-data"> {% csrf_token %}
+        <input type="hidden" name="tipo_solicitud" value="{{tipo_formulario}}">
         {% for campo in formulario %}
         <div class="space-y-2">
             <label class="text-sm font-medium" for="{{campo.id_for_label}}">

@@ -3,15 +3,14 @@
 {% block content %}
 <div class="flex flex-col justify-center items-center space-y-4">
     <h1 class="text-2xl font-bold text-[#005CFF]">Nueva Solicitud</h1>
-    <form method="post" enctype="multipart/form-data"> {% csrf_token %}
-        {% for campo in formulario %}
-        <div class="space-y-2">
-            <label class="text-sm font-medium" for="{{campo.id_for_label}}">
-                {{campo.label}}
-            </label>
-            {{campo}}
-        </div>
-        {% endfor %}
+    <form id="dynamic-form" method="post" enctype="multipart/form-data"> {% csrf_token %}
+        <select id="tipo_sol" name="tipo_sol">
+            <option value="">------</option>
+            {% for form in formularios %}
+            <option value="{{form.prefix}}">{{form.prefix}}</option>
+            {% endfor %}
+        </select>
+        <div id="campos-formulario" class="space-y-2"></div>
         <button
             class="inline-flex items-center justify-center text-sm font-medium h-10 px-4 py-2 my-4 bg-[#FF3D00] text-white rounded-full"
             type="submit">
@@ -19,4 +18,24 @@
         </button>
     </form>
 </div>
+<script>
+    document.getElementById('tipo_sol').addEventListener('change', function() {
+        var opcion = this.value;
+        var camposForm = document.getElementById('campos-formulario');
+        
+        // Lógica para mostrar los campos adicionales según la opción seleccionada
+        switch (opcion) {
+            {% for form in formularios %}
+            case "{{form.prefix}}":
+                camposForm.innerHTML = {% spaceless %}'{{form}}'{% endspaceless %};
+                break
+            {% endfor %}
+            default:
+                camposForm.innerHTML = '';
+                break;
+        }
+    });
+    
+</script>
 {% endblock %}
+
