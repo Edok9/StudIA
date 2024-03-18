@@ -1,26 +1,35 @@
 {% extends "base.html" %}
 
 {% block content %}
-<br><br><br><br>
+<br><br>
 <div class="container-fluid">
     <div class="row justify-content-center">
         <div class="col-md-8 bg-dark text-light p-4 rounded">
-            <div class="flex flex-col justify-center items-center space-y-4">
-                <h1 class="text-2xl font-bold text-[#005CFF]">Cambiar Contraseña</h1>
-                <h2 class="text-xl font-bold text-[#005CFF]">Usuario: {{usuario.nombre_usuario}}</h2>
-                <form method="post" class="w-full max-w-sm">
-                    {% csrf_token %}
-                    {% for campo in formulario %}
-                    <div class="space-y-2">
-                        <label class="block text-sm font-medium text-gray-400" for="{{campo.id_for_label}}">
-                            {{campo.label}}
-                        </label>
-                        {{campo}}
+            <h3 class="text-center mb-4">Cambiar Contraseña</h3>
+            <form method="post">
+                {% csrf_token %}
+                <div class="formulario-container">
+                    <div class="form-group">
+                        {% for campo in formulario %}
+                        <div class="mb-3" style="display: flex; align-items: center;">
+                            <label for="{{ campo.id_for_label }}" class="form-label text-gray-400" style="display: inline-block; width: 200px; text-align: right;">{{ campo.label }}:</label>
+                            <div style="margin-left: 40px;">  <!-- Ajusta el margen izquierdo aquí -->
+                                {{ campo }}
+                            </div>
+                        </div>
+                        {% endfor %}
                     </div>
-                    {% endfor %}
-                    <button class="w-full bg-[#FF3D00] text-black py-2 px-4 rounded-full text-sm font-medium" type="submit">Guardar Cambios</button>
-                </form>
-            </div>
+                    <div class="buttons-container">
+                        <div class="row justify-content-center">
+                            <div class="col-sm-8 offset-sm-4">
+                                <button type="submit" class="btn btn-primary w-full">
+                                    <i class="fas fa-user-plus mr-2"></i> Guardar Cambios
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </form>
         </div>
     </div>
 </div>

@@ -69,3 +69,12 @@ header h1 {
   margin-left: 50px;
 }
  
+ /* Cambiar el color del texto a blanco */
+ .navbar-nav .nav-link {
+  color: #ffffff !important; /* Color blanco */
+}
+
+/* Cambiar el color al pasar el mouse por encima */
+.navbar-nav .nav-link:hover {
+  color: #ADD8E6 !important; /* Color celeste */
+}

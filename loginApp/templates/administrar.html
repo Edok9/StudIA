@@ -2,14 +2,12 @@
 
 <body>
     {% block content %}
-    <br><br><br><br>
+    <br><br>
     <div class="container-fluid">
         <div class="row justify-content-center">
-            <div class="col-md-8 bg-dark text-light p-4 rounded">
+            <div class="col bg-dark text-light p-4 rounded">
                 <div class="solicitudes-container">
-                    <h3>Administración</h3>
-                    <hr class="bg-light">
-                    <h3>Gestión de usuario</h3>
+                    <h3>Administración: Gestión de usuarios</h3>
                     <hr class="bg-light">
                     <div class="table-responsive">
                         <table class="table table-dark">
@@ -33,11 +31,18 @@
                                             <td class="align-middle text-center">{% if usuario.is_staff %}Administrador{% else %}Usuario{% endif %}</td>
                                             <td class="align-middle text-center">{% if usuario.is_active %}Activo{% else %}Inactivo{% endif %}</td>
                                             <td class="align-middle text-center">
-                                                <div class="buttons-container">
-                                                    <button type="button" class="btn btn-primary" onclick="location.href='{% url 'editarUsuario' pk=usuario.id_usuario %}'">Editar</button>
-                                                    <button type="button" class="btn btn-secondary" onclick="location.href='{% url 'editarClaveAdmin' pk=usuario.id_usuario %}'">Cambiar Contraseña</button>
+                                                <div class="d-flex justify-content-center">
+                                                    <button type="button" class="btn btn-primary" onclick="location.href='{% url 'editarUsuario' pk=usuario.id_usuario %}'">
+                                                        <i class="fas fa-pencil-alt"></i> Editar
+                                                    </button>
+                                                    <button type="button" class="btn btn-secondary" onclick="location.href='{% url 'editarClaveAdmin' pk=usuario.id_usuario %}'">
+                                                        <i class="fas fa-key"></i> Cambiar Contraseña
+                                                    </button>
                                                     {% if not request.user.id_usuario is usuario.id_usuario %}
-                                                        <button type="button" class="btn btn-danger" onclick="location.href='{% url 'borrarUsuario' pk=usuario.id_usuario %}'">Borrar</button>
+                                                        <button type="button" class="btn btn-danger" onclick="location.href='{% url 'borrarUsuario' pk=usuario.id_usuario %}'">
+
+                                                            <span class="fas fa-trash-alt"></span> Borrar
+                                                        </button>
                                                     {% endif %}
                                                 </div>
                                             </td>
@@ -53,11 +58,14 @@
                     </div>
                 </div>
                 <div class="w-full flex justify-end">
-                    <a href="{% url 'crearUsuario' %}" class="btn btn-primary">Crear usuario</a>
+                    <a href="{% url 'crearUsuario' %}" class="btn btn-primary">
+                        <i class="fas fa-user-plus"></i> Crear usuario
+                    </a>
                 </div>
             </div>
         </div>
-    </div><!-- Fin del contenedor principal -->
+    </div>
+    <br><br>
     
     {% endblock %}
 </body>

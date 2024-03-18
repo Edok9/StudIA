@@ -81,13 +81,7 @@ def infoSolicitudes(request):
         return redirect('home')
     
 #HAY QUE QUITAR ESTO, ESTA ES MEDIDA TEMPORAL E IMPLEMENTARLA EN CODE DE SEBA
-def administrar(request):
-    try:
-        usuarios = Usuario.objects.all()  # Obtener todos los usuarios
-        return render(request, "administrar.html", {"usuarios": usuarios})
-    except Usuario.DoesNotExist:
-        # Si no se encuentra ningún usuario, maneja el caso según sea necesario
-        return render(request, "administrar.html", {"usuarios": []})
+
     
 @login_required
 def borrarSolicitud(request, pk):
@@ -101,7 +95,7 @@ def usuarios(request):
     usuarios = Usuario.objects.all().order_by('id_usuario')
     datos = {"solicitudes": solicitudes,
              "usuarios": usuarios}
-    return render(request, "listaUsuarios.html", datos)
+    return render(request, "administrar.html", datos)
 
 @staff_member_required(redirect_field_name=None, login_url=reverse_lazy("home"))
 def casosDeUso(request):
