@@ -28,7 +28,7 @@ class Ise_Vpn_Form(forms.Form):
     prefix = "Servicio VPN"
 
 class Ioc_Automatico_Form(forms.Form):
-    adjunto = forms.FileField()
+    adjunto = forms.FileField(required=False)
     notas = forms.CharField()
 
     prefix = "IOC Automatico"

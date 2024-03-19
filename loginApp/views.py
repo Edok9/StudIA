@@ -152,22 +152,26 @@ def borrarUsuario(request, pk):
 @staff_member_required(redirect_field_name=None, login_url=reverse_lazy("home"))
 def editarSolicitud(request, pk):
     if request.method == "POST":
+        sol = Solicitud.objects.get(id_sol = pk)
         form = request.POST
         match form["tipo_solicitud"]:
             case "Servicio VPN":
                 form = Ise_Vpn_Form(request.POST)
+                submit_caso_form(form, sol)
             case "IOC Automatico":
                 form = Ioc_Automatico_Form(request.POST, request.FILES)
+                submit_caso_form(form, sol)
             case "Cambio de Ruta":
                 form = Cambio_De_Ruta_Form(request.POST)
+                submit_caso_form(form, sol)
             case _:
                 return redirect("estadoSolicitudes")
-        if form.is_valid():
-            form = form.cleaned_data
-            Solicitud.objects.filter(id_sol = pk).update(campos_sol = form)
+                
         return redirect("estadoSolicitudes")
     try:
         solicitud = Solicitud.objects.get(id_sol = pk)
+        if(solicitud.adjunto_sol):
+            solicitud.campos_sol["adjunto"] = solicitud.adjunto_sol
         match solicitud.tipo_sol:
             case "Servicio VPN":
                 formulario = Ise_Vpn_Form(initial=solicitud.campos_sol)
