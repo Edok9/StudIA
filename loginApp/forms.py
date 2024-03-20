@@ -8,9 +8,9 @@ class CambioClaveUsuarioForm(forms.Form):
 
 class ReporteriaForm(forms.Form):
     opciones = (
-        ("1", "24 Horas" ),
-        ("2", "7 Días"),
-        ("3", "1 Mes"),
+        ("24h", "24 Horas" ),
+        ("7d", "7 Días"),
+        ("1m", "1 Mes"),
     )
     periodo_reportes = forms.ChoiceField(choices=opciones, label="Periodo de Reportes")
     total_usuarios = forms.BooleanField(required=False, label="Total de Usuarios Registrados")

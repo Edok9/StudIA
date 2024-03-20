@@ -1,24 +1,34 @@
 import csv
+from django.utils import timezone
+from dateutil.relativedelta import relativedelta
 from loginApp.models import Usuario
 from solicitudesManager.models import Solicitud
 
-def gen_informe():
-    '''
-    uhhh, de alguna manera recibir los parametros del formulario
-    es un diccionario, deberia de pedir los campos en la funcion nomas
-    luego pasar a filtrar
-    uno es la fecha de las solicitudes
-    otra es de obtener los usuarios (si/no)
-    de primeras sacar solo el csv
-    luego intentar implementar con pdf
-    seguramente se filtrara por formato, si es un csv o un pdf
-    investigar como trabajar con multiples archivos... zip? puede ser
-    ay caramba
-    '''
-    pass
+now = timezone.now()
+last_24h = now - relativedelta(hours=24)
+last_7d = now - relativedelta(days=7)
+last_1m = now - relativedelta(months=1)
 
-def to_csv():
-    pass
+def gen_informe(periodo, response):
+    match periodo:
+        case "24h":
+            lista_solicitudes = Solicitud.objects.filter(created_at__gte=last_24h)
+        case "7d":
+            lista_solicitudes = Solicitud.objects.filter(created_at__gte=last_7d)
+        case "1m":
+            lista_solicitudes = Solicitud.objects.filter(created_at__gte=last_1m)
+    # hocus pocus crear el csv
+    to_csv(lista_solicitudes, response)
+    
+    # pendiente el crear un pdf cuando sea necesario, ver que libreria usar y procesar el formato requerido si fuera posible
+
+def to_csv(datos, response):
+    campos = [campo.verbose_name for campo in Solicitud._meta.fields]
+    archivo = csv.writer(response)
+    archivo.writerow(campos)
+    solicitudes = datos.values_list()
+    for solicitud in solicitudes:
+        archivo.writerow(solicitud)
 
 def to_pdf():
     pass
