@@ -5,9 +5,9 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.admin.views.decorators import staff_member_required
 from django.urls import reverse_lazy
 from clientManager.models import Empresa
-from loginApp.forms import CrearUsuarioForm, EditarUsuarioForm, CambioClaveAdminForm, SolicitudForm, CasoDeUsoForm, ReporteriaForm
+from loginApp.forms import CrearUsuarioForm, EditarUsuarioForm, CambioClaveAdminForm, ReporteriaForm, Ise_Vpn_Form, Ioc_Automatico_Form, Cambio_De_Ruta_Form
 from loginApp.models import Usuario
-from solicitudesManager.models import Solicitud, Tipo_Solicitud
+from solicitudesManager.models import Solicitud
 
 def casos_de_uso(request):
     return render(request,'casos_de_uso.html')
@@ -30,6 +30,11 @@ def solicitudes(request):
 def administrar(request):
     return render(request,'administrar.html')
 
+formList = (
+    Ise_Vpn_Form(),
+    Ioc_Automatico_Form(),
+    Cambio_De_Ruta_Form(),
+)
 
 def index(request):
     if request.user.is_authenticated:
@@ -62,15 +67,23 @@ def index(request):
 @login_required
 def home(request):
     if request.method == "POST":
-        data = request.POST
-        sol_form = SolicitudForm(data, request.FILES)
+        sol = Solicitud()
         usuario = Usuario.objects.get(pk=request.user.id_usuario)
-        if sol_form.is_valid():
-            sol = sol_form.save(commit=False)
-            sol.id_usuario = usuario
-            sol.save()
-    formulario = SolicitudForm()
-    return render(request, "home.html", {"formulario": formulario})
+        sol.tipo_sol = request.POST["tipo_sol"]
+        sol.id_usuario = usuario
+        match sol.tipo_sol:
+            case "Servicio VPN":
+                form = Ise_Vpn_Form(request.POST)
+                submit_caso_form(form, sol)
+            case "IOC Automatico":
+                form = Ioc_Automatico_Form(request.POST, request.FILES)
+                submit_caso_form(form, sol)
+            case "Cambio de Ruta":
+                form = Cambio_De_Ruta_Form(request.POST)
+                submit_caso_form(form, sol)
+            case _:
+                return redirect("home")
+    return render(request, "home.html", {"formularios": formList})
 
 @login_required
 def infoSolicitudes(request):
@@ -98,11 +111,6 @@ def usuarios(request):
     return render(request, "administrar.html", datos)
 
 @staff_member_required(redirect_field_name=None, login_url=reverse_lazy("home"))
-def casosDeUso(request):
-    casos = Tipo_Solicitud.objects.all().order_by('id_tipo_sol')
-    return render(request, "listaCasosDeUso.html", {"casos": casos})
-
-@staff_member_required(redirect_field_name=None, login_url=reverse_lazy("home"))
 def crearUsuario(request):
     if request.method == "POST":
         form = CrearUsuarioForm(request.POST)
@@ -120,17 +128,6 @@ def crearUsuario(request):
     return render(request, "crearUsuario.html", datos_solicitudes)
 
 @staff_member_required(redirect_field_name=None, login_url=reverse_lazy("home"))
-def crearCaso(request):
-    if request.method == "POST":
-        form = CasoDeUsoForm(request.POST)
-        if form.is_valid():
-            caso = form.save(commit=False)
-            caso.save()
-            return redirect("casosDeUso")
-    formulario = CasoDeUsoForm()
-    return render(request, "crearCasoDeUso.html", {"formulario": formulario})
-
-@staff_member_required(redirect_field_name=None, login_url=reverse_lazy("home"))
 def editarUsuario(request, pk):
     if request.method == "POST":
         form = EditarUsuarioForm(request.POST)
@@ -144,22 +141,7 @@ def editarUsuario(request, pk):
         return render(request, "editarUsuario.html", {"formulario": formulario})
     except Usuario.DoesNotExist:
         return redirect("usuarios")        
-
-@staff_member_required(redirect_field_name=None, login_url=reverse_lazy("home"))
-def editarCaso(request, pk):
-    if request.method == "POST":
-        form = CasoDeUsoForm(request.POST)
-        if form.is_valid():
-            datos_formulario = form.cleaned_data
-            Tipo_Solicitud.objects.filter(id_tipo_sol = pk).update(**datos_formulario)
-            return redirect("casosDeUso")
-    try:
-        caso = Tipo_Solicitud.objects.get(id_tipo_sol = pk)
-        formulario = CasoDeUsoForm(instance=caso)
-        return render(request, "editarCasodeUso.html", {"formulario": formulario})
-    except Tipo_Solicitud.DoesNotExist:
-        return redirect("casosDeUso")
-    
+   
 @staff_member_required(redirect_field_name=None, login_url=reverse_lazy("home"))
 def editarClaveAdmin(request, pk):
     if request.method == "POST":
@@ -192,39 +174,49 @@ def borrarUsuario(request, pk):
     return redirect("usuarios")
 
 @staff_member_required(redirect_field_name=None, login_url=reverse_lazy("home"))
-def borrarCaso(request, pk):
-    caso = Tipo_Solicitud.objects.get(id_tipo_sol = pk)
-    caso.delete()
-    return redirect("casosDeUso")
-
-@staff_member_required(redirect_field_name=None, login_url=reverse_lazy("home"))
 def editarSolicitud(request, pk):
     if request.method == "POST":
-        form = SolicitudForm(request.POST)
-        if form.is_valid():
-            datos_formulario = form.cleaned_data
-            '''
-            Por alguna razon si actualizo sin esto, se borra los datos del campo "adjunto"
-            Pero no creo que sea necesario modificar este campo por parte del admin
-            Igual lo dejo en caso que sea necesario
-            '''
-            if not request.FILES:
-                solicitud = Solicitud.objects.get(id_sol = pk)
-                datos_formulario["adjunto"] = solicitud.adjunto
-            Solicitud.objects.filter(id_sol = pk).update(**datos_formulario)
-            return redirect("estadoSolicitudes")
+        sol = Solicitud.objects.get(id_sol = pk)
+        form = request.POST
+        match form["tipo_solicitud"]:
+            case "Servicio VPN":
+                form = Ise_Vpn_Form(request.POST)
+                submit_caso_form(form, sol)
+            case "IOC Automatico":
+                form = Ioc_Automatico_Form(request.POST, request.FILES)
+                submit_caso_form(form, sol)
+            case "Cambio de Ruta":
+                form = Cambio_De_Ruta_Form(request.POST)
+                submit_caso_form(form, sol)
+            case _:
+                return redirect("estadoSolicitudes")
+                
+        return redirect("estadoSolicitudes")
     try:
         solicitud = Solicitud.objects.get(id_sol = pk)
-        formulario = SolicitudForm(instance=solicitud)
-        return render(request, "editarSolicitud.html", {"formulario": formulario})
+        if(solicitud.adjunto_sol):
+            solicitud.campos_sol["adjunto"] = solicitud.adjunto_sol
+        match solicitud.tipo_sol:
+            case "Servicio VPN":
+                formulario = Ise_Vpn_Form(initial=solicitud.campos_sol)
+            case "IOC Automatico":
+                formulario = Ioc_Automatico_Form(initial=solicitud.campos_sol)
+            case "Cambio de Ruta":
+                formulario = Cambio_De_Ruta_Form(initial=solicitud.campos_sol)  
+            case _:
+                return redirect("home")
+        datos = {
+            "formulario": formulario,
+            "tipo_formulario": solicitud.tipo_sol
+        }
+        return render(request, "editarSolicitud.html", datos)
     except Solicitud.DoesNotExist:
-        return redirect("estadoSolicitudes")     
-
+        return redirect("estadoSolicitudes") 
+     
 @staff_member_required(redirect_field_name=None, login_url=reverse_lazy("home"))
 def reportes(request):
     if request.method == "POST":
         form = request.POST
-        print(form)
         return redirect("reporteria")
     
     formulario = ReporteriaForm()
@@ -236,3 +228,12 @@ def logoutProcess(request):
 
 
 # Create your views here.
+
+def submit_caso_form(form, sol):
+    if form.is_valid():
+        sol.campos_sol = form.cleaned_data
+        if form.files:
+            sol.adjunto_sol = form.files[f'{sol.tipo_sol}-adjunto']
+            del(sol.campos_sol["adjunto"])
+        sol.save()
+        return redirect("home")

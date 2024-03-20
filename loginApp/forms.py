@@ -1,6 +1,5 @@
 from django import forms
 from .models import Usuario
-from solicitudesManager.models import Solicitud, Tipo_Solicitud
 
 design = "flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
 
@@ -16,33 +15,29 @@ class ReporteriaForm(forms.Form):
     periodo_reportes = forms.ChoiceField(choices=opciones, label="Periodo de Reportes")
     total_usuarios = forms.BooleanField(required=False, label="Total de Usuarios Registrados")
 
-class CasoDeUsoForm(forms.ModelForm):
-    class Meta:
-        model = Tipo_Solicitud
-        fields = [
-            "nombre_t_sol",
-            "descripcion_t_sol",
-        ]
-        widgets = {
-            "nombre_t_sol": forms.TextInput(attrs={"class": design}),
-            "descripcion_t_sol": forms.TextInput(attrs={"class": design}),
+class Ise_Vpn_Form(forms.Form):
+    accion = forms.CharField()
+    usuario = forms.CharField()
+    correo_usuario = forms.EmailField()
+    fecha_expiracion = forms.DateInput()
+    
+    widgets = {
+            "fecha_expiracion": forms.DateInput(attrs={'type': 'date'}),
         }
 
-class SolicitudForm(forms.ModelForm):
-    class Meta:
-        model = Solicitud
-        fields = [
-            "nombre_sol",
-            "id_tipo_sol",
-            "descripcion_sol",
-            "adjunto",
-            "notas",
-        ]
-        widgets = {
-            "nombre_sol": forms.TextInput(attrs={"class": design}),
-            "descripcion_sol": forms.TextInput(attrs={"class": design}),
-            "notas": forms.TextInput(attrs={"class": design}),
-        }
+    prefix = "Servicio VPN"
+
+class Ioc_Automatico_Form(forms.Form):
+    adjunto = forms.FileField(required=False)
+    notas = forms.CharField()
+
+    prefix = "IOC Automatico"
+
+class Cambio_De_Ruta_Form(forms.Form):
+    gateway = forms.CharField()
+    interfaz_salida = forms.CharField()
+
+    prefix = "Cambio de Ruta"      
 
 class CambioClaveAdminForm(forms.Form):
     nueva_contraseña = forms.CharField(widget=forms.PasswordInput(attrs={"class": design}))

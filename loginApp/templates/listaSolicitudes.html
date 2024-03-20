@@ -12,8 +12,6 @@
                     Solicitud</th>
                 <th class="h-12 px-4 text-left align-middle font-medium">
                     Fecha de Solicitud</th>
-                <th class="h-12 px-4 text-left align-middle font-medium">
-                    Notas</th>
                 <th class="h-12 px-4 align-middle font-medium w-[160px] text-middle">
                     Acciones
                 </th>
@@ -24,9 +22,8 @@
             {% for solicitud in solicitudes %}
             <tr>
                 <td class="p-4 align-middle font-medium">{{solicitud.estado_sol}}</td>
-                <td class="p-4 align-middle">{{solicitud.nombre_sol}}</td>
+                <td class="p-4 align-middle">{{solicitud.tipo_sol}}</td>
                 <td class="p-4 align-middle">{{solicitud.created_at }}</td>
-                <td class="p-4 align-middle">{{solicitud.notas}}</td>
                 <td class="p-4 align-middle text-center">
                     {% if request.user.is_staff %}
                     <button
