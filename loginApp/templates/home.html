@@ -1,41 +1,96 @@
 {% extends "base.html" %}
 
 {% block content %}
-<div class="flex flex-col justify-center items-center space-y-4">
-    <h1 class="text-2xl font-bold text-[#005CFF]">Nueva Solicitud</h1>
-    <form id="dynamic-form" method="post" enctype="multipart/form-data"> {% csrf_token %}
-        <select id="tipo_sol" name="tipo_sol">
-            <option value="">------</option>
-            {% for form in formularios %}
-            <option value="{{form.prefix}}">{{form.prefix}}</option>
-            {% endfor %}
-        </select>
-        <div id="campos-formulario" class="space-y-2"></div>
-        <button
-            class="inline-flex items-center justify-center text-sm font-medium h-10 px-4 py-2 my-4 bg-[#FF3D00] text-white rounded-full"
-            type="submit">
-            Crear Solicitud
-        </button>
-    </form>
+<br><br>
+<div class="container-fluid">
+    <div class="row justify-content-center">
+        <div class="col-md-4 bg-dark text-light p-4 rounded">
+            <div class="flex flex-col justify-center items-center space-y-4">
+                <h1 class="text-2xl font-bold text-[#005CFF]">Nueva Solicitud</h1>
+                <form id="dynamic-form" method="post" enctype="multipart/form-data" class="formulario-container">
+                    {% csrf_token %}
+                    <div class="form-group">
+                        <label for="tipo_sol" class="form-label text-gray-400">Tipo de Solicitud:</label>
+                        <select id="tipo_sol" name="tipo_sol" class="form-control">
+                            <option value="">--Seleccione--</option>
+                            {% for form in formularios %}
+                            <option value="{{form.prefix}}">{{form.prefix}}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div id="opciones-dinamicas" class="space-y-2"></div>
+                    <div id="campos-formulario" class="space-y-2"></div>
+                    <button 
+                        class="btn btn-primary w-full mt-4" 
+                        type="submit">
+                        <i class="fas fa-plus-circle mr-2"></i> <!-- Icono de Font Awesome -->
+                        Crear Solicitud
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
 </div>
+
 <script>
     document.getElementById('tipo_sol').addEventListener('change', function() {
         var opcion = this.value;
-        var camposForm = document.getElementById('campos-formulario');
-        
+        var opcionesDinamicas = document.getElementById('opciones-dinamicas');
+
         // Lógica para mostrar los campos adicionales según la opción seleccionada
         switch (opcion) {
             {% for form in formularios %}
             case "{{form.prefix}}":
-                camposForm.innerHTML = {% spaceless %}'{{form}}'{% endspaceless %};
-                break
+                opcionesDinamicas.innerHTML = `
+                    <div class="opcion-seleccionada">
+                        <br>
+                        {% if form.prefix == "Servicio VPN" %}
+                        <div class="form-group row">
+                            <div class="form-group">
+                                <label for="accion" class="form-label">Acción:</label>
+                                <input type="text" name="accion" class="form-control mb-2">
+                            </div>
+                            <div class="form-group">
+                                <label for="usuario" class="form-label">Usuario:</label>
+                                <input type="text" name="usuario" class="form-control mb-2">
+                            </div>
+                            <div class="form-group">
+                                <label for="correo_usuario" class="form-label">Correo Usuario:</label>
+                                <input type="email" name="correo_usuario" class="form-control mb-2">
+                            </div>
+                            <div class="form-group">
+                                <label for="fecha_expiracion" class="form-label">Fecha de Expiración:</label>
+                                <input type="date" name="fecha_expiracion" class="form-control mb-2">
+                        
+                        </div>
+                        {% elif form.prefix == "IOC Automatico" %}
+                        <div class="form-group">
+                            <label for="adjunto" class="form-label">Adjunto:</label>
+                            <input type="file" name="adjunto" class="form-control mb-2" accept=".pdf,.docx">
+                            <div class="invalid-feedback">No se eligió ningún archivo.</div>
+                        </div>
+                        <div class="form-group">
+                            <label for="notas" class="form-label">Notas:</label>
+                            <textarea name="notas" rows="4" class="form-control"></textarea>
+                        </div>
+                        {% elif form.prefix == "Cambio de Ruta" %}
+                        <div class="form-group">
+                            <label for="gateway" class="form-label">Gateway:</label>
+                            <input type="text" name="gateway" class="form-control">
+                        </div>
+                        <div class="form-group">
+                            <label for="interfaz_salida" class="form-label">Interfaz de Salida:</label>
+                            <input type="text" name="interfaz_salida" class="form-control">
+                        </div>
+                        {% endif %}
+                    </div>`;
+                break;
             {% endfor %}
             default:
-                camposForm.innerHTML = '';
+                opcionesDinamicas.innerHTML = '';
                 break;
         }
     });
-    
 </script>
 {% endblock %}
 
