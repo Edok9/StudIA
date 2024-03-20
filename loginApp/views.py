@@ -5,6 +5,7 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.admin.views.decorators import staff_member_required
 from django.urls import reverse_lazy
 from clientManager.models import Empresa
+from .scripts.informe import gen_informe
 from loginApp.forms import CrearUsuarioForm, EditarUsuarioForm, CambioClaveAdminForm, ReporteriaForm, Ise_Vpn_Form, Ioc_Automatico_Form, Cambio_De_Ruta_Form
 from loginApp.models import Usuario
 from solicitudesManager.models import Solicitud
@@ -217,7 +218,11 @@ def editarSolicitud(request, pk):
 def reportes(request):
     if request.method == "POST":
         form = request.POST
-        return redirect("reporteria")
+        response = HttpResponse()
+        response['Content-Disposition'] = "attachment; filename=reporte.csv"
+        periodo = form["periodo_reportes"]
+        gen_informe(periodo, response)
+        return response
     
     formulario = ReporteriaForm()
     return render(request, "reporteria.html", {"formulario":formulario})
