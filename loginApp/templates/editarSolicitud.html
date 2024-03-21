@@ -1,9 +1,10 @@
 {% extends "base.html" %}
 
 {% block content %}
-<div class="flex flex-col justify-center items-center space-y-4">
+<br><br>
+<div class="bg-dark text-light p-4 rounded w-48 mx-auto">
     <h1 class="text-2xl font-bold text-[#005CFF]">Editar Solicitud</h1>
-    <form method="post"  enctype="multipart/form-data"> {% csrf_token %}
+    <form method="post" enctype="multipart/form-data"> {% csrf_token %}
         <input type="hidden" name="tipo_solicitud" value="{{tipo_formulario}}">
         {% for campo in formulario %}
         <div class="space-y-2">
@@ -11,12 +12,12 @@
                 {{campo.label}}
             </label>
             {{campo}}
+            
         </div>
         {% endfor %}
-        <button
-            class="inline-flex items-center justify-center text-sm font-medium h-10 px-4 py-2 my-4 bg-[#FF3D00] text-white rounded-full"
-            type="submit">
-            Guardar Cambios
+        <br>
+        <button class="btn btn-primary w-full" type="submit">
+            <i class="fas fa-save mr-2"></i> Guardar Cambios
         </button>
     </form>
 </div>

@@ -62,7 +62,7 @@
                             <a href="{% url 'home'%}" class="nav-link">Solicitudes</a>
                         </li>
                         <li class="nav-item">
-                            <a href="{% url 'estado'%}" class="nav-link">Estado Solicitudes</a>
+                            <a href="{% url 'infoSolicitudes'%}" class="nav-link">Estado Solicitudes</a>
                         </li>
                         {% if request.user.is_staff %}
                         <li class="nav-item">
@@ -96,13 +96,13 @@
                                 <a href="#" class="dropdown-item">Item 2 &raquo;</a>
                                 <ul class="dropdown-menu submenu submenu-left dropdown-menu-dark">
                                     <li>
-                                        <a href="{% url 'crearUsuario' %}" class="dropdown-item">Submenu1</a>
+                                        <a href="#" class="dropdown-item">Submenu1</a>
                                     </li>
                                     <li>
-                                        <a href="{% url 'usuarios' %}" class="dropdown-item">Submenu2</a>
+                                        <a href="{% url 'solicitudes' %}" class="dropdown-item">Solicitudes viejo</a>
                                     </li>
                                     <li>
-                                        <a href="{% url 'infoSolicitudes' %}" class="dropdown-item">Submenu3</a>
+                                        <a href="{% url 'estado' %}" class="dropdown-item">Estado viejo</a>
                                     </li>
                                 </ul>
                             </li>
