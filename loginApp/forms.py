@@ -12,8 +12,12 @@ class ReporteriaForm(forms.Form):
         ("7d", "7 Días"),
         ("1m", "1 Mes"),
     )
+    formatos = (
+        ("csv", "CSV"),
+        ("pdf", "PDF"),
+    )
     periodo_reportes = forms.ChoiceField(choices=opciones, label="Periodo de Reportes")
-    total_usuarios = forms.BooleanField(required=False, label="Total de Usuarios Registrados")
+    formato_reportes = forms.ChoiceField(choices=formatos, label="Formato de los Reportes")
 
 class Ise_Vpn_Form(forms.Form):
     accion = forms.CharField()

@@ -195,9 +195,13 @@ def reportes(request):
     if request.method == "POST":
         form = request.POST
         response = HttpResponse()
-        response['Content-Disposition'] = "attachment; filename=reporte.csv"
         periodo = form["periodo_reportes"]
-        gen_informe(periodo, response)
+        formato = form["formato_reportes"]
+        if formato == "pdf":
+            response['Content-Disposition'] = "attachment; filename=reporte.pdf"
+        else:
+            response['Content-Disposition'] = "attachment; filename=reporte.csv"
+        gen_informe(periodo, response, formato)
         return response
     
     formulario = ReporteriaForm()
