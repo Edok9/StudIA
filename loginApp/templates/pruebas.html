@@ -1,78 +1,174 @@
 {% extends "base.html" %}
 {% load static %}
-
-{% block title %}
-    Título de la página de pruebas
-{% endblock %}
-
 {% block content %}
 
-<br><br>
-<div class="menu-container">
-    <div class="row">
-        <div class="col-md">
-            <div class="menu-cont">
-                <div class="navbar navbar-dark bg-dark">
-                    <div class="container-fluid container">
-                        <a href="#" class="navbar-brand">Menu</a>
-                        <button class="navbar-toggler"
-                                type="button"
-                                data-bs-toggle="collapse"
-                                data-bs-target="#nav"
-                        >
-                            <span class="navbar-toggler-icon"></span>
-                        </button>
-                        <div class="collapse navbar-collapse flex-column" id="nav"> <!-- Cambié 'navbar-collapse' por 'flex-column' -->
-                            <ul class="navbar-nav mb-2 mb-lg-0"> <!-- Añadí la clase 'mb-2 mb-lg-0' para ajustar el margen inferior -->
-                                <li class="nav-item dropdown">
-                                    <a href="#" class="nav-link dropdown-toggle" data-bs-toggle="dropdown">Solicitudes</a>
-                                    <ul class="dropdown-menu dropdown-menu-dark">
-                                        <li>
-                                            <a href="{% url 'solicitudes' %}" class="dropdown-item">Nombre Solicitud 1</a>
-                                        </li>
-    
-                                        <li>
-                                            <a href="solicitudes.html" class="dropdown-item">Nombre Solicitud 2</a>
-                                        </li>
-                                    </ul>
-                                </li>
-                                <li class="nav-item">
-                                    <a href="estado.html" class="nav-link">Estado Solicitudes</a>
-                                </li>
-                                <li class="nav-item">
-                                    <a href="reporteria.html" class="nav-link">Reportería</a>
-                                </li>
-                                <li class="nav-item dropdown">
-                                    <a href="#" class="nav-link dropdown-toggle" data-bs-toggle="dropdown">Administración</a>
-                                    <ul class="dropdown-menu dropdown-menu-dark">
-                                        <li>
-                                            <a href="casos_de_uso.html" class="dropdown-item">Gestionar Casos de Uso</a>
-                                        </li>
-    
-                                        <li>
-                                            <a href="administrar.html" class="dropdown-item">Gestionar Usuarios</a>
-                                        </li>
-                                    </ul>
-                                </li>
-                            </ul>
-            
-                        </div>
+<div class="container-fluid mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-4 bg-dark text-light p-4 rounded">
+            <div class="nueva-solicitud-container">
+                <h3>Nueva Solicitud:</h3>
+                <form id="nuevaSolicitudForm" method="post" action="{% url 'nueva_solicitud' %}">
+                    {% csrf_token %}
+                    <div class="mb-3">
+                        <label for="tipo-solicitud" class="form-label">Tipo de Solicitud:</label>
+                        <select class="form-control" id="tipo-solicitud" name="tipo-solicitud" required>
+                            <option value="">-- Seleccione --</option>
+                            <option value="ISE VPN">ISE VPN</option>
+                            <option value="IOC AUTOMATICO">IOC AUTOMATICO</option>
+                            <option value="CAMBIO DE RUTA">CAMBIO DE RUTA</option>
+                        </select>
                     </div>
-                </div>
-                
-                
+                    <div id="campos-dinamicos" class="mb-3">
+                        <!-- Aquí se cargarán los campos dinámicos -->
+                    </div>
+                    <div class="form-group">
+                        <br>
+                        <button type="submit" class="btn btn-primary">Enviar</button>
+                    </div>
+                </form>
             </div>
         </div>
     </div>
-
-    
 </div>
 
-{% endblock %}
 
+<script>
+    // Event listener para el cambio en el tipo de solicitud
+    document.getElementById('tipo-solicitud').addEventListener('change', function() {
+        var tipoSeleccionado = this.value;
+        mostrarCamposDinamicos(tipoSeleccionado);
+    });
 
+    // Función para mostrar los campos dinámicos según el tipo de solicitud seleccionado
+    function mostrarCamposDinamicos(tipo) {
+        var camposDinamicos = document.getElementById('campos-dinamicos');
+        camposDinamicos.innerHTML = ''; // Limpiar campos dinámicos anteriores
 
+        if (tipo === 'ISE VPN') {
+            camposDinamicos.innerHTML += `
+                <div class="mb-3">
+                    <label for="accion" class="form-label">Acción:</label>
+                    <select class="form-control" id="accion" name="accion" required>
+                        <option value="">-- Seleccione --</option>
+                        <option value="Extensión de cuenta">Extensión de cuenta</option>
+                        <option value="Cambio de contraseña">Cambio de contraseña</option>
+                        <option value="Deshabilitación de cuenta">Deshabilitación de cuenta</option>
+                    </select>
+                </div>
+                <div class="mb-3" id="usuario-correo-container" style="display: none;">
+                    <label for="usuario" class="form-label">Usuario:</label>
+                    <input type="text" class="form-control" id="usuario" name="usuario" required>
+                </div>
+                <div class="mb-3" id="correo-container" style="display: none;">
+                    <label for="correo" class="form-label">Correo de usuario:</label>
+                    <input type="email" class="form-control" id="correo" name="correo" required>
+                    <div id="correoError" class="text-danger"></div>
+                </div>
+                <div class="mb-3" id="fecha-expiracion-container" style="display: none;">
+                    <label for="fecha-expiracion" class="form-label">Fecha de expiración:</label>
+                    <input type="date" class="form-control" id="fecha" name="fecha-expiracion">
+                </div>`;
 
-{% block javascript %}
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
+            // Asignar evento change al campo de selección de acción
+            document.getElementById('accion').addEventListener('change', function() {
+                var accionSeleccionada = this.value;
+                mostrarCamposUsuarioCorreo(accionSeleccionada);
+            });
+        } else if (tipo === 'IOC AUTOMATICO') {
+            camposDinamicos.innerHTML += `
+                <div class="input-group mb-3">
+                    <label>Adjunto (si se requiere):</label>
+                    <input type="file" id="adjunto" name="adjunto">
+                </div>
+                <div class="input-group mb-3">
+                    <label>Notas:</label>
+                    <textarea id="notas" name="notas" rows="4" cols="50"></textarea>
+                </div>`;
+        } else if (tipo === 'CAMBIO DE RUTA') {
+            camposDinamicos.innerHTML += `
+                <div class="mb-3">
+                    <label for="descripcion" class="form-label">Gateway:</label>
+                    <input type="text" class="form-control" id="gateway" name="gateway" required>
+                </div>
+                <div class="mb-3">
+                    <label for="descripcion" class="form-label">Interfaz de salida:</label>
+                    <input type="text" class="form-control" id="interfaz" name="interfaz" required>
+                </div>`;
+        }
+
+        // Mostrar u ocultar los campos de usuario, correo y fecha de expiración según la acción seleccionada
+        mostrarCamposUsuarioCorreo(document.getElementById('accion').value);
+    }
+
+    // Función para mostrar u ocultar los campos de usuario, correo y fecha de expiración según la acción seleccionada
+    function mostrarCamposUsuarioCorreo(accion) {
+        var usuarioCorreoContainer = document.getElementById('usuario-correo-container');
+        var correoContainer = document.getElementById('correo-container');
+        var fechaExpiracionContainer = document.getElementById('fecha-expiracion-container');
+
+        if (accion === 'Extensión de cuenta' || accion === 'Cambio de contraseña' || accion === 'Deshabilitación de cuenta') {
+            usuarioCorreoContainer.style.display = 'block';
+            correoContainer.style.display = 'block';
+            fechaExpiracionContainer.style.display = (accion === 'Extensión de cuenta') ? 'block' : 'none';
+        } else {
+            usuarioCorreoContainer.style.display = 'none';
+            correoContainer.style.display = 'none';
+            fechaExpiracionContainer.style.display = 'none';
+        }
+    }
+
+    // Validación del formulario antes de enviarlo
+    document.getElementById('validarEnviar').addEventListener('click', function(event) {
+        var tipoSolicitud = document.getElementById('tipo-solicitud').value;
+        var accion = document.getElementById('accion').value;
+        var usuario = document.getElementById('usuario').value;
+        var correo = document.getElementById('correo').value;
+
+        if (tipoSolicitud === "") {
+            alert("Por favor, seleccione un tipo de solicitud.");
+            return;
+        }
+
+        if (tipoSolicitud === "ISE VPN") {
+            if (accion === "") {
+                alert("Por favor, seleccione una acción.");
+                return;
+            }
+
+            if ((accion === "Extensión de cuenta" || accion === "Cambio de contraseña" || accion === "Deshabilitación de cuenta") && usuario === "") {
+                alert("Por favor, ingrese el usuario.");
+                return;
+            }
+
+            if ((accion === "Extensión de cuenta" || accion === "Cambio de contraseña" || accion === "Deshabilitación de cuenta") && correo === "") {
+                alert("Por favor, ingrese el correo.");
+                return;
+            }
+        }
+
+        // Si todas las validaciones pasan, enviar el formulario
+        document.getElementById('nuevaSolicitudForm').submit();
+    });
+    // Event listener para el envío del formulario
+document.getElementById('nuevaSolicitudForm').addEventListener('submit', function(event) {
+    event.preventDefault(); // Evitar el envío automático del formulario
+    var formData = new FormData(this); // Obtener los datos del formulario
+    fetch('{% url 'nueva_solicitud' %}', { // Actualizar la URL de la vista en Django
+        method: 'POST',
+        body: formData
+    })
+    .then(response => {
+        if (response.ok) {
+            alert("Solicitud enviada con éxito.");
+            // Realizar acciones adicionales si es necesario
+        } else {
+            throw new Error('Error al enviar la solicitud.');
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert("Hubo un error al enviar la solicitud.");
+    });
+});
+</script>
 {% endblock %}

@@ -9,7 +9,39 @@ from .scripts.informe import gen_informe
 from loginApp.forms import CrearUsuarioForm, EditarUsuarioForm, CambioClaveAdminForm, ReporteriaForm, Ise_Vpn_Form, Ioc_Automatico_Form, Cambio_De_Ruta_Form
 from loginApp.models import Usuario
 from solicitudesManager.models import Solicitud
+from django.http import JsonResponse
 
+def nueva_solicitud(request):
+    if request.method == "POST":
+        # Obtener el usuario actual
+        usuario = request.user
+
+        # Obtener el tipo de solicitud del formulario
+        tipo_solicitud = request.POST.get("tipo-solicitud")
+
+        # Crear un diccionario con los datos del formulario
+        campos_sol = request.POST.dict()
+
+        # Eliminar el tipo de solicitud del diccionario de campos_sol
+        del campos_sol["tipo-solicitud"]
+
+        # Eliminar el token CSRF del diccionario de campos_sol si está presente
+        if "csrfmiddlewaretoken" in campos_sol:
+            del campos_sol["csrfmiddlewaretoken"]
+
+        # Crear una nueva instancia de Solicitud y guardarla en la base de datos
+        nueva_solicitud = Solicitud.objects.create(
+            tipo_sol=tipo_solicitud,
+            campos_sol=campos_sol,
+            id_usuario=usuario
+        )
+
+        # Redirigir a la página deseada después de guardar la solicitud
+        return redirect("infoSolicitudes")
+
+    else:
+        return render(request, "nueva_solicitud.html")
+    
 def casos_de_uso(request):
     return render(request,'casos_de_uso.html')
 
@@ -22,14 +54,13 @@ def estado(request):
 def pruebas(request):
     return render(request,'pruebas.html')
 
-def reporteria(request):
-    return render(request,'reporteria.html')
 
 def solicitudes(request):
     return render(request,'solicitudes.html')
 
 def administrar(request):
     return render(request,'administrar.html')
+
 
 formList = (
     Ise_Vpn_Form(),
@@ -54,7 +85,7 @@ def index(request):
             if next_url:
                 return HttpResponse(status=302, headers={'Location': next_url})
             else:
-                return redirect("solicitudes")
+                return redirect("home")
         else:
             try:
                 user = Usuario.objects.get(email=email)

@@ -1,9 +1,8 @@
 {% extends "base.html" %}
 
 {% block content %}
-<br><br>
-<div class="flex flex-col justify-center items-center space-y-4">
-    <div class="bg-dark text-light p-4 rounded">
+<div class="flex flex-col justify-center items-center space-y-4 mt-5">
+    <div class="col-md-10 bg-dark text-light p-4 rounded">
         <h1 class="text-2xl font-bold text-[#005CFF]">Estado de Solicitudes</h1>
         <hr class="bg-[#005CFF]">
         <div class="w-full overflow-x-auto">
@@ -28,10 +27,11 @@
                                         <button class="btn btn-primary" onclick="location.href='{% url 'editarSolicitud' pk=solicitud.id_sol %}'">
                                             <i class="fas fa-pencil-alt"></i> Editar
                                         </button>
-                                    {% endif %}
+                                    
                                     <button class="btn btn-danger" onclick="location.href='{% url 'borrarSolicitud' pk=solicitud.id_sol %}'">
                                         <span class="fas fa-trash-alt"></span> Borrar
                                     </button>
+                                    {% endif %}
                                 </td>
                             </tr>
                         {% endfor %}

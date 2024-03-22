@@ -1,8 +1,8 @@
 {% extends "base.html" %}
 
 {% block content %}
-<br><br>
-<div class="container-fluid">
+
+<div class="container-fluid mt-5">
     <div class="row justify-content-center">
         <div class="col-md-4 bg-dark text-light p-4 rounded">
             <div class="flex flex-col justify-center items-center space-y-4">
@@ -11,17 +11,17 @@
                     {% csrf_token %}
                     <div class="form-group">
                         <label for="tipo_sol" class="form-label text-gray-400">Tipo de Solicitud:</label>
-                        <select id="tipo_sol" name="tipo_sol" class="form-control">
+                        <select id="tipo_sol" name="tipo_sol" class="form-control mi-clase-select">
                             <option value="">--Seleccione--</option>
                             {% for form in formularios %}
                             <option value="{{form.prefix}}">{{form.prefix}}</option>
                             {% endfor %}
                         </select>
                     </div>
-                    <div id="campos-formulario" class="space-y-2"></div>
-                    <button 
-                        class="btn btn-primary w-full mt-4" 
-                        type="submit">
+                    <div id="campos-formulario" class="space-y-2">
+                        <!-- Aquí van tus campos dinámicos -->
+                    </div>
+                    <button class="btn btn-primary w-full mt-4 mi-clase-boton" type="submit">
                         <i class="fas fa-plus-circle mr-2"></i> <!-- Icono de Font Awesome -->
                         Crear Solicitud
                     </button>

@@ -3,6 +3,7 @@ from .models import Usuario
 
 design = "flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
 
+    
 class CambioClaveUsuarioForm(forms.Form):
     pass
 

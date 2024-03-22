@@ -31,7 +31,7 @@ urlpatterns = [
     path('entel/', entel, name='entel'),
     path('estado/', estado, name='estado'),
     path('pruebas/', pruebas, name='pruebas'),
-    path('reporteria/', reporteria, name='reporteria'),
     path('solicitudes/', solicitudes, name='solicitudes'),
     path('administrar/', administrar, name='administrar'),
+    path('nueva_solicitud/', views.nueva_solicitud, name='nueva_solicitud'),
 ]
