@@ -10,8 +10,8 @@
                 <form id="nuevaSolicitudForm" method="post" action="{% url 'nueva_solicitud' %}">
                     {% csrf_token %}
                     <div class="mb-3">
-                        <label for="tipo-solicitud" class="form-label">Tipo de Solicitud:</label>
-                        <select class="form-control" id="tipo-solicitud" name="tipo-solicitud" required>
+                        <label for="tipoSolicitud" class="form-label">Tipo de Solicitud:</label>
+                        <select class="form-control" id="tipoSolicitud" name="tipoSolicitud" required>
                             <option value="">-- Seleccione --</option>
                             <option value="ISE VPN">ISE VPN</option>
                             <option value="IOC AUTOMATICO">IOC AUTOMATICO</option>
@@ -31,21 +31,21 @@
     </div>
 </div>
 
-
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script>
     // Event listener para el cambio en el tipo de solicitud
-    document.getElementById('tipo-solicitud').addEventListener('change', function() {
-        var tipoSeleccionado = this.value;
+    $('#tipoSolicitud').on('change', function() {
+        var tipoSeleccionado = $(this).val();
         mostrarCamposDinamicos(tipoSeleccionado);
     });
 
     // Función para mostrar los campos dinámicos según el tipo de solicitud seleccionado
     function mostrarCamposDinamicos(tipo) {
-        var camposDinamicos = document.getElementById('campos-dinamicos');
-        camposDinamicos.innerHTML = ''; // Limpiar campos dinámicos anteriores
+        var camposDinamicos = $('#campos-dinamicos');
+        camposDinamicos.empty(); // Limpiar campos dinámicos anteriores
 
         if (tipo === 'ISE VPN') {
-            camposDinamicos.innerHTML += `
+            camposDinamicos.append(`
                 <div class="mb-3">
                     <label for="accion" class="form-label">Acción:</label>
                     <select class="form-control" id="accion" name="accion" required>
@@ -67,62 +67,35 @@
                 <div class="mb-3" id="fecha-expiracion-container" style="display: none;">
                     <label for="fecha-expiracion" class="form-label">Fecha de expiración:</label>
                     <input type="date" class="form-control" id="fecha" name="fecha-expiracion">
-                </div>`;
+                </div>`);
+                
 
             // Asignar evento change al campo de selección de acción
-            document.getElementById('accion').addEventListener('change', function() {
-                var accionSeleccionada = this.value;
+            $('#accion').on('change', function() {
+                var accionSeleccionada = $(this).val();
                 mostrarCamposUsuarioCorreo(accionSeleccionada);
             });
-        } else if (tipo === 'IOC AUTOMATICO') {
-            camposDinamicos.innerHTML += `
-                <div class="input-group mb-3">
-                    <label>Adjunto (si se requiere):</label>
-                    <input type="file" id="adjunto" name="adjunto">
-                </div>
-                <div class="input-group mb-3">
-                    <label>Notas:</label>
-                    <textarea id="notas" name="notas" rows="4" cols="50"></textarea>
-                </div>`;
-        } else if (tipo === 'CAMBIO DE RUTA') {
-            camposDinamicos.innerHTML += `
-                <div class="mb-3">
-                    <label for="descripcion" class="form-label">Gateway:</label>
-                    <input type="text" class="form-control" id="gateway" name="gateway" required>
-                </div>
-                <div class="mb-3">
-                    <label for="descripcion" class="form-label">Interfaz de salida:</label>
-                    <input type="text" class="form-control" id="interfaz" name="interfaz" required>
-                </div>`;
-        }
 
-        // Mostrar u ocultar los campos de usuario, correo y fecha de expiración según la acción seleccionada
-        mostrarCamposUsuarioCorreo(document.getElementById('accion').value);
+            
+        }
+        // Resto del código para otras opciones de tipo de solicitud...
     }
 
     // Función para mostrar u ocultar los campos de usuario, correo y fecha de expiración según la acción seleccionada
     function mostrarCamposUsuarioCorreo(accion) {
-        var usuarioCorreoContainer = document.getElementById('usuario-correo-container');
-        var correoContainer = document.getElementById('correo-container');
-        var fechaExpiracionContainer = document.getElementById('fecha-expiracion-container');
-
-        if (accion === 'Extensión de cuenta' || accion === 'Cambio de contraseña' || accion === 'Deshabilitación de cuenta') {
-            usuarioCorreoContainer.style.display = 'block';
-            correoContainer.style.display = 'block';
-            fechaExpiracionContainer.style.display = (accion === 'Extensión de cuenta') ? 'block' : 'none';
-        } else {
-            usuarioCorreoContainer.style.display = 'none';
-            correoContainer.style.display = 'none';
-            fechaExpiracionContainer.style.display = 'none';
-        }
+        $('#usuario-correo-container').css('display', (accion === 'Extensión de cuenta' || accion === 'Cambio de contraseña' || accion === 'Deshabilitación de cuenta') ? 'block' : 'none');
+        $('#correo-container').css('display', (accion === 'Extensión de cuenta' || accion === 'Cambio de contraseña' || accion === 'Deshabilitación de cuenta') ? 'block' : 'none');
+        $('#fecha-expiracion-container').css('display', (accion === 'Extensión de cuenta') ? 'block' : 'none');
     }
 
     // Validación del formulario antes de enviarlo
-    document.getElementById('validarEnviar').addEventListener('click', function(event) {
-        var tipoSolicitud = document.getElementById('tipo-solicitud').value;
-        var accion = document.getElementById('accion').value;
-        var usuario = document.getElementById('usuario').value;
-        var correo = document.getElementById('correo').value;
+    $('#nuevaSolicitudForm').on('submit', function(event) {
+        event.preventDefault(); // Evitar el envío automático del formulario
+
+        var tipoSolicitud = $('#tipoSolicitud').val();
+        var accion = $('#accion').val();
+        var usuario = $('#usuario').val();
+        var correo = $('#correo').val();
 
         if (tipoSolicitud === "") {
             alert("Por favor, seleccione un tipo de solicitud.");
@@ -147,28 +120,8 @@
         }
 
         // Si todas las validaciones pasan, enviar el formulario
-        document.getElementById('nuevaSolicitudForm').submit();
+        this.submit();
     });
-    // Event listener para el envío del formulario
-document.getElementById('nuevaSolicitudForm').addEventListener('submit', function(event) {
-    event.preventDefault(); // Evitar el envío automático del formulario
-    var formData = new FormData(this); // Obtener los datos del formulario
-    fetch('{% url 'nueva_solicitud' %}', { // Actualizar la URL de la vista en Django
-        method: 'POST',
-        body: formData
-    })
-    .then(response => {
-        if (response.ok) {
-            alert("Solicitud enviada con éxito.");
-            // Realizar acciones adicionales si es necesario
-        } else {
-            throw new Error('Error al enviar la solicitud.');
-        }
-    })
-    .catch(error => {
-        console.error('Error:', error);
-        alert("Hubo un error al enviar la solicitud.");
-    });
-});
 </script>
+
 {% endblock %}

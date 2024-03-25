@@ -10,8 +10,8 @@
                 <h3>Nueva Solicitud:</h3>
                 <form id="nuevaSolicitudForm">
                     <div class="mb-3">
-                        <label for="tipo-solicitud" class="form-label">Tipo de Solicitud:</label>
-                        <select class="form-control" id="tipo-solicitud" name="tipo-solicitud" required>
+                        <label for="tipoSolicitud" class="form-label">Tipo de Solicitud:</label>
+                        <select class="form-control" id="tipoSolicitud" name="tipoSolicitud" required>
                             <option value="">-- Seleccione --</option>
                             <option value="ISE VPN">ISE VPN</option>
                             <option value="IOC AUTOMATICO">IOC AUTOMATICO</option>
@@ -34,7 +34,7 @@
 
 <script>
     // Event listener para el cambio en el tipo de solicitud
-    document.getElementById('tipo-solicitud').addEventListener('change', function() {
+    document.getElementById('tipoSolicitud').addEventListener('change', function() {
         var tipoSeleccionado = this.value;
         mostrarCamposDinamicos(tipoSeleccionado);
     });
@@ -119,7 +119,7 @@
 
     // Validación del formulario antes de enviarlo
     document.getElementById('validarEnviar').addEventListener('click', function(event) {
-        var tipoSolicitud = document.getElementById('tipo-solicitud').value;
+        var tipoSolicitud = document.getElementById('tipoSolicitud').value;
         var accion = document.getElementById('accion').value;
         var usuario = document.getElementById('usuario').value;
         var correo = document.getElementById('correo').value;

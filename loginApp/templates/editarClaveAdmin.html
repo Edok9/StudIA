@@ -6,7 +6,7 @@
     <div class="row justify-content-center">
         <div class="col-md-8 bg-dark text-light p-4 rounded">
             <h3 class="text-center mb-4">Cambiar Contraseña</h3>
-            <form method="post">
+            <form id="cambiarContraseñaForm" method="post">
                 {% csrf_token %}
                 <div class="formulario-container">
                     <div class="form-group">
@@ -22,7 +22,7 @@
                     <div class="buttons-container">
                         <div class="row justify-content-center">
                             <div class="col-sm-8 offset-sm-4">
-                                <button type="submit" class="btn btn-primary w-full">
+                                <button type="button" id="guardarCambiosBtn" class="btn btn-primary w-full">
                                     <i class="fas fa-user-plus mr-2"></i> Guardar Cambios
                                 </button>
                             </div>
@@ -33,4 +33,62 @@
         </div>
     </div>
 </div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    document.getElementById('guardarCambiosBtn').addEventListener('click', function() {
+        var nuevaContraseña = document.getElementById('id_nueva_contraseña').value;
+        var confirmarNuevaContraseña = document.getElementById('id_confirmar_nueva_contraseña').value;
+
+        // Validación de campos no vacíos
+        if (nuevaContraseña.trim() === '' || confirmarNuevaContraseña.trim() === '') {
+            alert('Por favor, complete todos los campos.');
+            return;
+        }
+
+        // Validación de coincidencia de contraseñas
+        if (nuevaContraseña !== confirmarNuevaContraseña) {
+            alert('Las contraseñas no coinciden.');
+            return;
+        }
+
+        // Validación de complejidad de contraseña
+        if (!validarContraseña(nuevaContraseña)) {
+            alert('La contraseña debe tener al menos 6 caracteres, incluyendo al menos 2 números, una mayúscula y un punto.');
+            return;
+        }
+
+        // Obtener el formulario
+        var cambioContraseñaForm = document.getElementById('cambiarContraseñaForm');
+
+        // Verificar si el formulario existe antes de enviarlo
+        if (cambioContraseñaForm) {
+            cambioContraseñaForm.submit(); // Enviar el formulario
+        } else {
+            alert('Error: El formulario no se encontró.');
+        }
+    });
+});
+
+function validarContraseña(contraseña) {
+    // Longitud mínima de 6 caracteres
+    if (contraseña.length < 6) {
+        return false;
+    }
+    // Al menos 2 números
+    if ((contraseña.match(/[0-9]/g) || []).length < 2) {
+        return false;
+    }
+    // Al menos una mayúscula
+    if (!/[A-Z]/.test(contraseña)) {
+        return false;
+    }
+    // Al menos un punto
+    if (!/\./.test(contraseña)) {
+        return false;
+    }
+    return true;
+}
+</script>
+
 {% endblock %}

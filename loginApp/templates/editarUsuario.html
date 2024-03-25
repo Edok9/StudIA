@@ -6,7 +6,7 @@
     <div class="row justify-content-center">
         <div class="col-md-8 bg-dark text-light p-4 rounded">
             <h3 class="text-center mb-4">Editar Usuario</h3>
-            <form method="post">
+            <form id="editarUsuarioForm" method="post">
                 {% csrf_token %}
                 <div class="formulario-container">
                     <div class="form-group">
@@ -22,7 +22,7 @@
                     <div class="buttons-container">
                         <div class="row justify-content-center">
                             <div class="col-sm-8 offset-sm-4">
-                                <button type="submit" class="btn btn-primary w-full">
+                                <button type="button" id="guardarCambiosBtn" class="btn btn-primary w-full">
                                     <i class="fas fa-save mr-2"></i> Guardar Cambios
                                 </button>
                             </div>
@@ -33,4 +33,45 @@
         </div>
     </div>
 </div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        document.getElementById('guardarCambiosBtn').addEventListener('click', function() {
+            var nombre = document.getElementById('id_nombre').value;
+            var telefono = document.getElementById('id_telefono').value;
+            var cargo = document.getElementById('id_cargo').value;
+            var horario = document.getElementById('id_horario_atencion').value;
+
+            // Validación de campos no vacíos
+            if (nombre.trim() === '' || telefono.trim() === '') {
+                alert('Por favor, complete todos los campos.');
+                return;
+            }
+            if (nombre.trim() === '' || horario.trim() === '') {
+                alert('Por favor, complete todos los campos.');
+                return;
+            }
+
+            if (nombre.trim() === '' || cargo.trim() === '') {
+                alert('Por favor, complete todos los campos.');
+                return;
+            }
+
+            // Validación de teléfono (solo números)
+            if (!/^\d+$/.test(telefono)) {
+                alert('El teléfono solo puede contener números.');
+                return;
+            }
+
+            // Validación de nombre (solo letras)
+            if (!/^[a-zA-Z\s]+$/.test(nombre)) {
+                alert('El nombre solo puede contener letras y espacios.');
+                return;
+            }
+
+            // Si pasa todas las validaciones, enviar el formulario
+            document.getElementById('editarUsuarioForm').submit();
+        });
+    });
+</script>
 {% endblock %}

@@ -41,7 +41,7 @@ class Cambio_De_Ruta_Form(forms.Form):
     prefix = "Cambio de Ruta"      
 
 class CambioClaveAdminForm(forms.Form):
-    nueva_contraseña = forms.CharField(widget=forms.PasswordInput(attrs={"class": design}))
+    nueva_contraseña = forms.CharField(widget=forms.PasswordInput(attrs={"class": design}), min_length=6)
     confirmar_nueva_contraseña = forms.CharField(widget=forms.PasswordInput(attrs={"class": design}))
 
     def clean(self):
@@ -49,8 +49,27 @@ class CambioClaveAdminForm(forms.Form):
         nueva_contraseña = cleaned_data.get("nueva_contraseña")
         confirmar_nueva_contraseña = cleaned_data.get("confirmar_nueva_contraseña")
 
-        if nueva_contraseña != confirmar_nueva_contraseña:
+        if nueva_contraseña and confirmar_nueva_contraseña and nueva_contraseña != confirmar_nueva_contraseña:
             raise forms.ValidationError("Las contraseñas no coinciden.")
+
+        # Verificar la complejidad de la nueva contraseña
+        if nueva_contraseña and not self.validar_contraseña(nueva_contraseña):
+            raise forms.ValidationError("La contraseña debe tener al menos 6 caracteres, incluyendo al menos 2 números, una mayúscula y un punto.")
+
+    def validar_contraseña(self, contraseña):
+        # Longitud mínima de 6 caracteres
+        if len(contraseña) < 6:
+            return False
+        # Al menos 2 números
+        if sum(c.isdigit() for c in contraseña) < 2:
+            return False
+        # Al menos una mayúscula
+        if not any(c.isupper() for c in contraseña):
+            return False
+        # Al menos un punto
+        if '.' not in contraseña:
+            return False
+        return True
 
 class CrearUsuarioForm(forms.ModelForm):
     class Meta:
@@ -85,8 +104,8 @@ class EditarUsuarioForm(forms.ModelForm):
             "is_staff"
         ]
         widgets = {
-            "nombre_usuario": forms.TextInput(attrs={"class": design}),
-            "telefono": forms.TextInput(attrs={"class": design}),
-            "cargo": forms.TextInput(attrs={"class": design}),
-            "horario_atencion": forms.TextInput(attrs={"class": design}),
+            "nombre_usuario": forms.TextInput(attrs={"id": "id_nombre", "class": "form-control"}),
+            "telefono": forms.TextInput(attrs={"id": "id_telefono", "class": "form-control"}),
+            "cargo": forms.TextInput(attrs={"id": "id_cargo", "class": "form-control"}),
+            "horario_atencion": forms.TextInput(attrs={"id": "id_horario_atencion", "class": "form-control"}),
         }

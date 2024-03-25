@@ -17,13 +17,13 @@ def nueva_solicitud(request):
         usuario = request.user
 
         # Obtener el tipo de solicitud del formulario
-        tipo_solicitud = request.POST.get("tipo-solicitud")
+        tipo_solicitud = request.POST.get("tipoSolicitud")
 
         # Crear un diccionario con los datos del formulario
         campos_sol = request.POST.dict()
 
         # Eliminar el tipo de solicitud del diccionario de campos_sol
-        del campos_sol["tipo-solicitud"]
+        del campos_sol["tipoSolicitud"]
 
         # Eliminar el token CSRF del diccionario de campos_sol si está presente
         if "csrfmiddlewaretoken" in campos_sol:
