@@ -8,9 +8,9 @@ urlpatterns = [
     path('home', views.home, name='home'),
     # URLs para usuarios
     path('solicitudes', views.infoSolicitudes, name="solicitudes"),
-    path('estadoSolicitudes', views.infoSolicitudes, name="estadoSolicitudes"),
-    path('infoSolicitudes', views.infoSolicitudes, name="infoSolicitudes"),
-    path('borrarSolicitud/<int:pk>', views.borrarSolicitud, name="borrarSolicitud"),
+    path('estadosolicitudes', views.infoSolicitudes, name="estadoSolicitudes"),
+    path('infosolicitudes', views.infoSolicitudes, name="infoSolicitudes"),
+    path('borrarsolicitud/<int:pk>', views.borrarSolicitud, name="borrarSolicitud"),
     
     
     # URLs para admins
@@ -19,6 +19,6 @@ urlpatterns = [
     path('editar/usuario/<int:pk>', views.editarUsuario, name="editarUsuario"),
     path('editar/solicitud/<int:pk>', views.editarSolicitud, name="editarSolicitud"),
     path('editar/clave/<int:pk>', views.editarClaveAdmin, name='editarClaveAdmin'),
-    path('borrarUsuario/<int:pk>', views.borrarUsuario, name='borrarUsuario'),
+    path('borrarusuario/<int:pk>', views.borrarUsuario, name='borrarUsuario'),
     path('reportes', views.reportes, name='reporteria'),
 ]
