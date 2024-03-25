@@ -16,6 +16,13 @@ formList = (
     Cambio_De_Ruta_Form(),
 )
 
+# Cambiar el resto de cosas para usar el diccionario si queda mas comodo de trabajar
+formDict = {
+    Ise_Vpn_Form().prefix: Ise_Vpn_Form,
+    Ioc_Automatico_Form().prefix: Ioc_Automatico_Form,
+    Cambio_De_Ruta_Form().prefix: Cambio_De_Ruta_Form
+}
+
 def index(request):
     if request.user.is_authenticated:
         return redirect("home")
@@ -64,6 +71,16 @@ def home(request):
             case _:
                 return redirect("home")
     return render(request, "home.html", {"formularios": formList})
+
+@login_required
+def verSolicitud(request, pk):
+    solicitud = Solicitud.objects.get(pk=pk)
+    tipo_solicitud = solicitud.tipo_sol
+    if tipo_solicitud in formDict:
+        form = formDict[tipo_solicitud](initial=solicitud.campos_sol)
+        return render(request, "infoSolicitud.html", {"solicitud": form})
+        
+    return redirect("infoSolicitudes")
 
 @login_required
 def infoSolicitudes(request):

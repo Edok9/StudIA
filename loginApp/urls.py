@@ -8,6 +8,7 @@ urlpatterns = [
     path('home', views.home, name='home'),
     # URLs para usuarios
     path('solicitudes', views.infoSolicitudes, name="solicitudes"),
+    path('solicitud/<int:pk>', views.verSolicitud, name="verSolicitud"),
     path('estadosolicitudes', views.infoSolicitudes, name="estadoSolicitudes"),
     path('infosolicitudes', views.infoSolicitudes, name="infoSolicitudes"),
     path('borrarsolicitud/<int:pk>', views.borrarSolicitud, name="borrarSolicitud"),
