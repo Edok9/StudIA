@@ -78,6 +78,11 @@ def verSolicitud(request, pk):
     tipo_solicitud = solicitud.tipo_sol
     if tipo_solicitud in formDict:
         form = formDict[tipo_solicitud](initial=solicitud.campos_sol)
+        campos_form = form.fields
+        if solicitud.adjunto_sol:
+            solicitud.campos_sol["adjunto"] = solicitud.adjunto_sol
+        for c in campos_form:
+            form.fields[c].widget.attrs['disabled'] = True
         return render(request, "infoSolicitud.html", {"solicitud": form})
         
     return redirect("infoSolicitudes")
