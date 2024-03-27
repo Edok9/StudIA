@@ -31,21 +31,18 @@
     </div>
 </div>
 
-<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script>
-    // Event listener para el cambio en el tipo de solicitud
-    $('#tipoSolicitud').on('change', function() {
-        var tipoSeleccionado = $(this).val();
+    document.getElementById('tipoSolicitud').addEventListener('change', function() {
+        var tipoSeleccionado = this.value;
         mostrarCamposDinamicos(tipoSeleccionado);
     });
-
-    // Función para mostrar los campos dinámicos según el tipo de solicitud seleccionado
+    
     function mostrarCamposDinamicos(tipo) {
-        var camposDinamicos = $('#campos-dinamicos');
-        camposDinamicos.empty(); // Limpiar campos dinámicos anteriores
-
+        var camposDinamicos = document.getElementById('campos-dinamicos');
+        camposDinamicos.innerHTML = ''; // Limpiar campos dinámicos anteriores
+    
         if (tipo === 'ISE VPN') {
-            camposDinamicos.append(`
+            camposDinamicos.innerHTML += `
                 <div class="mb-3">
                     <label for="accion" class="form-label">Acción:</label>
                     <select class="form-control" id="accion" name="accion" required>
@@ -66,62 +63,96 @@
                 </div>
                 <div class="mb-3" id="fecha-expiracion-container" style="display: none;">
                     <label for="fecha-expiracion" class="form-label">Fecha de expiración:</label>
-                    <input type="date" class="form-control" id="fecha" name="fecha-expiracion">
-                </div>`);
-                
-
-            // Asignar evento change al campo de selección de acción
-            $('#accion').on('change', function() {
-                var accionSeleccionada = $(this).val();
+                    <input type="date" class="form-control" id="fecha-expiracion" name="fecha-expiracion">
+                </div>`;
+        } else if (tipo === 'IOC AUTOMATICO') {
+            camposDinamicos.innerHTML += `
+                <div class="input-group mb-3">
+                    <label>Adjunto (si se requiere):</label>
+                    <input type="file" id="adjunto" name="adjunto">
+                </div>
+                <div class="input-group mb-3">
+                    <label>Notas:</label>
+                    <textarea id="notas" name="notas" rows="4" cols="50"></textarea>
+                </div>`;
+        } else if (tipo === 'CAMBIO DE RUTA') {
+            camposDinamicos.innerHTML += `
+                <div class="mb-3">
+                    <label for="gateway" class="form-label">Gateway:</label>
+                    <input type="text" class="form-control" id="gateway" name="gateway" required>
+                </div>
+                <div class="mb-3">
+                    <label for="interfaz" class="form-label">Interfaz de salida:</label>
+                    <input type="text" class="form-control" id="interfaz" name="interfaz" required>
+                </div>`;
+        }
+    
+        var accionElement = document.getElementById('accion');
+        if (accionElement) {
+            accionElement.addEventListener('change', function() {
+                var accionSeleccionada = this.value;
                 mostrarCamposUsuarioCorreo(accionSeleccionada);
             });
-
-            
         }
-        // Resto del código para otras opciones de tipo de solicitud...
     }
-
-    // Función para mostrar u ocultar los campos de usuario, correo y fecha de expiración según la acción seleccionada
+    
     function mostrarCamposUsuarioCorreo(accion) {
-        $('#usuario-correo-container').css('display', (accion === 'Extensión de cuenta' || accion === 'Cambio de contraseña' || accion === 'Deshabilitación de cuenta') ? 'block' : 'none');
-        $('#correo-container').css('display', (accion === 'Extensión de cuenta' || accion === 'Cambio de contraseña' || accion === 'Deshabilitación de cuenta') ? 'block' : 'none');
-        $('#fecha-expiracion-container').css('display', (accion === 'Extensión de cuenta') ? 'block' : 'none');
+        var usuarioCorreoContainer = document.getElementById('usuario-correo-container');
+        var correoContainer = document.getElementById('correo-container');
+        var fechaExpiracionContainer = document.getElementById('fecha-expiracion-container');
+    
+        if (accion === 'Extensión de cuenta' || accion === 'Cambio de contraseña' || accion === 'Deshabilitación de cuenta') {
+            if (usuarioCorreoContainer) usuarioCorreoContainer.style.display = 'block';
+            if (correoContainer) correoContainer.style.display = 'block';
+        } else {
+            if (usuarioCorreoContainer) usuarioCorreoContainer.style.display = 'none';
+            if (correoContainer) correoContainer.style.display = 'none';
+        }if (accion === 'Extensión de cuenta') {
+        if (fechaExpiracionContainer) fechaExpiracionContainer.style.display = 'block';
+    } else {
+        if (fechaExpiracionContainer) fechaExpiracionContainer.style.display = 'none';
+    }
+}
+
+document.getElementById('nuevaSolicitudForm').addEventListener('submit', function(event) {
+    event.preventDefault(); // Evitar el envío automático del formulario
+
+    var tipoSolicitud = document.getElementById('tipoSolicitud').value;
+    var camposValidos = true;
+
+    if (tipoSolicitud === "") {
+        alert("Por favor, seleccione un tipo de solicitud.");
+        camposValidos = false;
     }
 
-    // Validación del formulario antes de enviarlo
-    $('#nuevaSolicitudForm').on('submit', function(event) {
-        event.preventDefault(); // Evitar el envío automático del formulario
+    if (tipoSolicitud === "ISE VPN" && camposValidos) {
+        var accion = document.getElementById('accion') ? document.getElementById('accion').value : "";
+        var usuario = document.getElementById('usuario') ? document.getElementById('usuario').value : "";
+        var correo = document.getElementById('correo') ? document.getElementById('correo').value : "";
 
-        var tipoSolicitud = $('#tipoSolicitud').val();
-        var accion = $('#accion').val();
-        var usuario = $('#usuario').val();
-        var correo = $('#correo').val();
-
-        if (tipoSolicitud === "") {
-            alert("Por favor, seleccione un tipo de solicitud.");
-            return;
+        if (accion === "") {
+            alert("Por favor, seleccione una acción.");
+            camposValidos = false;
         }
 
-        if (tipoSolicitud === "ISE VPN") {
-            if (accion === "") {
-                alert("Por favor, seleccione una acción.");
-                return;
-            }
-
-            if ((accion === "Extensión de cuenta" || accion === "Cambio de contraseña" || accion === "Deshabilitación de cuenta") && usuario === "") {
-                alert("Por favor, ingrese el usuario.");
-                return;
-            }
-
-            if ((accion === "Extensión de cuenta" || accion === "Cambio de contraseña" || accion === "Deshabilitación de cuenta") && correo === "") {
-                alert("Por favor, ingrese el correo.");
-                return;
-            }
+        if ((accion === "Extensión de cuenta" || accion === "Cambio de contraseña" || accion === "Deshabilitación de cuenta") && usuario === "") {
+            alert("Por favor, ingrese el usuario.");
+            camposValidos = false;
         }
 
-        // Si todas las validaciones pasan, enviar el formulario
+        if ((accion === "Extensión de cuenta" || accion === "Cambio de contraseña" || accion === "Deshabilitación de cuenta") && correo === "") {
+            alert("Por favor, ingrese el correo de usuario.");
+            camposValidos = false;
+        }
+
+        // Podrías incluir aquí más validaciones específicas para otros campos si fuera necesario.
+    }
+
+    // Si todas las validaciones pasan, enviar el formulario
+    if (camposValidos) {
         this.submit();
-    });
+    }
+});
 </script>
 
 {% endblock %}

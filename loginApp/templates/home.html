@@ -1,29 +1,29 @@
 {% extends "base.html" %}
 
 {% block content %}
-
-<div class="container-fluid mt-5">
+<br><br>
+<div class="container-fluid">
     <div class="row justify-content-center">
-        <div class="col-md-4 bg-dark text-light p-4 rounded">
+        <div class="col-md-6 bg-dark text-light p-4 rounded">
             <div class="flex flex-col justify-center items-center space-y-4">
                 <h1 class="text-2xl font-bold text-[#005CFF]">Nueva Solicitud</h1>
-                <form id="dynamic-form" method="post" enctype="multipart/form-data" class="formulario-container">
+                <!-- Asegúrate de reemplazar 'nueva_solicitud_url' con el nombre de tu URL real en urls.py -->
+                <form id="dynamic-form" method="post" action="{% url 'nueva_solicitud' %}" enctype="multipart/form-data">
                     {% csrf_token %}
                     <div class="form-group">
-                        <label for="tipo_sol" class="form-label text-gray-400">Tipo de Solicitud:</label>
-                        <select id="tipo_sol" name="tipo_sol" class="form-control mi-clase-select">
+                        <label for="tipoSolicitud" class="form-label text-gray-400">Tipo de Solicitud:</label>
+                        <select id="tipoSolicitud" name="tipoSolicitud" class="form-control">
                             <option value="">--Seleccione--</option>
-                            {% for form in formularios %}
-                            <option value="{{form.prefix}}">{{form.prefix}}</option>
-                            {% endfor %}
+                            <option value="Servicio VPN">Servicio VPN</option>
+                            <option value="IOC Automatico">IOC Automático</option>
+                            <option value="Cambio de Ruta">Cambio de Ruta</option>
                         </select>
                     </div>
                     <div id="campos-formulario" class="space-y-2">
-                        <!-- Aquí van tus campos dinámicos -->
+                        <!-- Los campos dinámicos se renderizarán aquí -->
                     </div>
-                    <button class="btn btn-primary w-full mt-4 mi-clase-boton" type="submit">
-                        <i class="fas fa-plus-circle mr-2"></i> <!-- Icono de Font Awesome -->
-                        Crear Solicitud
+                    <button class="btn btn-primary w-full mt-4" type="submit">
+                        <i class="fas fa-plus-circle mr-2"></i> Crear Solicitud
                     </button>
                 </form>
             </div>
@@ -32,22 +32,141 @@
 </div>
 
 <script>
-    document.getElementById('tipo_sol').addEventListener('change', function() {
-        var opcion = this.value;
-        var camposForm = document.getElementById('campos-formulario');
-        
-        // Lógica para mostrar los campos adicionales según la opción seleccionada
-        switch (opcion) {
-            {% for form in formularios %}
-            case "{{form.prefix}}":
-                camposForm.innerHTML = {% spaceless %}'{{form}}'{% endspaceless %};
-                break
-            {% endfor %}
-            default:
-                camposForm.innerHTML = '';
-                break;
-        }
-    });
+    document.addEventListener('DOMContentLoaded', function() {
+    document.getElementById('tipoSolicitud').addEventListener('change', cambiarFormulario);
+    document.getElementById('dynamic-form').addEventListener('submit', validarFormularioAntesDeEnviar);
+});
+
+function cambiarFormulario() {
+    var opcion = document.getElementById('tipoSolicitud').value;
+    var camposForm = document.getElementById('campos-formulario');
+    
+    camposForm.innerHTML = ''; // Limpiar campos previos
+
+    if (!opcion) {
+        alert('Por favor, seleccione un tipo de solicitud.');
+        return; // Detener la ejecución si no hay selección
+    }
+    
+        if (opcion === 'Servicio VPN') {
+            camposForm.innerHTML = `
+                <div id="contenedor_accion">
+                    <label for="accion">Acción:</label>
+                    <select id="accion" name="accion" class="form-control" onchange="accionSeleccionada()">
+                        <option value="">--Seleccione--</option>
+                        <option value="Extensión de cuenta">Extensión de cuenta</option>
+                        <option value="Cambio de contraseña">Cambio de contraseña</option>
+                        <option value="Deshabilitación de cuenta">Deshabilitación de cuenta</option>
+                    </select>
+                </div>
+                <div id="campos_adicionales"></div> <!-- Contenedor para campos adicionales -->
+            `;
+            document.getElementById('accion').addEventListener('change', accionSeleccionada);
+        } else if (opcion === 'IOC Automatico') {
+            camposForm.innerHTML = `
+                <div class="input-group mb-3">
+                    <label>Adjunto (si se requiere):</label>
+                    <input type="file" id="adjunto" name="adjunto" class="form-control">
+                </div>
+                <div class="input-group mb-3">
+                    <label>Notas:</label>
+                    <textarea id="notas" name="notas" rows="4" cols="50" class="form-control" required></textarea>
+                </div>
+            `;
+        } else if (opcion === 'Cambio de Ruta') {
+            camposForm.innerHTML = `
+                <label for="gateway">Gateway:</label>
+                <input type="text" id="gateway" name="gateway" class="form-control" required>
+                <label for="interfaz_salida">Interfaz de salida:</label>
+                <input type="text"id="interfaz_salida" name="interfaz_salida" class="form-control" required>
+        `;
+    }
+
+    // Llamar a accionSeleccionada si la opción es 'Servicio VPN'
+    // para asegurar que cualquier manipulación adicional necesaria se realice
+    if (opcion === 'Servicio VPN') {
+        document.getElementById('accion').addEventListener('change', accionSeleccionada);
+    }
+}
+function validarFormularioAntesDeEnviar(event) {
+    var tipoSolicitud = document.getElementById('tipoSolicitud').value;
+    var accion = document.getElementById('accion') ? document.getElementById('accion').value : "";
+
+    if (!tipoSolicitud) {
+        event.preventDefault();
+        alert('Por favor, seleccione un tipo de solicitud.');
+        return;
+    }
+
+    // Verifica si la opción seleccionada es 'Servicio VPN' y no se ha seleccionado una acción
+    if (tipoSolicitud === 'Servicio VPN' && !accion) {
+        event.preventDefault();
+        alert('Por favor, seleccione una acción para el tipo de solicitud seleccionado.');
+    }
+}
+function accionSeleccionada() {
+    var accion = document.getElementById('accion').value;
+    var camposAdicionales = document.getElementById('campos_adicionales');
+
+    // Limpiar campos adicionales previos
+    camposAdicionales.innerHTML = '';
+
+    if (!accion) return; // No hacer nada si no se selecciona una acción
+
+    camposAdicionales.innerHTML += `
+        <label for="usuario">Usuario:</label>
+        <input type="text" id="usuario" name="usuario" class="form-control" required pattern="[a-zA-Z]{3,}" title="El usuario debe contener al menos 3 letras y no números.">
+        <label for="correo_usuario">Correo Usuario:</label>
+        <input type="email" id="correo_usuario" name="correo_usuario" class="form-control" required>
+    `;
+
+    if (accion === 'Extensión de cuenta') {
+        camposAdicionales.innerHTML += `
+            <label for="fecha_expiracion">Fecha de expiración:</label>
+            <input type="date" id="fecha_expiracion" name="fecha_expiracion" class="form-control" required>
+        `;
+    }
+
+    // Agregar validaciones específicas para los campos nuevos
+    document.getElementById('usuario').addEventListener('input', validarUsuario);
+    document.getElementById('correo_usuario').addEventListener('input', validarCorreo);
+    if (accion === 'Extensión de cuenta') {
+        document.getElementById('fecha_expiracion').addEventListener('change', validarFecha);
+    }
+}
+
+function validarUsuario() {
+    const usuario = document.getElementById('usuario');
+    const regexUsuario = /^[a-zA-Z]{3,}$/; // Solo letras, mínimo 3 caracteres
+    if (!regexUsuario.test(usuario.value)) {
+        usuario.setCustomValidity('El usuario debe contener al menos 3 letras y no números.');
+    } else {
+        usuario.setCustomValidity('');
+    }
+}
+
+function validarCorreo() {
+    const correo = document.getElementById('correo_usuario');
+    const regexCorreo = /^[^\s@]+@[^\s@]+\.[^\s@]+$/; // Patrón básico de correo
+    if (!regexCorreo.test(correo.value)) {
+        correo.setCustomValidity('Por favor, ingrese una dirección de correo válida.');
+    } else {
+        correo.setCustomValidity('');
+    }
+}
+
+function validarFecha() {
+    const fechaExpiracion = document.getElementById('fecha_expiracion');
+    const fechaIngresada = new Date(fechaExpiracion.value);
+    const hoy = new Date();
+    hoy.setHours(0, 0, 0, 0); // Quitar la hora actual para comparar solo fecha
+    if (fechaIngresada <= hoy) {
+        fechaExpiracion.setCustomValidity('La fecha debe ser a partir del siguiente día en adelante.');
+    } else {
+        fechaExpiracion.setCustomValidity('');
+    }
+}
 </script>
 {% endblock %}
+
 

@@ -11,6 +11,7 @@ from loginApp.models import Usuario
 from solicitudesManager.models import Solicitud
 from django.http import JsonResponse
 
+
 def nueva_solicitud(request):
     if request.method == "POST":
         # Obtener el usuario actual

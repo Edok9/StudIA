@@ -1,12 +1,11 @@
 {% extends "base.html" %}
 
 {% block content %}
-
 <div class="container-fluid mt-5">
     <div class="row justify-content-center">
         <div class="col-md-6 bg-dark text-light p-4 rounded">
             <h3 class="text-center mb-4">Registrar nuevo usuario</h3>
-            <form method="post">
+            <form id="crearUsuarioForm" method="post">
                 {% csrf_token %}
                 <div class="formulario-container">
                     <div class="form-group">
@@ -22,7 +21,7 @@
                     <div class="buttons-container">
                         <div class="row justify-content-center">
                             <div class="col-sm-8 offset-sm-4">
-                                <button type="submit" class="btn btn-primary w-full">
+                                <button type="submit" id="crearUsuarioBtn" class="btn btn-primary w-full">
                                     <i class="fas fa-user-plus mr-2"></i> Crear Usuario
                                 </button>
                             </div>
@@ -33,4 +32,50 @@
         </div>
     </div>
 </div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        document.getElementById('crearUsuarioBtn').addEventListener('click', function() {
+            var nombreUsuario = document.getElementById('id_nombre_usuario').value;
+            var email = document.getElementById('id_email').value;
+            var password = document.getElementById('id_password').value;
+            var telefono = document.getElementById('id_telefono').value;
+            var cargo = document.getElementById('id_cargo').value;
+            var horarioAtencion = document.getElementById('id_horario_atencion').value;
+
+            // Validación de campos no vacíos
+            if (nombreUsuario.trim() === '' || email.trim() === '' || password.trim() === '' || telefono.trim() === '' || cargo.trim() === '' || horarioAtencion.trim() === '') {
+                alert('Por favor, complete todos los campos.');
+                return;
+            }
+
+            // Validación de nombre de usuario: al menos 3 letras y sin números
+            if (nombreUsuario.length < 3 || /\d/.test(nombreUsuario)) {
+                alert('El nombre de usuario debe tener al menos 3 caracteres y no puede contener números.');
+                return;
+            }
+
+            // Validación de formato de email
+            if (!email.includes('@')) {
+                alert('Por favor, ingrese un correo electrónico válido.');
+                return;
+            }
+
+            // Validación de complejidad de contraseña
+            if (password.length < 6 || !/[A-Z]/.test(password) || (password.match(/\d/g) || []).length < 2 || !/\./.test(password)) {
+                alert('La contraseña debe tener al menos 6 caracteres, incluyendo al menos una letra mayúscula, dos números y un punto.');
+                return;
+            }
+
+            // Validación de campo de teléfono: solo números
+            if (!/^\d+$/.test(telefono)) {
+                alert('El número de teléfono solo puede contener números.');
+                return;
+            }
+
+            // Si pasa todas las validaciones, enviar el formulario
+            document.getElementById('crearUsuarioForm').submit();
+        });
+    });
+</script>
 {% endblock %}

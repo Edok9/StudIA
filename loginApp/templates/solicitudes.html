@@ -19,7 +19,7 @@
                         </select>
                     </div>
                     <div id="campos-dinamicos" class="mb-3">
-                        <!-- Aquí se cargarán los campos dinámicos -->
+                        <!-- Aquí se cargarán los campos dinámicos según la selección -->
                     </div>
                     <div class="form-group">
                         <br>
@@ -30,7 +30,6 @@
         </div>
     </div>
 </div>
-
 
 <script>
     // Event listener para el cambio en el tipo de solicitud
@@ -50,7 +49,7 @@
                     <label for="accion" class="form-label">Acción:</label>
                     <select class="form-control" id="accion" name="accion" required>
                         <option value="">-- Seleccione --</option>
-                        <option value="Extensión de cuenta">Extensión de cuenta</option>
+                        <option value="Extension de cuenta">Extension de cuenta</option>
                         <option value="Cambio de contraseña">Cambio de contraseña</option>
                         <option value="Deshabilitación de cuenta">Deshabilitación de cuenta</option>
                     </select>
@@ -68,12 +67,6 @@
                     <label for="fecha-expiracion" class="form-label">Fecha de expiración:</label>
                     <input type="date" class="form-control" id="fecha" name="fecha-expiracion">
                 </div>`;
-
-            // Asignar evento change al campo de selección de acción
-            document.getElementById('accion').addEventListener('change', function() {
-                var accionSeleccionada = this.value;
-                mostrarCamposUsuarioCorreo(accionSeleccionada);
-            });
         } else if (tipo === 'IOC AUTOMATICO') {
             camposDinamicos.innerHTML += `
                 <div class="input-group mb-3">
@@ -106,10 +99,10 @@
         var correoContainer = document.getElementById('correo-container');
         var fechaExpiracionContainer = document.getElementById('fecha-expiracion-container');
 
-        if (accion === 'Extensión de cuenta' || accion === 'Cambio de contraseña' || accion === 'Deshabilitación de cuenta') {
+        if (accion === 'Extension de cuenta' || accion === 'Cambio de contraseña' || accion === 'Deshabilitación de cuenta') {
             usuarioCorreoContainer.style.display = 'block';
             correoContainer.style.display = 'block';
-            fechaExpiracionContainer.style.display = (accion === 'Extensión de cuenta') ? 'block' : 'none';
+            fechaExpiracionContainer.style.display = (accion === 'Extension de cuenta') ? 'block' : 'none';
         } else {
             usuarioCorreoContainer.style.display = 'none';
             correoContainer.style.display = 'none';
@@ -120,9 +113,10 @@
     // Validación del formulario antes de enviarlo
     document.getElementById('validarEnviar').addEventListener('click', function(event) {
         var tipoSolicitud = document.getElementById('tipoSolicitud').value;
-        var accion = document.getElementById('accion').value;
-        var usuario = document.getElementById('usuario').value;
-        var correo = document.getElementById('correo').value;
+        var accion = document.getElementById('accion') ? document.getElementById('accion').value : '';
+        var usuario = document.getElementById('usuario') ? document.getElementById('usuario').value : '';
+        var correo = document.getElementById('correo') ? document.getElementById('correo').value : '';
+        var fecha = document.getElementById('fecha') ? document.getElementById('fecha').value : '';
 
         if (tipoSolicitud === "") {
             alert("Por favor, seleccione un tipo de solicitud.");
@@ -135,19 +129,50 @@
                 return;
             }
 
-            if ((accion === "Extensión de cuenta" || accion === "Cambio de contraseña" || accion === "Deshabilitación de cuenta") && usuario === "") {
+            if ((accion === "Extension de cuenta" || accion === "Cambio de contraseña" || accion === "Deshabilitación de cuenta") && usuario === "") {
                 alert("Por favor, ingrese el usuario.");
                 return;
             }
 
-            if ((accion === "Extensión de cuenta" || accion === "Cambio de contraseña" || accion === "Deshabilitación de cuenta") && correo === "") {
+            if ((accion === "Extension de cuenta" || accion === "Cambio de contraseña" || accion === "Deshabilitación de cuenta") && correo === "") {
                 alert("Por favor, ingrese el correo.");
+                return;
+            }
+            if ((accion === "Extension de cuenta") && fecha === "") {
+                alert("Por favor, ingrese una fecha.");
                 return;
             }
         }
 
-        // Si todas las validaciones pasan, enviar el formulario
+        if (tipoSolicitud === "IOC AUTOMATICO") {
+            var adjunto = document.getElementById('adjunto') ? document.getElementById('adjunto').value : '';
+            var notas = document.getElementById('notas') ? document.getElementById('notas').value : '';
+
+            if (adjunto === "" || notas === "") {
+                alert("Por favor, complete los campos de adjunto y notas.");
+                return;
+            }
+        }
+
+        if (tipoSolicitud === "CAMBIO DE RUTA") {
+            var gateway = document.getElementById('gateway') ? document.getElementById('gateway').value : '';
+            var interfaz = document.getElementById('interfaz') ? document.getElementById('interfaz').value : '';
+            var ipPattern = /^(?:[0-9]{1,3}\.){3}[0-9]{1,3}$/; // Expresión regular para validar una dirección IP
+
+            if (gateway === "" || interfaz === "") {
+                alert("Por favor, complete los campos de Gateway e Interfaz de salida.");
+                return;
+            }
+
+            if (!ipPattern.test(gateway)) {
+                alert("Por favor, ingrese una dirección IP válida para el Gateway.");
+                return;
+            }
+        }
+
+        // Si pasa todas las validaciones, enviar el formulario
         document.getElementById('nuevaSolicitudForm').submit();
     });
 </script>
+
 {% endblock %}

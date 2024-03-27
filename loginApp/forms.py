@@ -17,14 +17,17 @@ class ReporteriaForm(forms.Form):
     total_usuarios = forms.BooleanField(required=False, label="Total de Usuarios Registrados")
 
 class Ise_Vpn_Form(forms.Form):
-    accion = forms.CharField()
-    usuario = forms.CharField()
-    correo_usuario = forms.EmailField()
-    fecha_expiracion = forms.DateInput()
-    
-    widgets = {
-            "fecha_expiracion": forms.DateInput(attrs={'type': 'date'}),
-        }
+    ACCIONES_CHOICES = [
+        ('', '-- Seleccione --'),
+        ('Extensión de cuenta', 'Extensión de cuenta'),
+        ('Cambio de contraseña', 'Cambio de contraseña'),
+        ('Deshabilitación de cuenta', 'Deshabilitación de cuenta'),
+    ]
+
+    accion = forms.ChoiceField(choices=ACCIONES_CHOICES, label='Acción', required=True)
+    usuario = forms.CharField(max_length=100, required=True)
+    correo_usuario = forms.EmailField(required=True)
+    fecha_expiracion = forms.DateField(required=False, widget=forms.DateInput(attrs={'type': 'date'}))
 
     prefix = "Servicio VPN"
 
@@ -84,12 +87,12 @@ class CrearUsuarioForm(forms.ModelForm):
             "is_staff"
         ]
         widgets = {
-            "nombre_usuario": forms.TextInput(attrs={"class": design}),
-            "email": forms.EmailInput(attrs={"class": design}),
-            "password": forms.PasswordInput(attrs={"class": design}),
-            "telefono": forms.TextInput(attrs={"class": design}),
-            "cargo": forms.TextInput(attrs={"class": design}),
-            "horario_atencion": forms.TextInput(attrs={"class": design}),
+            "nombre_usuario": forms.TextInput(attrs={"class": "design", "id": "id_nombre_usuario"}),
+            "email": forms.EmailInput(attrs={"class": "design", "id": "id_email"}),
+            "password": forms.PasswordInput(attrs={"class": "design", "id": "id_password"}),
+            "telefono": forms.TextInput(attrs={"class": "design", "id": "id_telefono"}),
+            "cargo": forms.TextInput(attrs={"class": "design", "id": "id_cargo"}),
+            "horario_atencion": forms.TextInput(attrs={"class": "design", "id": "id_horario_atencion"}),
         }
 
 class EditarUsuarioForm(forms.ModelForm):
