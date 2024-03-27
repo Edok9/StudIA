@@ -24,11 +24,7 @@ class Ise_Vpn_Form(forms.Form):
     accion = forms.CharField()
     usuario = forms.CharField()
     correo_usuario = forms.EmailField()
-    fecha_expiracion = forms.DateInput()
-    
-    widgets = {
-            "fecha_expiracion": forms.DateInput(attrs={'type': 'date'}),
-        }
+    fecha_expiracion = forms.DateField(widget=forms.DateInput(attrs={'type': 'date'}))
 
     prefix = "Servicio VPN"
 
