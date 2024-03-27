@@ -95,19 +95,17 @@ def usuarios(request):
 
 @staff_member_required(redirect_field_name=None, login_url=reverse_lazy("home"))
 def crearUsuario(request):
-    if request.method == "POST":
-        form = CrearUsuarioForm(request.POST)
-        if form.is_valid():
-            empresa = Empresa.objects.get(pk=request.tenant.id_empresa)
-            usuario = form.save(commit=False)
-            usuario.id_empresa = empresa
-            usuario.set_password(usuario.password)
-            usuario.save()
-            return redirect("usuarios")
+    form = CrearUsuarioForm(request.POST or None)
+    if request.method == "POST" and form.is_valid():
+        empresa = Empresa.objects.get(pk=request.tenant.id_empresa)
+        usuario = form.save(commit=False)
+        usuario.id_empresa = empresa
+        usuario.set_password(usuario.password)
+        usuario.save()
+        return redirect("usuarios")
     solicitudes = Solicitud.objects.filter(id_usuario = request.user.id_usuario)
-    formulario = CrearUsuarioForm()
     datos_solicitudes = {"solicitudes": solicitudes,
-                         "formulario": formulario}
+                         "formulario": form}
     return render(request, "crearUsuario.html", datos_solicitudes)
 
 @staff_member_required(redirect_field_name=None, login_url=reverse_lazy("home"))
@@ -127,8 +125,8 @@ def editarUsuario(request, pk):
    
 @staff_member_required(redirect_field_name=None, login_url=reverse_lazy("home"))
 def editarClaveAdmin(request, pk):
+    form = CambioClaveAdminForm(request.POST or None)
     if request.method == "POST":
-        form = CambioClaveAdminForm(request.POST)
         if form.is_valid():
             usuario = Usuario.objects.get(id_usuario = pk)
             nueva_contraseña = form.cleaned_data['nueva_contraseña']
@@ -138,9 +136,8 @@ def editarClaveAdmin(request, pk):
             return redirect('usuarios')
     try:
         usuario = Usuario.objects.get(id_usuario = pk)
-        formulario = CambioClaveAdminForm()
         data = {"usuario": usuario,
-                "formulario": formulario}
+                "formulario": form}
         return render(request, "editarClaveAdmin.html", data)
     except Usuario.DoesNotExist:
         return redirect("usuarios") 
@@ -185,13 +182,12 @@ def editarSolicitud(request, pk):
     
 @staff_member_required(redirect_field_name=None, login_url=reverse_lazy("home"))
 def casosDeUso(request):
+    empresa = Empresa.objects.get(pk=request.tenant.id_empresa)
     if request.method == "POST":
         data = request.POST.getlist("lista_formularios")
-        empresa = Empresa.objects.get(pk=request.tenant.id_empresa)
         empresa.casos_disponibles = data
         empresa.save()
         return redirect("casosDeUso")
-    empresa = Empresa.objects.get(pk=request.tenant.id_empresa)
     casos_empresa = empresa.casos_disponibles
     form = FiltrodeFormulariosForm(initial={"lista_formularios": casos_empresa})
     return render(request, "listaCasosdeUso.html", {"formulario": form})
