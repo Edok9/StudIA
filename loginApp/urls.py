@@ -16,6 +16,7 @@ urlpatterns = [
     
     # URLs para admins
     path('usuarios', views.usuarios, name='usuarios'),
+    path('casos', views.casosDeUso, name='casosDeUso'),
     path('crear/usuario', views.crearUsuario, name='crearUsuario'),
     path('editar/usuario/<int:pk>', views.editarUsuario, name="editarUsuario"),
     path('editar/solicitud/<int:pk>', views.editarSolicitud, name="editarSolicitud"),

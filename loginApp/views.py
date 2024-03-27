@@ -6,22 +6,9 @@ from django.contrib.admin.views.decorators import staff_member_required
 from django.urls import reverse_lazy
 from clientManager.models import Empresa
 from .scripts.informe import gen_informe
-from loginApp.forms import CrearUsuarioForm, EditarUsuarioForm, CambioClaveAdminForm, ReporteriaForm, Ise_Vpn_Form, Ioc_Automatico_Form, Cambio_De_Ruta_Form
+from loginApp.forms import CrearUsuarioForm, EditarUsuarioForm, CambioClaveAdminForm, ReporteriaForm, FiltrodeFormulariosForm, form_dict
 from loginApp.models import Usuario
 from solicitudesManager.models import Solicitud
-
-formList = (
-    Ise_Vpn_Form(),
-    Ioc_Automatico_Form(),
-    Cambio_De_Ruta_Form(),
-)
-
-# Cambiar el resto de cosas para usar el diccionario si queda mas comodo de trabajar
-formDict = {
-    Ise_Vpn_Form().prefix: Ise_Vpn_Form,
-    Ioc_Automatico_Form().prefix: Ioc_Automatico_Form,
-    Cambio_De_Ruta_Form().prefix: Cambio_De_Ruta_Form
-}
 
 def index(request):
     if request.user.is_authenticated:
@@ -58,26 +45,23 @@ def home(request):
         usuario = Usuario.objects.get(pk=request.user.id_usuario)
         sol.tipo_sol = request.POST["tipo_sol"]
         sol.id_usuario = usuario
-        match sol.tipo_sol:
-            case "Servicio VPN":
-                form = Ise_Vpn_Form(request.POST)
-                submit_caso_form(form, sol)
-            case "IOC Automatico":
-                form = Ioc_Automatico_Form(request.POST, request.FILES)
-                submit_caso_form(form, sol)
-            case "Cambio de Ruta":
-                form = Cambio_De_Ruta_Form(request.POST)
-                submit_caso_form(form, sol)
-            case _:
-                return redirect("home")
-    return render(request, "home.html", {"formularios": formList})
+        if sol.tipo_sol in form_dict:
+            tipo_form = form_dict[sol.tipo_sol]
+            form = tipo_form(request.POST, request.FILES) if request.FILES else tipo_form(request.POST)
+            submit_caso_form(form, sol)
+        else:
+            return redirect("home")
+    empresa = Empresa.objects.get(pk=request.tenant.id_empresa)
+    casos_empresa = empresa.casos_disponibles
+    form_list = [f for n,f in form_dict.items() if n in casos_empresa]
+    return render(request, "home.html", {"formularios": form_list})
 
 @login_required
 def verSolicitud(request, pk):
     solicitud = Solicitud.objects.get(pk=pk)
     tipo_solicitud = solicitud.tipo_sol
-    if tipo_solicitud in formDict:
-        form = formDict[tipo_solicitud](initial=solicitud.campos_sol)
+    if tipo_solicitud in form_dict:
+        form = form_dict[tipo_solicitud](initial=solicitud.campos_sol)
         campos_form = form.fields
         if solicitud.adjunto_sol:
             solicitud.campos_sol["adjunto"] = solicitud.adjunto_sol
@@ -177,40 +161,40 @@ def editarSolicitud(request, pk):
     if request.method == "POST":
         sol = Solicitud.objects.get(id_sol = pk)
         form = request.POST
-        match form["tipo_solicitud"]:
-            case "Servicio VPN":
-                form = Ise_Vpn_Form(request.POST)
-                submit_caso_form(form, sol)
-            case "IOC Automatico":
-                form = Ioc_Automatico_Form(request.POST, request.FILES)
-                submit_caso_form(form, sol)
-            case "Cambio de Ruta":
-                form = Cambio_De_Ruta_Form(request.POST)
-                submit_caso_form(form, sol)
-            case _:
-                return redirect("estadoSolicitudes")
-                
+        if form["tipo_solicitud"] in form_dict:
+            tipo_form = form_dict[sol.tipo_sol]
+            form = tipo_form(request.POST, request.FILES) if request.FILES else tipo_form(request.POST)
+            submit_caso_form(form, sol)
         return redirect("estadoSolicitudes")
     try:
-        solicitud = Solicitud.objects.get(id_sol = pk)
-        if(solicitud.adjunto_sol):
-            solicitud.campos_sol["adjunto"] = solicitud.adjunto_sol
-        match solicitud.tipo_sol:
-            case "Servicio VPN":
-                formulario = Ise_Vpn_Form(initial=solicitud.campos_sol)
-            case "IOC Automatico":
-                formulario = Ioc_Automatico_Form(initial=solicitud.campos_sol)
-            case "Cambio de Ruta":
-                formulario = Cambio_De_Ruta_Form(initial=solicitud.campos_sol)  
-            case _:
-                return redirect("home")
+        sol = Solicitud.objects.get(id_sol = pk)
+        if(sol.adjunto_sol):
+            sol.campos_sol["adjunto"] = sol.adjunto_sol
+        if sol.tipo_sol in form_dict:
+            tipo_form = form_dict[sol.tipo_sol]
+            form = tipo_form(initial=sol.campos_sol)
+        else:
+            return redirect("home")
         datos = {
-            "formulario": formulario,
-            "tipo_formulario": solicitud.tipo_sol
+            "formulario": form,
+            "tipo_formulario": sol.tipo_sol
         }
         return render(request, "editarSolicitud.html", datos)
     except Solicitud.DoesNotExist:
-        return redirect("estadoSolicitudes") 
+        return redirect("estadoSolicitudes")
+    
+@staff_member_required(redirect_field_name=None, login_url=reverse_lazy("home"))
+def casosDeUso(request):
+    if request.method == "POST":
+        data = request.POST.getlist("lista_formularios")
+        empresa = Empresa.objects.get(pk=request.tenant.id_empresa)
+        empresa.casos_disponibles = data
+        empresa.save()
+        return redirect("casosDeUso")
+    empresa = Empresa.objects.get(pk=request.tenant.id_empresa)
+    casos_empresa = empresa.casos_disponibles
+    form = FiltrodeFormulariosForm(initial={"lista_formularios": casos_empresa})
+    return render(request, "listaCasosdeUso.html", {"formulario": form})
      
 @staff_member_required(redirect_field_name=None, login_url=reverse_lazy("home"))
 def reportes(request):

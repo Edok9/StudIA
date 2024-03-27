@@ -3,6 +3,7 @@ from .models import Usuario
 
 design = "flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
 
+
 class CambioClaveUsuarioForm(forms.Form):
     pass
 
@@ -42,6 +43,17 @@ class Cambio_De_Ruta_Form(forms.Form):
     interfaz_salida = forms.CharField()
 
     prefix = "Cambio de Ruta"      
+        
+# Cambiar el resto de cosas para usar el diccionario si queda mas comodo de trabajar
+form_dict = {
+    Ise_Vpn_Form().prefix: Ise_Vpn_Form,
+    Ioc_Automatico_Form().prefix: Ioc_Automatico_Form,
+    Cambio_De_Ruta_Form().prefix: Cambio_De_Ruta_Form
+}
+
+class FiltrodeFormulariosForm(forms.Form):
+    opciones = [(k,k) for k in form_dict.keys()]
+    lista_formularios = forms.MultipleChoiceField(widget=forms.CheckboxSelectMultiple, choices=opciones)
 
 class CambioClaveAdminForm(forms.Form):
     nueva_contraseña = forms.CharField(widget=forms.PasswordInput(attrs={"class": design}))

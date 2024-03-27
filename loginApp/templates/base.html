@@ -32,18 +32,18 @@
                 <h1 class="text-2xl font-bold text-[#005CFF]">Bienvenido {{request.user}}</h1>
                 <h2 class="text-xl font-bold text-[#005CFF]">{{request.tenant.nombre_empresa}}</h2>
                 <ul class="flex-col items-start space-y-4">
-                    <ul><a class="font-semibold inline-flex items-center space-x-2" href="">
-                        Solicitudes
-                    </a></ul>
-                    <ul><a class="font-semibold inline-flex items-center space-x-2" href="{% url 'estadoSolicitudes' %}">
-                        Estado de Solicitudes
+                    <ul><a class="font-semibold inline-flex items-center space-x-2" href="{% url "home" %}">
+                        Home
                     </a></ul>
                     <ul><a class="font-semibold inline-flex items-center space-x-2" href="{% url 'infoSolicitudes' %}">
                         Información de solicitudes
                     </a></ul>
                     {% if request.user.is_staff %}
                     <ul><a class="font-semibold inline-flex items-center space-x-2" href="{% url 'usuarios' %}">
-                        Administración
+                        Usuarios
+                    </a></ul>
+                    <ul><a class="font-semibold inline-flex items-center space-x-2" href="{% url 'casosDeUso' %}">
+                        Casos de Uso
                     </a></ul>
                     <ul><a class="font-semibold inline-flex items-center space-x-2" href="{% url 'reporteria' %}">
                         Reportería
