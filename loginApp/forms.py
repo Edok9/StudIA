@@ -21,10 +21,16 @@ class ReporteriaForm(forms.Form):
     formato_reportes = forms.ChoiceField(choices=formatos, label="Formato de los Reportes")
 
 class Ise_Vpn_Form(forms.Form):
-    accion = forms.CharField()
-    usuario = forms.CharField()
-    correo_usuario = forms.EmailField()
-    fecha_expiracion = forms.DateField(widget=forms.DateInput(attrs={'type': 'date'}))
+    acciones = (
+        ("Nada", "------"),
+        ("Extension de cuenta", "Extension de cuenta"),
+        ("Cambio de contraseña", "Cambio de contraseña"),
+        ("Deshabilitación de cuenta", "Deshabilitación de cuenta"),
+    )
+    accion = forms.ChoiceField(choices=acciones, label="Accion")
+    usuario = forms.CharField(label="Usuario de VPN")
+    correo_usuario = forms.EmailField(label="Correo del Usuario")
+    fecha_expiracion = forms.DateField(widget=forms.DateInput(attrs={'type': 'date'}), label="Fecha de Expiración", required=False)
 
     prefix = "Servicio VPN"
 

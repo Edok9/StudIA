@@ -1,3 +1,4 @@
+from datetime import datetime
 from django.shortcuts import render, redirect
 from django.http import HttpResponse
 from django.contrib.auth import authenticate, login, logout, update_session_auth_hash
@@ -63,6 +64,9 @@ def verSolicitud(request, pk):
     if tipo_solicitud in form_dict:
         form = form_dict[tipo_solicitud](initial=solicitud.campos_sol)
         campos_form = form.fields
+        if "fecha_expiracion" in solicitud.campos_sol:
+            # Arreglar de date a datetime para mostrarlo
+            pass
         if solicitud.adjunto_sol:
             solicitud.campos_sol["adjunto"] = solicitud.adjunto_sol
         for c in campos_form:
@@ -218,6 +222,12 @@ def logoutProcess(request):
 def submit_caso_form(form, sol):
     if form.is_valid():
         sol.campos_sol = form.cleaned_data
+        if "fecha_expiracion" in sol.campos_sol:
+            if sol.campos_sol["fecha_expiracion"] is not None:
+                # Arreglar el formato de fecha
+                sol.campos_sol["fecha_expiracion"] = sol.campos_sol["fecha_expiracion"].strftime("%Y-%m-%d")
+            else:
+                del(sol.campos_sol["fecha_expiracion"])
         if form.files:
             sol.adjunto_sol = form.files[f'{sol.tipo_sol}-adjunto']
             del(sol.campos_sol["adjunto"])

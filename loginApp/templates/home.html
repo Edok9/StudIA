@@ -4,7 +4,7 @@
 <div class="flex flex-col justify-center items-center space-y-4">
     <h1 class="text-2xl font-bold text-[#005CFF]">Nueva Solicitud</h1>
     <form id="dynamic-form" method="post" enctype="multipart/form-data"> {% csrf_token %}
-        <select id="tipo_sol" name="tipo_sol">
+        <div class="space-y-2">Tipo de Reporte: <select id="tipo_sol" name="tipo_sol"></div>
             <option value="">------</option>
             {% for form in formularios %}
             <option value="{{form.prefix}}">{{form.prefix}}</option>
@@ -19,10 +19,11 @@
     </form>
 </div>
 <script>
+
     document.getElementById('tipo_sol').addEventListener('change', function() {
         var opcion = this.value;
         var camposForm = document.getElementById('campos-formulario');
-        
+
         // Lógica para mostrar los campos adicionales según la opción seleccionada
         switch (opcion) {
             {% for form in formularios %}
@@ -34,6 +35,52 @@
                 camposForm.innerHTML = '';
                 break;
         }
+
+        //Ajustes para Formularios mas dinamicos
+        //  - Servicio VPN (Rico desorden con tantos foreach XD)
+        var selectorVpn = document.getElementById('id_Servicio VPN-accion')
+        var camposVpn = document.querySelectorAll('[name^="Servicio VPN"]')
+        camposVpn.forEach(campo => {
+            if(!campo.parentElement.hidden && campo.tagName!=="SELECT"){
+                campo.parentElement.hidden = true
+            }
+        });
+        if (selectorVpn){
+            selectorVpn.addEventListener('change', function() {        
+                let tareaVpn = this.value
+                let campo_fecha = document.querySelector('[name="Servicio VPN-fecha_expiracion"]')
+                campo_fecha.required = true
+                campo_fecha.disabled = false
+                camposVpn.forEach(campo => {
+                    if(campo.parentElement.hidden){
+                        campo.parentElement.hidden = false
+                    }
+                });
+                switch(tareaVpn) {
+                    case "Nada":
+                        //Esconder todo del formulario
+                        camposVpn.forEach(campo => {
+                            if(!campo.parentElement.hidden && campo.tagName!=="SELECT"){
+                                campo.parentElement.hidden = true
+                            }
+                        });
+                        break
+                    case "Extension de cuenta":
+                    //No hacemos nada, de paso para evitar algun bug
+                        break
+                    default:
+                        //Esconder el campo de fecha de expiracion y hacerlo no necesario por temas de javascript
+                        if(!campo_fecha.parentElement.hidden){
+                            campo_fecha.parentElement.hidden = true
+                        }
+                        campo_fecha.required = false
+                        campo_fecha.disabled = true
+                        break
+                }
+                }
+            )
+        }
+
     });
     
 </script>
