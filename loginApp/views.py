@@ -1,4 +1,4 @@
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect , get_object_or_404
 from django.http import HttpResponse
 from django.contrib.auth import authenticate, login, logout, update_session_auth_hash
 from django.contrib.auth.decorators import login_required
@@ -10,39 +10,37 @@ from loginApp.forms import CrearUsuarioForm, EditarUsuarioForm, CambioClaveAdmin
 from loginApp.models import Usuario
 from solicitudesManager.models import Solicitud
 from django.http import JsonResponse
+import json 
 
 
+@login_required
 def nueva_solicitud(request):
     if request.method == "POST":
-        # Obtener el usuario actual
         usuario = request.user
-
-        # Obtener el tipo de solicitud del formulario
         tipo_solicitud = request.POST.get("tipoSolicitud")
+        
+        # Trabajar con el diccionario de campos, excluyendo campos no necesarios
+        campos_sol = {key: value for key, value in request.POST.items() if key not in ["csrfmiddlewaretoken", "tipoSolicitud"]}
 
-        # Crear un diccionario con los datos del formulario
-        campos_sol = request.POST.dict()
-
-        # Eliminar el tipo de solicitud del diccionario de campos_sol
-        del campos_sol["tipoSolicitud"]
-
-        # Eliminar el token CSRF del diccionario de campos_sol si está presente
-        if "csrfmiddlewaretoken" in campos_sol:
-            del campos_sol["csrfmiddlewaretoken"]
-
-        # Crear una nueva instancia de Solicitud y guardarla en la base de datos
-        nueva_solicitud = Solicitud.objects.create(
+        # Crear una nueva instancia de Solicitud sin guardarla aún
+        nueva_solicitud = Solicitud(
             tipo_sol=tipo_solicitud,
             campos_sol=campos_sol,
             id_usuario=usuario
         )
 
-        # Redirigir a la página deseada después de guardar la solicitud
-        return redirect("infoSolicitudes")
+        # Verificar si hay un archivo adjunto y guardarlo
+        if 'adjunto' in request.FILES:
+            nueva_solicitud.adjunto_sol = request.FILES['adjunto']
+        
+        # Guardar la nueva solicitud con todos los datos
+        nueva_solicitud.save()
 
+        return redirect("infoSolicitudes")
     else:
         return render(request, "nueva_solicitud.html")
     
+
 def casos_de_uso(request):
     return render(request,'casos_de_uso.html')
 
@@ -211,30 +209,37 @@ def borrarUsuario(request, pk):
 
 @staff_member_required(redirect_field_name=None, login_url=reverse_lazy("home"))
 def editarSolicitud(request, pk):
+    sol = get_object_or_404(Solicitud, id_sol=pk)
+
     if request.method == "POST":
-        sol = Solicitud.objects.get(id_sol = pk)
-        form = request.POST
-        if form["tipo_solicitud"] in form_dict:
-            tipo_form = form_dict[sol.tipo_sol]
-            form = tipo_form(request.POST, request.FILES) if request.FILES else tipo_form(request.POST)
-            submit_caso_form(form, sol)
-        return redirect("estadoSolicitudes")
-    try:
-        sol = Solicitud.objects.get(id_sol = pk)
-        if(sol.adjunto_sol):
-            sol.campos_sol["adjunto"] = sol.adjunto_sol
-        if sol.tipo_sol in form_dict:
-            tipo_form = form_dict[sol.tipo_sol]
-            form = tipo_form(initial=sol.campos_sol)
-        else:
-            return redirect("home")
-        datos = {
-            "formulario": form,
-            "tipo_formulario": sol.tipo_sol
-        }
-        return render(request, "editarSolicitud.html", datos)
-    except Solicitud.DoesNotExist:
-        return redirect("estadoSolicitudes")
+        # Aquí actualizas cada campo de Solicitud directamente desde request.POST y request.FILES
+        sol.estado_sol = request.POST.get('estado_sol', sol.estado_sol)
+        sol.tipo_sol = request.POST.get('tipo_sol', sol.tipo_sol)
+        
+        # Ejemplo para manejar un campo JSON, asegúrate de que el valor enviado sea adecuado
+        campos_sol = request.POST.get('campos_sol', '{}')
+        try:
+            sol.campos_sol = json.loads(campos_sol)  # Solo si esperas un string JSON
+        except json.JSONDecodeError:
+            pass  # Maneja el error como consideres adecuado
+
+        if 'adjunto_sol' in request.FILES:
+            sol.adjunto_sol = request.FILES['adjunto_sol']
+        
+        sol.save()
+        return redirect('estadoSolicitudes')  # Asegúrate de que el nombre de URL es correcto
+
+    # Para el caso GET, prepara los datos para el formulario.
+    # Aquí simplemente convertimos los campos_sol a un string JSON para el valor inicial
+    # en el formulario si es necesario.
+    datos_iniciales = {
+        'estado_sol': sol.estado_sol,
+        'tipo_sol': sol.tipo_sol,
+        'campos_sol': json.dumps(sol.campos_sol),  # Convertir dict a string JSON
+        'adjunto_sol': sol.adjunto_sol,
+    }
+
+    return render(request, "editarSolicitud.html", {'sol': sol, 'datos_iniciales': datos_iniciales})
     
 @staff_member_required(redirect_field_name=None, login_url=reverse_lazy("home"))
 def casosDeUso(request):

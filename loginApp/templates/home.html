@@ -4,13 +4,13 @@
 <br><br>
 <div class="container-fluid">
     <div class="row justify-content-center">
-        <div class="col-md-6 bg-dark text-light p-4 rounded">
+        <div class="col-md-4 bg-dark text-light p-4 rounded">
             <div class="flex flex-col justify-center items-center space-y-4">
                 <h1 class="text-2xl font-bold text-[#005CFF]">Nueva Solicitud</h1>
                 <!-- Asegúrate de reemplazar 'nueva_solicitud_url' con el nombre de tu URL real en urls.py -->
                 <form id="dynamic-form" method="post" action="{% url 'nueva_solicitud' %}" enctype="multipart/form-data">
                     {% csrf_token %}
-                    <div class="form-group">
+                    <div class="form-group mb-3">
                         <label for="tipoSolicitud" class="form-label text-gray-400">Tipo de Solicitud:</label>
                         <select id="tipoSolicitud" name="tipoSolicitud" class="form-control">
                             <option value="">--Seleccione--</option>
@@ -19,7 +19,7 @@
                             <option value="Cambio de Ruta">Cambio de Ruta</option>
                         </select>
                     </div>
-                    <div id="campos-formulario" class="space-y-2">
+                    <div id="campos-formulario" class="mb-3">
                         <!-- Los campos dinámicos se renderizarán aquí -->
                     </div>
                     <button class="btn btn-primary w-full mt-4" type="submit">
@@ -50,7 +50,7 @@ function cambiarFormulario() {
     
         if (opcion === 'Servicio VPN') {
             camposForm.innerHTML = `
-                <div id="contenedor_accion">
+                <div class="mb-3" id="contenedor_accion">
                     <label for="accion">Acción:</label>
                     <select id="accion" name="accion" class="form-control" onchange="accionSeleccionada()">
                         <option value="">--Seleccione--</option>
@@ -64,13 +64,13 @@ function cambiarFormulario() {
             document.getElementById('accion').addEventListener('change', accionSeleccionada);
         } else if (opcion === 'IOC Automatico') {
             camposForm.innerHTML = `
-                <div class="input-group mb-3">
-                    <label>Adjunto (si se requiere):</label>
+                <div class="mb-3">
+                    <label class="form-label" for="adjunto">Adjunto (si se requiere):</label>
                     <input type="file" id="adjunto" name="adjunto" class="form-control">
                 </div>
-                <div class="input-group mb-3">
-                    <label>Notas:</label>
-                    <textarea id="notas" name="notas" rows="4" cols="50" class="form-control" required></textarea>
+                <div class="mb-3">
+                    <label class="form-label" for="notas">Notas:</label>
+                    <textarea id="notas" name="notas" rows="4" class="form-control" required></textarea>
                 </div>
             `;
         } else if (opcion === 'Cambio de Ruta') {

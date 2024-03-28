@@ -35,19 +35,20 @@
 
 <script>
     document.addEventListener('DOMContentLoaded', function() {
-        document.getElementById('crearUsuarioBtn').addEventListener('click', function() {
-            var nombreUsuario = document.getElementById('id_nombre_usuario').value;
-            var email = document.getElementById('id_email').value;
-            var password = document.getElementById('id_password').value;
-            var telefono = document.getElementById('id_telefono').value;
-            var cargo = document.getElementById('id_cargo').value;
-            var horarioAtencion = document.getElementById('id_horario_atencion').value;
+    document.getElementById('crearUsuarioForm').addEventListener('submit', function(event) {
+        var nombreUsuario = document.getElementById('id_nombre_usuario').value;
+        var email = document.getElementById('id_email').value;
+        var password = document.getElementById('id_password').value;
+        var telefono = document.getElementById('id_telefono').value;
+        var cargo = document.getElementById('id_cargo').value;
+        var horarioAtencion = document.getElementById('id_horario_atencion').value;
 
-            // Validación de campos no vacíos
-            if (nombreUsuario.trim() === '' || email.trim() === '' || password.trim() === '' || telefono.trim() === '' || cargo.trim() === '' || horarioAtencion.trim() === '') {
-                alert('Por favor, complete todos los campos.');
-                return;
-            }
+        // Validación de campos no vacíos
+        if (nombreUsuario.trim() === '' || email.trim() === '' || password.trim() === '' || telefono.trim() === '' || cargo.trim() === '' || horarioAtencion.trim() === '') {
+            alert('Por favor, complete todos los campos.');
+            event.preventDefault(); // Detiene el envío del formulario
+            return false;
+        }
 
             // Validación de nombre de usuario: al menos 3 letras y sin números
             if (nombreUsuario.length < 3 || /\d/.test(nombreUsuario)) {
@@ -72,6 +73,11 @@
                 alert('El número de teléfono solo puede contener números.');
                 return;
             }
+
+            if (!isValid) {
+            event.preventDefault(); // Detiene el envío del formulario
+            return false; // Como medida adicional para asegurar que el formulario no se envíe
+        }
 
             // Si pasa todas las validaciones, enviar el formulario
             document.getElementById('crearUsuarioForm').submit();

@@ -49,7 +49,7 @@
                         {% if request.user.is_staff %}
                         <span class="navbar-text text-light">Rol: Administrador</span>
                         {% else %}
-                        <span class="navbar-text text-light">{{ request.tenant.nombre_empresa }}</span>
+                        <span class="navbar-text text-light">Empresa: {{ request.tenant.nombre_empresa }}</span>
                         {% endif %}
                     </div>
                 </div>
