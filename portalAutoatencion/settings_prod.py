@@ -21,12 +21,14 @@ import os
 # See https://docs.djangoproject.com/en/5.0/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-w+*cbtuky&ghmcctne!wlo24-5+839qm$takon9w3a25^*@i)^'
+SECRET_KEY = 'w+*cbtuky&ghmcctne!wlo24-5+839qm$takon9w3a25^*@i)^'
+# Nota: Mover esto a variables de entorno para mayor seguridad en un futuro
+
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = False
 
-ALLOWED_HOSTS = ['*']
+ALLOWED_HOSTS = [".localhost"]
 
 
 # Application definition
@@ -98,12 +100,12 @@ DATABASES = {
         'ENGINE': 'django_tenants.postgresql_backend',
         'NAME': 'postgres',
         'USER': 'postgres',
-        'PASSWORD': 'vale1819',
+        'PASSWORD': 'postgres',
         'HOST': 'localhost',
         'PORT': 5432
     }
 }
-
+# Nota: Mover esto a variables de entorno para mayor seguridad en un futuro
 
 DATABASE_ROUTERS = (
     'django_tenants.routers.TenantSyncRouter',
@@ -148,8 +150,6 @@ USE_TZ = True
 
 STATIC_URL = 'static/'
 
-STATICFILES_DIRS = (os.path.join(BASE_DIR, 'loginApp/static'),)
-
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 
 # Default primary key field type
@@ -160,3 +160,17 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 TENANT_MODEL = 'clientManager.Empresa'
 
 TENANT_DOMAIN_MODEL = 'clientManager.Dominio'
+
+# Configuración de Producción
+
+SECURE_HSTS_SECONDS = 3600
+
+SECURE_SSL_REDIRECT = True
+
+SESSION_COOKIE_SECURE = True
+
+CSRF_COOKIE_SECURE = True
+
+SECURE_HSTS_INCLUDE_SUBDOMAINS = True
+
+SECURE_HSTS_PRELOAD = True

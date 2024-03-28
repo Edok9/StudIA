@@ -9,7 +9,7 @@ class Solicitud(models.Model):
     created_at = models.DateTimeField(auto_now_add=True, null=True, verbose_name="Fecha de creación")
     
     #Este campo aplicará solo en formularios con adjuntos, asi evito que explote el json de arriba o crear otra tabla
-    adjunto_sol = models.FileField(upload_to="archivos/", blank=True, null=True, verbose_name="Archivos Adjuntos")
+    adjunto_sol = models.FileField(blank=True, null=True, verbose_name="Archivos Adjuntos")
     
     id_usuario = models.ForeignKey(Usuario, on_delete=models.CASCADE, verbose_name = "Usuario")
 
