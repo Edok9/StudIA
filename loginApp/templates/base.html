@@ -36,6 +36,9 @@
                         Home
                     </a></ul>
                     <ul><a class="font-semibold inline-flex items-center space-x-2" href="{% url 'infoSolicitudes' %}">
+                        Mis solicitudes
+                    </a></ul>
+                    <ul><a class="font-semibold inline-flex items-center space-x-2" href="{% url 'estadoSolicitudes' %}">
                         Información de solicitudes
                     </a></ul>
                     {% if request.user.is_staff %}

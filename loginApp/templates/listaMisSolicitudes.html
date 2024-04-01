@@ -2,7 +2,7 @@
 
 {% block content %}
 <div class="flex flex-col justify-center items-center space-y-4">
-    <h1 class="text-2xl font-bold text-[#005CFF]">Estado de Solicitudes</h1>
+    <h1 class="text-2xl font-bold text-[#005CFF]">Mis Solicitudes</h1>
     <table class="w-full caption-bottom text-sm">
         <thead class="[&amp;_tr]:border-b">
             <tr class="border-b transition-colors hover:bg-muted/50 data-[state=selected]:bg-muted">
@@ -10,8 +10,6 @@
                     Estado</th>
                 <th class="h-12 px-4 text-left align-middle font-medium">
                     Solicitud</th>
-                <th class="h-12 px-4 text-left align-middle font-medium">
-                    Creado por</th>
                 <th class="h-12 px-4 text-left align-middle font-medium">
                     Fecha de Solicitud</th>
                 <th class="h-12 px-4 align-middle font-medium w-[160px] text-middle">
@@ -25,7 +23,6 @@
             <tr>
                 <td class="p-4 align-middle font-medium">{{solicitud.estado_sol}}</td>
                 <td class="p-4 align-middle">{{solicitud.tipo_sol}}</td>
-                <td class="p-4 align-middle">{{solicitud.id_usuario}}</td>
                 <td class="p-4 align-middle">{{solicitud.created_at }}</td>
                 <td class="p-4 align-middle text-center">
                     <button class="inline-flex items-center justify-center h-10 w-10 rounded-full" title="Ver"
@@ -51,6 +48,7 @@
                             </path>
                         </svg>
                     </button>
+                    {% endif %}
                     <button class="inline-flex items-center justify-center h-10 w-10 rounded-full" title="Borrar"
                         type="button" onclick="location.href='{% url 'borrarSolicitud' pk=solicitud.id_sol %}'">
                         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
@@ -61,7 +59,6 @@
                             <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"></path>
                         </svg>
                     </button>
-                    {% endif %}
                 </td>
             </tr>
             {% endfor %}
