@@ -38,7 +38,7 @@
     }
 </style>
 </style>
-<body>
+<body class="d-flex flex-column min-vh-100">
     <div class="menu-container">
         <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
             <div class="container-fluid container">
@@ -61,8 +61,16 @@
                         <li class="nav-item">
                             <a href="{% url 'home'%}" class="nav-link">Solicitudes</a>
                         </li>
-                        <li class="nav-item">
-                            <a href="{% url 'infoSolicitudes'%}" class="nav-link">Estado Solicitudes</a>
+                        <li class="nav-item dropdown">
+                            <a href="#" class="nav-link dropdown-toggle" data-bs-toggle="dropdown">Estado Solicitudes</a>
+                            <ul class="dropdown-menu dropdown-menu-dark">
+                                <li>
+                                    <a href="{% url 'infoSolicitudes'%}" class="dropdown-item">Mis solicitudes</a>
+                                </li>
+                                <li>
+                                    <a href="{% url 'solicitudes_empresa'%}" class="dropdown-item">Solicitudes de empresa</a>
+                                </li>
+                            </ul>
                         </li>
                         {% if request.user.is_staff %}
                         <li class="nav-item">
@@ -71,9 +79,7 @@
                         <li class="nav-item dropdown">
                             <a href="#" class="nav-link dropdown-toggle" data-bs-toggle="dropdown">Administración</a>
                             <ul class="dropdown-menu dropdown-menu-dark">
-                                <li>
-                                    <a href="{% url 'casos_de_uso'%}" class="dropdown-item">Gestionar Casos de Uso</a>
-                                </li>
+        
                                 <li>
                                     <a href="{% url 'usuarios'%}" class="dropdown-item">Gestionar Usuarios</a>
                                 </li>
@@ -83,31 +89,6 @@
                     </ul>
                 </div>
                 <div class="navbar-nav ms-auto">
-                    <li class="nav-item dropdown">
-                        <a href="#" class="nav-link dropdown-toggle" data-bs-toggle="dropdown">
-                            <i class="fas fa-user-circle"></i> <!-- Icono de perfil -->
-                            Perfil
-                        </a>
-                        <ul class="dropdown-menu dropdown-menu-dark">
-                            <li>
-                                <a href="{% url 'pruebas' %}" class="dropdown-item">Item 1</a>
-                            </li>
-                            <li>
-                                <a href="#" class="dropdown-item">Item 2 &raquo;</a>
-                                <ul class="dropdown-menu submenu submenu-left dropdown-menu-dark">
-                                    <li>
-                                        <a href="#" class="dropdown-item">Submenu1</a>
-                                    </li>
-                                    <li>
-                                        <a href="{% url 'solicitudes' %}" class="dropdown-item">Solicitudes viejo</a>
-                                    </li>
-                                    <li>
-                                        <a href="{% url 'estado' %}" class="dropdown-item">Estado viejo</a>
-                                    </li>
-                                </ul>
-                            </li>
-                        </ul>
-                    </li>
                     <li><a href="{% url 'logout' %}" class="nav-link">
                         <i class="fas fa-sign-out-alt"></i> <!-- Icono de logout -->
                         Logout

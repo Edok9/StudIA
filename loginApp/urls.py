@@ -12,6 +12,7 @@ urlpatterns = [
     path('estadosolicitudes', views.infoSolicitudes, name="estadoSolicitudes"),
     path('infosolicitudes', views.infoSolicitudes, name="infoSolicitudes"),
     path('borrarsolicitud/<int:pk>', views.borrarSolicitud, name="borrarSolicitud"),
+    path('solicitudes_empresa', views.solicitudes_empresa, name="solicitudes_empresa"),
     
     
     # URLs para admins

@@ -2,13 +2,16 @@
 
 {% block content %}
 <!-- Contenedor principal para centrar y manejar el margen con el footer -->
-<div class="flex flex-col min-h-screen mt-5">
+<div class="flex flex-col min-h-screen mt-5 pb-20 md:pb-10">
     <div class="flex-grow">
         <div class="flex justify-center items-center pt-6 pb-20">
             <div class="flex flex-col space-y-4 max-w-4xl w-full px-4">
                 <div class="bg-dark text-light p-4 rounded">
                     <h1 class="text-2xl font-bold text-[#005CFF]">Estado de Solicitudes</h1>
                     <hr class="bg-[#005CFF] my-2">
+                    <div class="flex justify-center mb-4">
+                        <input type="text" id="searchInput" placeholder="Buscar por estado o tipo..." class="form-control">
+                    </div>
                     <div class="overflow-x-auto">
                         <table class="w-full text-sm table-dark">
                             <thead>
@@ -50,8 +53,26 @@
             </div>
         </div>
     </div>
-    <!-- Asumiendo que tienes un bloque de footer en base.html o similar -->
-    {% block footer %}{% endblock %}
 </div>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const searchInput = document.getElementById('searchInput');
+        
+        searchInput.addEventListener('keyup', function() {
+            const term = searchInput.value.toLowerCase();
+            const rows = document.querySelectorAll("tbody tr");
+            
+            rows.forEach(row => {
+                const estado = row.cells[0].textContent.toLowerCase();
+                const tipo = row.cells[1].textContent.toLowerCase();
+                if (estado.includes(term) || tipo.includes(term)) {
+                    row.style.display = '';
+                } else {
+                    row.style.display = 'none';
+                }
+            });
+        });
+    });
+    </script>
 {% endblock %}
 

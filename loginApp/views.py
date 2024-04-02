@@ -40,6 +40,18 @@ def nueva_solicitud(request):
     else:
         return render(request, "nueva_solicitud.html")
     
+@login_required    
+def estado_solicitudes(request):
+    search_term = request.GET.get('search', '').strip()
+    if search_term:
+        solicitudes = Solicitud.objects.filter(estado_sol__icontains=search_term) | Solicitud.objects.filter(tipo_sol__icontains=search_term)
+    else:
+        solicitudes = Solicitud.objects.all()
+    
+    return render(request, 'infoSolicitudes.html', {'solicitudes': solicitudes})
+
+def solicitudes_empresa(request):
+    return render(request,'solicitudes_empresa.html')
 
 def casos_de_uso(request):
     return render(request,'casos_de_uso.html')
