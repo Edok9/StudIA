@@ -135,7 +135,7 @@ LOGIN_URL = "/"
 
 # Internationalization
 # https://docs.djangoproject.com/en/5.0/topics/i18n/
-
+# Nota: Mover esto a variables de entorno para mayor seguridad en un futuro
 LANGUAGE_CODE = 'es-cl'
 
 TIME_ZONE = 'America/Santiago'
@@ -162,7 +162,7 @@ TENANT_MODEL = 'clientManager.Empresa'
 TENANT_DOMAIN_MODEL = 'clientManager.Dominio'
 
 # Configuración de Producción
-
+# Nota: Mover esto a variables de entorno para mayor seguridad en un futuro
 SECURE_HSTS_SECONDS = 3600
 
 SECURE_SSL_REDIRECT = True

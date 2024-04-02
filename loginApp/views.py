@@ -1,5 +1,6 @@
 from django.shortcuts import render, redirect , get_object_or_404
 from django.http import HttpResponse
+from django.contrib import messages
 from django.contrib.auth import authenticate, login, logout, update_session_auth_hash
 from django.contrib.auth.decorators import login_required
 from django.contrib.admin.views.decorators import staff_member_required
@@ -111,9 +112,16 @@ def home(request):
         if sol.tipo_sol in form_dict:
             tipo_form = form_dict[sol.tipo_sol]
             form = tipo_form(request.POST, request.FILES) if request.FILES else tipo_form(request.POST)
-            submit_caso_form(form, sol)
+            lista_sol = Solicitud.objects.all().filter(estado_sol = "Pendiente", tipo_sol = sol.tipo_sol)
+            sol = submit_caso_form(form, sol)
+            for s in lista_sol:
+                if sol.campos_sol == s.campos_sol:
+                    messages.error(request, "Una solicitud similar existe en curso")
+                    return redirect("home")
+            sol.save()
         else:
             return redirect("home")
+        
     empresa = Empresa.objects.get(pk=request.tenant.id_empresa)
     casos_empresa = empresa.casos_disponibles
     form_list = [f for n,f in form_dict.items() if n in casos_empresa]
@@ -126,6 +134,9 @@ def verSolicitud(request, pk):
     if tipo_solicitud in form_dict:
         form = form_dict[tipo_solicitud](initial=solicitud.campos_sol)
         campos_form = form.fields
+        if "fecha_expiracion" in solicitud.campos_sol:
+            # Arreglar de date a datetime para mostrarlo
+            pass
         if solicitud.adjunto_sol:
             solicitud.campos_sol["adjunto"] = solicitud.adjunto_sol
         for c in campos_form:
@@ -135,14 +146,18 @@ def verSolicitud(request, pk):
     return redirect("infoSolicitudes")
 
 @login_required
-def infoSolicitudes(request):
+def estadoSolicitudes(request):
+    solicitudes = Solicitud.objects.all()
+    return render(request, "listaSolicitudes.html", {"solicitudes": solicitudes})
+
+@login_required
+def solicitudesUsuario(request):
     try:
         solicitudes = Solicitud.objects.all().filter(id_usuario = request.user.id_usuario)
-        return render(request, "listaSolicitudes.html", {"solicitudes": solicitudes})
+        return render(request, "listaMisSolicitudes.html", {"solicitudes": solicitudes})
     except Solicitud.DoesNotExist:
         return redirect('home')
     
-#HAY QUE QUITAR ESTO, ESTA ES MEDIDA TEMPORAL E IMPLEMENTARLA EN CODE DE SEBA
 
     
 @login_required
@@ -292,8 +307,13 @@ def logoutProcess(request):
 def submit_caso_form(form, sol):
     if form.is_valid():
         sol.campos_sol = form.cleaned_data
+        if "fecha_expiracion" in sol.campos_sol:
+            if sol.campos_sol["fecha_expiracion"] is not None:
+                # Arreglar el formato de fecha
+                sol.campos_sol["fecha_expiracion"] = sol.campos_sol["fecha_expiracion"].strftime("%Y-%m-%d")
+            else:
+                del(sol.campos_sol["fecha_expiracion"])
         if form.files:
             sol.adjunto_sol = form.files[f'{sol.tipo_sol}-adjunto']
             del(sol.campos_sol["adjunto"])
-        sol.save()
-        return redirect("home")
+        return sol
