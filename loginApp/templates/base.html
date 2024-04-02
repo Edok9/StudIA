@@ -67,6 +67,11 @@
                                 <li>
                                     <a href="{% url 'infoSolicitudes'%}" class="dropdown-item">Mis solicitudes</a>
                                 </li>
+                                {% if request.user.is_staff %}
+                                <li>
+                                    <a href="{% url 'estadoSolicitudes'%}" class="dropdown-item">Manejo de solicitudes</a>
+                                </li>
+                                {% endif %}
                                 <li>
                                     <a href="{% url 'solicitudes_empresa'%}" class="dropdown-item">Solicitudes de empresa</a>
                                 </li>
@@ -82,6 +87,9 @@
         
                                 <li>
                                     <a href="{% url 'usuarios'%}" class="dropdown-item">Gestionar Usuarios</a>
+                                </li>
+                                <li>
+                                    <a href="{% url 'casosDeUso'%}" class="dropdown-item">Gestionar Casos de Uso</a>
                                 </li>
                             </ul>
                         </li>
@@ -99,54 +107,6 @@
     </div>
     <main class="container">
         {% block content %}
-        <!-- Contenido de tu página aquí -->
-
-<body>
-    <div class="grid grid-cols-2 justify-center m-4 py-4">
-        <div>
-            <img src="{% static "logo_entel.svg" %}" alt="">
-        </div>
-        <form class="place-self-end" action="{% url 'logout' %}" method="post">
-            {% csrf_token %}
-            <button
-                class="inline-flex items-center justify-center text-sm font-medium h-10 px-4 py-2 bg-[#FF3D00] text-white rounded-full"
-                type="submit">Virar de aca</button>
-        </form>
-    </div>
-    <!--
-// v0 by Vercel.
-// https://v0.dev/t/qeujZ1tYEtT
--->
-    <div class="grid grid-cols-[max-content_1fr] justify-center m-4 px-8 py-4">
-        {% block sidebar %}
-        <div class="space-y-4 text-center mx-2 max-w-xs">
-            <nav class="grid gap-4 px-4 md:px-6">
-                <h1 class="text-2xl font-bold text-[#005CFF]">Bienvenido {{request.user}}</h1>
-                <h2 class="text-xl font-bold text-[#005CFF]">{{request.tenant.nombre_empresa}}</h2>
-                <ul class="flex-col items-start space-y-4">
-                    <ul><a class="font-semibold inline-flex items-center space-x-2" href="{% url "home" %}">
-                        Home
-                    </a></ul>
-                    <ul><a class="font-semibold inline-flex items-center space-x-2" href="{% url 'infoSolicitudes' %}">
-                        Mis solicitudes
-                    </a></ul>
-                    <ul><a class="font-semibold inline-flex items-center space-x-2" href="{% url 'estadoSolicitudes' %}">
-                        Información de solicitudes
-                    </a></ul>
-                    {% if request.user.is_staff %}
-                    <ul><a class="font-semibold inline-flex items-center space-x-2" href="{% url 'usuarios' %}">
-                        Usuarios
-                    </a></ul>
-                    <ul><a class="font-semibold inline-flex items-center space-x-2" href="{% url 'casosDeUso' %}">
-                        Casos de Uso
-                    </a></ul>
-                    <ul><a class="font-semibold inline-flex items-center space-x-2" href="{% url 'reporteria' %}">
-                        Reportería
-                    </a></ul>
-                    {% endif %}
-                </ul>
-            </nav>
-        </div>
         {% endblock %}
     </main>
     <footer class="footer mt-auto py-3">

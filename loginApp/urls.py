@@ -11,7 +11,7 @@ urlpatterns = [
     path('solicitudes', views.estadoSolicitudes, name="estadoSolicitudes"),
     path('mis-solicitudes', views.solicitudesUsuario, name="infoSolicitudes"),
     path('borrarsolicitud/<int:pk>', views.borrarSolicitud, name="borrarSolicitud"),
-    path('solicitudes_empresa', views.solicitudes_empresa, name="solicitudes_empresa"),
+    path('solicitudes_empresa', views.estadoSolicitudes, name="solicitudes_empresa"),
     
     
     # URLs para admins
@@ -28,7 +28,7 @@ urlpatterns = [
     path('home', views.home, name='home'),
     path('usuarios', views.usuarios, name='usuarios'),
     path('crear/usuario', views.crearUsuario, name='nuevoUsuario'),
-    path('solicitud/<int:pk>', views.infoSolicitudes, name="infoSolicitud"),
+    
     path('casos_de_uso/', casos_de_uso, name='casos_de_uso'),
     path('entel/', entel, name='entel'),
     path('estado/', estado, name='estado'),
