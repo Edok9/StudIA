@@ -21,15 +21,6 @@ header h1 {
 }
 
 
-.footer {
-  background-color: #333333; /* Color medio negro */
-  color: white;
-  text-align: center;
-  padding: 20px 0;
-  position: relative;
-  width: 100%;
-}
-
 .dropdown-menu li{
   position:relative;
 }
@@ -105,4 +96,67 @@ header h1 {
   display: flex;
   flex-direction: column;
   min-height: 100vh;
+}
+
+/* styles.css */
+.form-input {
+  border: 1px solid #ccc;
+  padding: 10px;
+  margin-bottom: 10px;
+  width: 100%;
+  box-sizing: border-box; /* Asegúrate de que el padding no afecte el ancho total */
+}
+
+.form-select {
+  border: 1px solid #ccc;
+  padding: 10px;
+  margin-bottom: 10px;
+  width: 100%;
+  background-color: white;
+  box-sizing: border-box;
+}
+
+.form-button {
+  background-color: #005CFF;
+  color: white;
+  padding: 10px 15px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  width: 100%;
+}
+
+.form-label {
+  margin-bottom: 5px;
+  display: block;
+}
+
+html {
+  height: 100%;
+}
+
+body {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  margin: 0;
+}
+
+#content {
+  flex: 1 0 auto;
+  padding-bottom: 20px; /* Ajusta este valor según la separación deseada */
+}
+
+.footer {
+  flex-shrink: 0;
+  width: 100%;
+  margin-top: 20px;
+  position: absolute;
+  bottom: 0;
+  width: 100%;
+  background-color: #333333; /* Color medio negro */
+  color: white;
+  text-align: center;
+  padding: 20px 0;
+  width: 100%;
 }

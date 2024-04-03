@@ -11,6 +11,7 @@ from loginApp.forms import CrearUsuarioForm, EditarUsuarioForm, CambioClaveAdmin
 from loginApp.models import Usuario
 from solicitudesManager.models import Solicitud
 from django.http import JsonResponse
+from datetime import date
 import json 
 
 
@@ -101,31 +102,52 @@ def index(request):
             return render(request, "login.html", errores)
     else:
         return render(request, "login.html")
+    
 
 @login_required
 def home(request):
     if request.method == "POST":
-        sol = Solicitud()
         usuario = Usuario.objects.get(pk=request.user.id_usuario)
-        sol.tipo_sol = request.POST["tipo_sol"]
-        sol.id_usuario = usuario
-        if sol.tipo_sol in form_dict:
-            tipo_form = form_dict[sol.tipo_sol]
-            form = tipo_form(request.POST, request.FILES) if request.FILES else tipo_form(request.POST)
-            lista_sol = Solicitud.objects.all().filter(estado_sol = "Pendiente", tipo_sol = sol.tipo_sol)
-            sol = submit_caso_form(form, sol)
-            for s in lista_sol:
-                if sol.campos_sol == s.campos_sol:
+        tipo_form = request.POST.get("tipo_sol")
+
+        if tipo_form in form_dict:
+            form_class = form_dict[tipo_form]
+            form = form_class(request.POST, request.FILES) if request.FILES else form_class(request.POST)
+
+            if form.is_valid():
+                cleaned_data = form.cleaned_data
+                
+                # Manejar la conversión de fecha a cadena antes de la serialización si es necesario
+                if 'fecha_expiracion' in cleaned_data and isinstance(cleaned_data['fecha_expiracion'], date):
+                    cleaned_data['fecha_expiracion'] = cleaned_data['fecha_expiracion'].isoformat()
+                
+                # Preparar el objeto Solicitud con datos limpios
+                sol = Solicitud(tipo_sol=tipo_form, id_usuario=usuario, campos_sol=cleaned_data)
+                
+                lista_sol = Solicitud.objects.filter(estado_sol="Pendiente", tipo_sol=tipo_form)
+                if any(sol.campos_sol == s.campos_sol for s in lista_sol):
                     messages.error(request, "Una solicitud similar existe en curso")
+                else:
+                    sol.save()
+                    messages.success(request, "Solicitud guardada con éxito")
                     return redirect("home")
-            sol.save()
+            else:
+                # Si el formulario no es válido, renderizar nuevamente con errores
+                messages.error(request, "Por favor corrija los errores en el formulario.")
         else:
-            return redirect("home")
-        
+            messages.error(request, "Tipo de solicitud no válido.")
+
+    # Para solicitudes GET o si el formulario tiene errores
     empresa = Empresa.objects.get(pk=request.tenant.id_empresa)
     casos_empresa = empresa.casos_disponibles
-    form_list = [f for n,f in form_dict.items() if n in casos_empresa]
-    return render(request, "home.html", {"formularios": form_list})
+    form_list = [f() for n, f in form_dict.items() if n in casos_empresa]
+
+    context = {
+        "formularios": form_list,
+        # Añade el formulario actual al contexto si es una solicitud POST y hay errores
+        "current_form": form if 'form' in locals() else None,
+    }
+    return render(request, "home.html", context)
 
 @login_required
 def verSolicitud(request, pk):
