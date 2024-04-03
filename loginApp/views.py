@@ -109,7 +109,7 @@ def home(request):
     if request.method == "POST":
         usuario = Usuario.objects.get(pk=request.user.id_usuario)
         tipo_form = request.POST.get("tipo_sol")
-
+        print(tipo_form)
         if tipo_form in form_dict:
             form_class = form_dict[tipo_form]
             form = form_class(request.POST, request.FILES) if request.FILES else form_class(request.POST)
@@ -141,11 +141,11 @@ def home(request):
     empresa = Empresa.objects.get(pk=request.tenant.id_empresa)
     casos_empresa = empresa.casos_disponibles
     form_list = [f() for n, f in form_dict.items() if n in casos_empresa]
-
     context = {
         "formularios": form_list,
         # Añade el formulario actual al contexto si es una solicitud POST y hay errores
         "current_form": form if 'form' in locals() else None,
+        "tipo_form": tipo_form if 'tipo_form' in locals() else None,
     }
     return render(request, "home.html", context)
 

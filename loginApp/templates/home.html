@@ -22,13 +22,15 @@
                         <select id="tipo_sol" name="tipo_sol" class="form-control">
                             <option value="">--Seleccione--</option>
                             {% for form in formularios %}
-                                <option value="{{form.prefix}}">{{form.prefix}}</option>
+                                <option value="{{form.prefix}}"
+                                {% if tipo_form and tipo_form == form.prefix %}
+                                selected
+                                {% endif %}>{{form.prefix}}</option>
                             {% endfor %}
                         </select>
                     </div>
                     <div id="campos-formulario" class="mb-3">
                         <!-- Aquí se insertarán los campos dinámicos -->
-                    </div>
                     {% if current_form %}
                         {% for field in current_form %}
                             <div class="form-group">
@@ -42,6 +44,7 @@
                             </div>
                         {% endfor %}
                     {% endif %}
+                    </div>
                     <button class="btn btn-primary w-full mt-4" type="submit">
                         <i class="fas fa-plus-circle mr-2"></i> Crear Solicitud
                     </button>
@@ -54,7 +57,6 @@
     document.getElementById('tipo_sol').addEventListener('change', function() {
         var opcion = this.value;
         var camposForm = document.getElementById('campos-formulario');
-
         // Lógica para mostrar los campos adicionales según la opción seleccionada
         switch (opcion) {
             {% for form in formularios %}
