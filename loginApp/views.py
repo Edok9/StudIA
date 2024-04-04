@@ -7,6 +7,7 @@ from django.contrib.admin.views.decorators import staff_member_required
 from django.urls import reverse_lazy
 from clientManager.models import Empresa
 from .scripts.informe import gen_informe
+from .scripts.formularios import procesar_form, revision_form
 from loginApp.forms import CrearUsuarioForm, EditarUsuarioForm, CambioClaveAdminForm, ReporteriaForm, FiltrodeFormulariosForm, form_dict
 from loginApp.models import Usuario
 from solicitudesManager.models import Solicitud
@@ -50,11 +51,10 @@ def home(request):
             tipo_form = form_dict[sol.tipo_sol]
             form = tipo_form(request.POST, request.FILES) if request.FILES else tipo_form(request.POST)
             lista_sol = Solicitud.objects.all().filter(estado_sol = "Pendiente", tipo_sol = sol.tipo_sol)
-            sol = submit_caso_form(form, sol)
-            for s in lista_sol:
-                if sol.campos_sol == s.campos_sol:
-                    messages.error(request, "Una solicitud similar existe en curso")
-                    return redirect("home")
+            sol = procesar_form(form, sol)
+            if not revision_form(sol, lista_sol):
+                messages.error(request, "Una solicitud similar existe en curso")
+                return redirect("home")        
             sol.save()
         else:
             return redirect("home")
@@ -177,7 +177,7 @@ def editarSolicitud(request, pk):
         if form["tipo_solicitud"] in form_dict:
             tipo_form = form_dict[sol.tipo_sol]
             form = tipo_form(request.POST, request.FILES) if request.FILES else tipo_form(request.POST)
-            sol = submit_caso_form(form, sol)
+            sol = procesar_form(form, sol)
             sol.save()
         return redirect("estadoSolicitudes")
     try:
@@ -232,16 +232,5 @@ def logoutProcess(request):
 
 # Create your views here.
 
-def submit_caso_form(form, sol):
-    if form.is_valid():
-        sol.campos_sol = form.cleaned_data
-        if "fecha_expiracion" in sol.campos_sol:
-            if sol.campos_sol["fecha_expiracion"] is not None:
-                # Arreglar el formato de fecha
-                sol.campos_sol["fecha_expiracion"] = sol.campos_sol["fecha_expiracion"].strftime("%Y-%m-%d")
-            else:
-                del(sol.campos_sol["fecha_expiracion"])
-        if form.files:
-            sol.adjunto_sol = form.files[f'{sol.tipo_sol}-adjunto']
-            del(sol.campos_sol["adjunto"])
-        return sol
+ 
+
