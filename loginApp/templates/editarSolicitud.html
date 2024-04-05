@@ -7,27 +7,25 @@
             <h1 class="text-2xl font-bold text-[#005CFF] mb-4 text-center">Editar Solicitud</h1>
             <form method="post" enctype="multipart/form-data">
                 {% csrf_token %}
+                <!-- Renderizar los campos del formulario Django automáticamente -->
+                {{ formulario.as_p }}
+
+                <!-- Campo para editar el estado de la solicitud -->
                 <div class="mb-3">
-                    <label for="estado_sol" class="form-label">Estado:</label>
-                    <input type="text" class="form-control" id="estado_sol" name="estado_sol" value="{{ datos_iniciales.estado_sol }}" required>
+                    <label for="estado_sol" class="form-label">Estado de la Solicitud:</label>
+                    <select class="form-control" id="estado_sol" name="estado_sol">
+                        {% for estado in estados_posibles %}
+                        <option value="{{ estado }}" {% if estado == solicitud.estado_sol %}selected{% endif %}>{{ estado }}</option>
+                        {% endfor %}
+                    </select>
                 </div>
+
+                <!-- Campo deshabilitado solo para visualización del tipo de solicitud -->
                 <div class="mb-3">
-                    <label for="tipo_sol" class="form-label">Tipo de Solicitud:</label>
-                    <input type="text" class="form-control" id="tipo_sol" name="tipo_sol" value="{{ datos_iniciales.tipo_sol }}" disabled>
+                    <label for="tipo_sol_disabled" class="form-label">Tipo de Solicitud:</label>
+                    <input type="text" class="form-control" id="tipo_sol_disabled" name="tipo_sol_disabled" value="{{ tipo_formulario }}" disabled>
                 </div>
-                <!-- Asume que campos_sol es un campo JSON que quieres editar como un string -->
-                <div class="mb-3">
-                    <label for="campos_sol" class="form-label">Campos del Formulario (JSON):</label>
-                    <textarea class="form-control" id="campos_sol" name="campos_sol" rows="3">{{ datos_iniciales.campos_sol }}</textarea>
-                </div>
-                <div class="mb-3">
-                    <label for="adjunto_sol" class="form-label">Archivo Adjunto:</label>
-                    <!-- Aviso: Los navegadores no permiten prellenar el campo file por razones de seguridad. -->
-                    <input type="file" class="form-control" id="adjunto_sol" name="adjunto_sol">
-                    {% if datos_iniciales.adjunto_sol %}
-                    <small class="text-muted">Archivo actual: {{ datos_iniciales.adjunto_sol.name }}</small>
-                    {% endif %}
-                </div>
+                
                 <button type="submit" class="btn btn-primary">Guardar Cambios</button>
             </form>
         </div>

@@ -105,35 +105,47 @@ def index(request):
         return render(request, "login.html")
     
 
+
 @login_required
 def home(request):
+    usuario = request.user  
+    form = None
+    tipo_form = None
+   
+    empresa = request.tenant  
+    casos_empresa = empresa.casos_disponibles if hasattr(empresa, 'casos_disponibles') else []
+
     if request.method == "POST":
-        usuario = Usuario.objects.get(pk=request.user.id_usuario)
-        sol.tipo_sol = request.POST["tipo_sol"]
-        sol.id_usuario = usuario
-        if sol.tipo_sol in form_dict:
-            tipo_form = form_dict[sol.tipo_sol]
-            form = tipo_form(request.POST, request.FILES) if request.FILES else tipo_form(request.POST)
-            lista_sol = Solicitud.objects.all().filter(estado_sol = "Pendiente", tipo_sol = sol.tipo_sol)
-            sol = procesar_form(form, sol)
-            if not revision_form(sol, lista_sol):
-                messages.error(request, "Una solicitud similar existe en curso")
-                return redirect("home")        
-            sol.save()
+        tipo_form = request.POST.get("tipo_sol")
+        if tipo_form in form_dict:
+            form_class = form_dict[tipo_form]
+            form = form_class(request.POST, request.FILES) if request.FILES else form_class(request.POST)
+
+            if form.is_valid():
+                sol = Solicitud(tipo_sol=tipo_form, id_usuario=usuario)
+                sol = procesar_form(form, sol)
+
+                lista_sol = Solicitud.objects.filter(estado_sol="Pendiente", tipo_sol=tipo_form)
+                if revision_form(sol, lista_sol):
+                    sol.save()
+                    messages.success(request, "Solicitud guardada con éxito")
+                    return redirect("home")
+                else:
+                    messages.error(request, "Una solicitud similar existe en curso")
+            else:
+                messages.error(request, "Por favor corrija los errores en el formulario.")
         else:
             messages.error(request, "Tipo de solicitud no válido.")
 
-    # Para solicitudes GET o si el formulario tiene errores
-    empresa = Empresa.objects.get(pk=request.tenant.id_empresa)
-    casos_empresa = empresa.casos_disponibles
-    form_list = [f() for n, f in form_dict.items() if n in casos_empresa]
+    form_list = [f() for name, f in form_dict.items() if name in casos_empresa]
+
     context = {
         "formularios": form_list,
-        # Añade el formulario actual al contexto si es una solicitud POST y hay errores
-        "current_form": form if 'form' in locals() else None,
-        "tipo_form": tipo_form if 'tipo_form' in locals() else None,
+        "current_form": form,  # Pasar el formulario actual (puede ser None)
+        "tipo_form": tipo_form,  # Ayuda a mantener seleccionado el formulario actual después de un POST fallido
     }
     return render(request, "home.html", context)
+
 
 @login_required
 def verSolicitud(request, pk):
@@ -245,60 +257,48 @@ def borrarUsuario(request, pk):
 @staff_member_required(redirect_field_name=None, login_url=reverse_lazy("home"))
 def editarSolicitud(request, pk):
     sol = get_object_or_404(Solicitud, id_sol=pk)
+    estados_posibles = ['Pendiente', 'En Proceso', 'Completo']  # Ejemplo de estados
 
     if request.method == "POST":
-        sol = Solicitud.objects.get(id_sol = pk)
-        form = request.POST
-        if form["tipo_solicitud"] in form_dict:
-            tipo_form = form_dict[sol.tipo_sol]
-            form = tipo_form(request.POST, request.FILES) if request.FILES else tipo_form(request.POST)
-            sol = procesar_form(form, sol)
-            sol.save()
-        return redirect("estadoSolicitudes")
-    try:
-        sol = Solicitud.objects.get(id_sol = pk)
-        if(sol.adjunto_sol):
-            sol.campos_sol["adjunto"] = sol.adjunto_sol
+        # Obtener el estado de la solicitud del formulario
+        estado_sol = request.POST.get('estado_sol')
+
+        tipo_form = sol.tipo_sol  # Usar el tipo de solicitud ya existente
+        if tipo_form in form_dict and estado_sol in estados_posibles:
+            form_class = form_dict[tipo_form]
+            form = form_class(request.POST, request.FILES, initial=sol.campos_sol)
+
+            if form.is_valid():
+                # Actualizar el estado de la solicitud con el nuevo valor
+                sol.estado_sol = estado_sol
+
+                # Procesar y actualizar la instancia de Solicitud con los nuevos datos del formulario
+                sol = procesar_form(form, sol)
+                lista_sol = Solicitud.objects.filter(estado_sol="Pendiente", tipo_sol=tipo_form).exclude(id_sol=pk)
+
+                if revision_form(sol, lista_sol):
+                    sol.save()
+                    messages.success(request, "Solicitud actualizada con éxito")
+                    return redirect("estadoSolicitudes")
+                else:
+                    messages.error(request, "Una solicitud similar existe en curso")
+            else:
+                messages.error(request, "Por favor corrija los errores en el formulario.")
+        else:
+            messages.error(request, "Tipo de solicitud no válido o estado de solicitud no válido.")
+    else:
+        # Prellenar el formulario con datos existentes de la solicitud, incluido su estado
         if sol.tipo_sol in form_dict:
             tipo_form = form_dict[sol.tipo_sol]
             form = tipo_form(initial=sol.campos_sol)
-        else:
-            return redirect("home")
-        datos = {
-            "formulario": form,
-            "tipo_formulario": sol.tipo_sol
-        }
-        return render(request, "editarSolicitud.html", datos)
-    except Solicitud.DoesNotExist:
-        return redirect("estadoSolicitudes")
-        # Aquí actualizas cada campo de Solicitud directamente desde request.POST y request.FILES
-        sol.estado_sol = request.POST.get('estado_sol', sol.estado_sol)
-        sol.tipo_sol = request.POST.get('tipo_sol', sol.tipo_sol)
-        
-        # Ejemplo para manejar un campo JSON, asegúrate de que el valor enviado sea adecuado
-        campos_sol = request.POST.get('campos_sol', '{}')
-        try:
-            sol.campos_sol = json.loads(campos_sol)  # Solo si esperas un string JSON
-        except json.JSONDecodeError:
-            pass  # Maneja el error como consideres adecuado
 
-        if 'adjunto_sol' in request.FILES:
-            sol.adjunto_sol = request.FILES['adjunto_sol']
-        
-        sol.save()
-        return redirect('estadoSolicitudes')  # Asegúrate de que el nombre de URL es correcto
-
-    # Para el caso GET, prepara los datos para el formulario.
-    # Aquí simplemente convertimos los campos_sol a un string JSON para el valor inicial
-    # en el formulario si es necesario.
-    datos_iniciales = {
+    context = {
+        'formulario': form,
+        'tipo_formulario': sol.tipo_sol,
         'estado_sol': sol.estado_sol,
-        'tipo_sol': sol.tipo_sol,
-        'campos_sol': json.dumps(sol.campos_sol),  # Convertir dict a string JSON
-        'adjunto_sol': sol.adjunto_sol,
+        'estados_posibles': estados_posibles,
     }
-
-    return render(request, "editarSolicitud.html", {'sol': sol, 'datos_iniciales': datos_iniciales})
+    return render(request, "editarSolicitud.html", context)
     
 @staff_member_required(redirect_field_name=None, login_url=reverse_lazy("home"))
 def casosDeUso(request):

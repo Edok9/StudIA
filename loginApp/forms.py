@@ -23,7 +23,7 @@ class ReporteriaForm(forms.Form):
     )
     periodo_reportes = forms.ChoiceField(choices=opciones, label="Periodo de Reportes")
     formato_reportes = forms.ChoiceField(choices=formatos, label="Formato de los Reportes")
-
+    
 class Ise_Vpn_Form(forms.Form):
     acciones = (
         ("Nada", "------"),
@@ -71,22 +71,39 @@ class Ioc_Automatico_Form(forms.Form):
         return notas
 
 class Cambio_De_Ruta_Form(forms.Form):
-<<<<<<< HEAD
-    gateway = forms.CharField(widget=forms.TextInput(attrs={'class': 'form-input'}))
-    interfaz_salida = forms.CharField(widget=forms.TextInput(attrs={'class': 'form-input'}))
-=======
     opciones_id_ruta = (
-        ("","Ninguno"),
-        ("PORT","PORT"),
-        ("VLAN","VLAN"),
+        ("", "Ninguno"),
+        ("PORT", "PORT"),
+        ("VLAN", "VLAN"),
     )
-    gateway = forms.CharField(label="Gateway")
-    interfaz_salida = forms.CharField(label="Interfaz de Salida")
-    prefijo_id_ruta = forms.ChoiceField(choices = opciones_id_ruta, label="Prefijo de ID de Ruta", required=False)
-    id_ruta = forms.CharField(label="ID de Ruta")
->>>>>>> d5da5d1797be83d0f596e664be5b519b7553cee6
+    gateway = forms.CharField(
+        label="Gateway",
+        widget=forms.TextInput(attrs={'class': 'form-input', 'placeholder': 'Ej. 192.168.1.1'}),
+        required=True
+    )
+    interfaz_salida = forms.CharField(
+        label="Interfaz de Salida",
+        widget=forms.TextInput(attrs={'class': 'form-input', 'placeholder': 'Ej. eth0'}),
+        required=True
+    )
+    prefijo_id_ruta = forms.ChoiceField(
+        choices=opciones_id_ruta,
+        label="Prefijo de ID de Ruta",
+        widget=forms.Select(attrs={'class': 'form-select'}),
+        required=False
+    )
+    id_ruta = forms.IntegerField(
+        label="ID de Ruta",
+        widget=forms.NumberInput(attrs={'class': 'form-input', 'placeholder': 'Ej. 123'}),
+        required=False
+    )
 
     prefix = "Cambio de Ruta"
+    
+    def clean_id_ruta(self):
+        id_ruta = self.cleaned_data.get('id_ruta')
+        # La validación como número ya se realizó por ser IntegerField
+        return str(id_ruta) if id_ruta is not None else id_ruta
 
     def clean_gateway(self):
         gateway = self.cleaned_data.get('gateway')
@@ -96,12 +113,12 @@ class Cambio_De_Ruta_Form(forms.Form):
 
     def clean_interfaz_salida(self):
         interfaz_salida = self.cleaned_data.get('interfaz_salida')
-        if not self.validar_direccion_ip(interfaz_salida):
-            raise ValidationError("Ingrese una dirección IP válida para la interfaz de salida.")
+        # Asumimos que cualquier string no vacío es válido.
+        if not interfaz_salida.strip():
+            raise ValidationError("Este campo no puede estar vacío.")
         return interfaz_salida
 
     def validar_direccion_ip(self, ip):
-        # Regex para validar una dirección IPv4
         ip_pattern = re.compile(r'^(\d{1,3}\.){3}\d{1,3}$')
         if ip_pattern.match(ip):
             octetos = ip.split('.')
