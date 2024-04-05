@@ -71,8 +71,20 @@ class Ioc_Automatico_Form(forms.Form):
         return notas
 
 class Cambio_De_Ruta_Form(forms.Form):
+<<<<<<< HEAD
     gateway = forms.CharField(widget=forms.TextInput(attrs={'class': 'form-input'}))
     interfaz_salida = forms.CharField(widget=forms.TextInput(attrs={'class': 'form-input'}))
+=======
+    opciones_id_ruta = (
+        ("","Ninguno"),
+        ("PORT","PORT"),
+        ("VLAN","VLAN"),
+    )
+    gateway = forms.CharField(label="Gateway")
+    interfaz_salida = forms.CharField(label="Interfaz de Salida")
+    prefijo_id_ruta = forms.ChoiceField(choices = opciones_id_ruta, label="Prefijo de ID de Ruta", required=False)
+    id_ruta = forms.CharField(label="ID de Ruta")
+>>>>>>> d5da5d1797be83d0f596e664be5b519b7553cee6
 
     prefix = "Cambio de Ruta"
 

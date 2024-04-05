@@ -7,6 +7,7 @@ from django.contrib.admin.views.decorators import staff_member_required
 from django.urls import reverse_lazy
 from clientManager.models import Empresa
 from .scripts.informe import gen_informe
+from .scripts.formularios import procesar_form, revision_form
 from loginApp.forms import CrearUsuarioForm, EditarUsuarioForm, CambioClaveAdminForm, ReporteriaForm, FiltrodeFormulariosForm, form_dict
 from loginApp.models import Usuario
 from solicitudesManager.models import Solicitud
@@ -108,32 +109,17 @@ def index(request):
 def home(request):
     if request.method == "POST":
         usuario = Usuario.objects.get(pk=request.user.id_usuario)
-        tipo_form = request.POST.get("tipo_sol")
-        print(tipo_form)
-        if tipo_form in form_dict:
-            form_class = form_dict[tipo_form]
-            form = form_class(request.POST, request.FILES) if request.FILES else form_class(request.POST)
-
-            if form.is_valid():
-                cleaned_data = form.cleaned_data
-                
-                # Manejar la conversión de fecha a cadena antes de la serialización si es necesario
-                if 'fecha_expiracion' in cleaned_data and isinstance(cleaned_data['fecha_expiracion'], date):
-                    cleaned_data['fecha_expiracion'] = cleaned_data['fecha_expiracion'].isoformat()
-                
-                # Preparar el objeto Solicitud con datos limpios
-                sol = Solicitud(tipo_sol=tipo_form, id_usuario=usuario, campos_sol=cleaned_data)
-                
-                lista_sol = Solicitud.objects.filter(estado_sol="Pendiente", tipo_sol=tipo_form)
-                if any(sol.campos_sol == s.campos_sol for s in lista_sol):
-                    messages.error(request, "Una solicitud similar existe en curso")
-                else:
-                    sol.save()
-                    messages.success(request, "Solicitud guardada con éxito")
-                    return redirect("home")
-            else:
-                # Si el formulario no es válido, renderizar nuevamente con errores
-                messages.error(request, "Por favor corrija los errores en el formulario.")
+        sol.tipo_sol = request.POST["tipo_sol"]
+        sol.id_usuario = usuario
+        if sol.tipo_sol in form_dict:
+            tipo_form = form_dict[sol.tipo_sol]
+            form = tipo_form(request.POST, request.FILES) if request.FILES else tipo_form(request.POST)
+            lista_sol = Solicitud.objects.all().filter(estado_sol = "Pendiente", tipo_sol = sol.tipo_sol)
+            sol = procesar_form(form, sol)
+            if not revision_form(sol, lista_sol):
+                messages.error(request, "Una solicitud similar existe en curso")
+                return redirect("home")        
+            sol.save()
         else:
             messages.error(request, "Tipo de solicitud no válido.")
 
@@ -261,6 +247,30 @@ def editarSolicitud(request, pk):
     sol = get_object_or_404(Solicitud, id_sol=pk)
 
     if request.method == "POST":
+        sol = Solicitud.objects.get(id_sol = pk)
+        form = request.POST
+        if form["tipo_solicitud"] in form_dict:
+            tipo_form = form_dict[sol.tipo_sol]
+            form = tipo_form(request.POST, request.FILES) if request.FILES else tipo_form(request.POST)
+            sol = procesar_form(form, sol)
+            sol.save()
+        return redirect("estadoSolicitudes")
+    try:
+        sol = Solicitud.objects.get(id_sol = pk)
+        if(sol.adjunto_sol):
+            sol.campos_sol["adjunto"] = sol.adjunto_sol
+        if sol.tipo_sol in form_dict:
+            tipo_form = form_dict[sol.tipo_sol]
+            form = tipo_form(initial=sol.campos_sol)
+        else:
+            return redirect("home")
+        datos = {
+            "formulario": form,
+            "tipo_formulario": sol.tipo_sol
+        }
+        return render(request, "editarSolicitud.html", datos)
+    except Solicitud.DoesNotExist:
+        return redirect("estadoSolicitudes")
         # Aquí actualizas cada campo de Solicitud directamente desde request.POST y request.FILES
         sol.estado_sol = request.POST.get('estado_sol', sol.estado_sol)
         sol.tipo_sol = request.POST.get('tipo_sol', sol.tipo_sol)
@@ -326,16 +336,5 @@ def logoutProcess(request):
 
 # Create your views here.
 
-def submit_caso_form(form, sol):
-    if form.is_valid():
-        sol.campos_sol = form.cleaned_data
-        if "fecha_expiracion" in sol.campos_sol:
-            if sol.campos_sol["fecha_expiracion"] is not None:
-                # Arreglar el formato de fecha
-                sol.campos_sol["fecha_expiracion"] = sol.campos_sol["fecha_expiracion"].strftime("%Y-%m-%d")
-            else:
-                del(sol.campos_sol["fecha_expiracion"])
-        if form.files:
-            sol.adjunto_sol = form.files[f'{sol.tipo_sol}-adjunto']
-            del(sol.campos_sol["adjunto"])
-        return sol
+ 
+

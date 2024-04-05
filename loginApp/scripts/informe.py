@@ -31,6 +31,9 @@ def to_csv(datos, response):
     archivo.writerow(campos)
     solicitudes = datos.values_list()
     for solicitud in solicitudes:
+        solicitud = list(solicitud)
+        usuario = Usuario.objects.get(id_usuario = solicitud[-1])
+        solicitud[-1] = usuario.nombre_usuario
         archivo.writerow(solicitud)
 
 def to_pdf():
