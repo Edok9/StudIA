@@ -59,18 +59,6 @@ def solicitudes_empresa(request):
 def casos_de_uso(request):
     return render(request,'casos_de_uso.html')
 
-def entel(request):
-    return render(request,'entel.html')
-
-def estado(request):
-    return render(request,'estado.html')
-
-def pruebas(request):
-    return render(request,'pruebas.html')
-
-
-def solicitudes(request):
-    return render(request,'solicitudes.html')
 
 def administrar(request):
     return render(request,'administrar.html')

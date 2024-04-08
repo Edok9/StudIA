@@ -30,10 +30,6 @@ urlpatterns = [
     path('crear/usuario', views.crearUsuario, name='nuevoUsuario'),
     
     path('casos_de_uso/', casos_de_uso, name='casos_de_uso'),
-    path('entel/', entel, name='entel'),
-    path('estado/', estado, name='estado'),
-    path('pruebas/', pruebas, name='pruebas'),
-    path('solicitudes/', solicitudes, name='solicitudes'),
     path('administrar/', administrar, name='administrar'),
     path('nueva_solicitud/', views.nueva_solicitud, name='nueva_solicitud'),
 ]
