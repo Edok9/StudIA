@@ -15,17 +15,23 @@ def procesar_form(form, sol):
                     del(sol.campos_sol["adjunto"])
             case "Cambio de Ruta":
                 # Agregar el prefijo a la ruta que anotaron
-                sol.campos_sol["id_ruta"] = sol.campos_sol["prefijo_id_ruta"] + sol.campos_sol["id_ruta"]
-                del(sol.campos_sol["prefijo_id_ruta"])
-                print(sol.campos_sol)
+                sol.campos_sol["interfaz_salida"] = sol.campos_sol["prefijo_interfaz"] + sol.campos_sol["interfaz_salida"]
+                del(sol.campos_sol["prefijo_interfaz"])
+                # Procesar la cantidad de IDs de ruta que vengan, mucho atao hacer un formset
+                sol.campos_sol["ids_ruta"] = [id.strip() for id in sol.campos_sol["ids_ruta"].split(",")]
         return sol
     
 def revision_form(sol, lista_sol):
     tipo_sol, campos_sol = sol.tipo_sol, sol.campos_sol
     #Cambiar a un switch a futuro si otros tipos de solicitudes requieren mas verificaciones
-    if tipo_sol == "Servicio VPN":
-        for s in lista_sol:
-            campos_sol_alojado = s.campos_sol
-            if campos_sol["usuario"] == campos_sol_alojado["usuario"]:
-                return False
+    match tipo_sol:
+            case "Servicio VPN":
+                for s in lista_sol:
+                    campos_sol_alojado = s.campos_sol
+                    if campos_sol["usuario"] == campos_sol_alojado["usuario"] and campos_sol["accion"] == campos_sol_alojado["accion"]:
+                        return False
+            case "Cambio de Ruta":
+                if campos_sol["gateway"] == campos_sol["interfaz_salida"]:
+                    return False
+                
     return True

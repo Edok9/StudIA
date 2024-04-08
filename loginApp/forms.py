@@ -98,12 +98,12 @@ class Cambio_De_Ruta_Form(forms.Form):
     )
     interfaz_salida = forms.CharField(
         label="Interfaz de Salida",
-        widget=forms.TextInput(attrs={'class': f"form-control {design}", 'placeholder': 'Ej. eth0'}),
+        widget=forms.TextInput(attrs={'class': f"form-control {design}", 'placeholder': 'Ej. 5'}),
         required=True
     )
-    id_ruta = forms.IntegerField(
-        label="ID de Ruta",
-        widget=forms.NumberInput(attrs={'class': f"form-control {design}", 'placeholder': 'Ej. 123'}),
+    ids_ruta = forms.CharField(
+        label="IDs de Ruta",
+        widget=forms.TextInput(attrs={'class': f"form-control {design}", 'placeholder': 'Ej. 12, 34, 56'}),
         required=False
     )
 

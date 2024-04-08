@@ -44,13 +44,12 @@
         <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
             <div class="container-fluid container">
                 <div>
-                    <div style="width: 100%">
-                        <span class="navbar-text text-light">Bienvenido: {{ request.user }}</span>
-                        <br>
+                    <div class="row">
+                        <span class="navbar-text text-light p-0">Bienvenido: {{ request.user }}</span>
                         {% if request.user.is_staff %}
-                        <span class="navbar-text text-light">Rol: Administrador</span>
+                        <span class="navbar-text text-light p-0">Rol: Administrador</span>
                         {% else %}
-                        <span class="navbar-text text-light">Empresa: {{ request.tenant.nombre_empresa }}</span>
+                        <span class="navbar-text text-light p-0">Empresa: {{ request.tenant.nombre_empresa }}</span>
                         {% endif %}
                     </div>
                 </div>
@@ -68,11 +67,6 @@
                                 <li>
                                     <a href="{% url 'infoSolicitudes'%}" class="dropdown-item">Mis solicitudes</a>
                                 </li>
-                                {% if request.user.is_staff %}
-                                <li>
-                                    <a href="{% url 'estadoSolicitudes'%}" class="dropdown-item">Manejo de solicitudes</a>
-                                </li>
-                                {% endif %}
                                 <li>
                                     <a href="{% url 'solicitudes_empresa'%}" class="dropdown-item">Solicitudes de empresa</a>
                                 </li>
@@ -110,9 +104,11 @@
         {% block content %}
         {% endblock %}
     </main>
-    <footer class="footer flex-shrink-0 w-100 mt-4 py-4 position-absolute bottom-0 text-white text-center" style="background-color: #333333;" >
-        <span>Copyright Empresa Nacional de Telecomunicaciones S.A. Todos los derechos reservados.</span>
-    </footer>
+    <div class="mt-4">
+        <footer class="footer flex-shrink-0 w-100 py-4 position-absolute bottom-0 text-white text-center" style="background-color: #333333;" >
+            Copyright Empresa Nacional de Telecomunicaciones S.A. Todos los derechos reservados.
+        </footer>
+    </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>

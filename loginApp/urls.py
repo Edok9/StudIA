@@ -8,8 +8,7 @@ urlpatterns = [
     path('home', views.home, name='home'),
     # URLs para usuarios
     path('solicitud/<int:pk>', views.verSolicitud, name="verSolicitud"),
-    path('solicitudes', views.estadoSolicitudes, name="estadoSolicitudes"),
-    path('mis-solicitudes', views.solicitudesUsuario, name="infoSolicitudes"),
+    path('mis_solicitudes', views.solicitudesUsuario, name="infoSolicitudes"),
     path('borrarsolicitud/<int:pk>', views.borrarSolicitud, name="borrarSolicitud"),
     path('solicitudes_empresa', views.estadoSolicitudes, name="solicitudes_empresa"),
     
@@ -28,12 +27,5 @@ urlpatterns = [
     path('home', views.home, name='home'),
     path('usuarios', views.usuarios, name='usuarios'),
     path('crear/usuario', views.crearUsuario, name='nuevoUsuario'),
-    
-    path('casos_de_uso/', casos_de_uso, name='casos_de_uso'),
-    path('entel/', entel, name='entel'),
-    path('estado/', estado, name='estado'),
-    path('pruebas/', pruebas, name='pruebas'),
-    path('solicitudes/', solicitudes, name='solicitudes'),
-    path('administrar/', administrar, name='administrar'),
-    path('nueva_solicitud/', views.nueva_solicitud, name='nueva_solicitud'),
+
 ]
