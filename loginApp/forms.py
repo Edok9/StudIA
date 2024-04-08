@@ -60,7 +60,11 @@ class Ise_Vpn_Form(forms.Form):
 
 class Ioc_Automatico_Form(forms.Form):
     adjunto = forms.FileField(required=False, widget=forms.FileInput(attrs={'class': 'form-input'}))
-    notas = forms.CharField(widget=forms.Textarea(attrs={'class': 'form-input', 'rows': 4}))
+    notas = forms.CharField(widget=forms.Textarea(attrs={
+        'class': 'form-input', 
+        'rows': 4, 
+        'placeholder': 'Ingrese detalle de su solicitud...'
+    }))
 
     prefix = "IOC Automatico"
     
