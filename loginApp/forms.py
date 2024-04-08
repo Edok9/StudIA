@@ -5,7 +5,9 @@ from django.core.exceptions import ValidationError
 from django.utils.translation import gettext_lazy as _
 import re
 
-design = "flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
+design = "w-100 mb-2 p-2 border border-1"
+design_comboBox = "form-select w-100 mb-2 p-2 border border-1"
+design_bigInput = "form-input"
 
 
 class CambioClaveUsuarioForm(forms.Form):
@@ -31,10 +33,17 @@ class Ise_Vpn_Form(forms.Form):
         ("Cambio de contraseña", "Cambio de contraseña"),
         ("Deshabilitación de cuenta", "Deshabilitación de cuenta"),
     )
-    accion = forms.ChoiceField(choices=acciones, label="Accion", widget=forms.Select(attrs={'class': 'form-select'}))
-    usuario = forms.CharField(label="Usuario de VPN", widget=forms.TextInput(attrs={'class': 'form-input'}))
-    correo_usuario = forms.EmailField(label="Correo del Usuario", widget=forms.EmailInput(attrs={'class': 'form-input'}))
-    fecha_expiracion = forms.DateField(widget=forms.DateInput(attrs={'type': 'date', 'class': 'form-input'}), label="Fecha de Expiración", required=False)
+    accion = forms.ChoiceField(choices=acciones, label="Accion",
+                               widget=forms.Select(attrs={'class': f"form-select {design}"}))
+
+    usuario = forms.CharField(label="Usuario de VPN",
+                              widget=forms.TextInput(attrs={"class": f"form-control {design}"}))
+
+    correo_usuario = forms.EmailField(label="Correo del Usuario",
+                                      widget=forms.EmailInput(attrs={"class": f"form-control {design}"}))
+
+    fecha_expiracion = forms.DateField(widget=forms.DateInput(attrs={'type': 'date', "class": f"form-control {design}"}),
+                                       label="Fecha de Expiración", required=False)
 
     prefix = "Servicio VPN"
     
@@ -59,8 +68,8 @@ class Ise_Vpn_Form(forms.Form):
         return fecha_expiracion
 
 class Ioc_Automatico_Form(forms.Form):
-    adjunto = forms.FileField(required=False, widget=forms.FileInput(attrs={'class': 'form-input'}))
-    notas = forms.CharField(widget=forms.Textarea(attrs={'class': 'form-input', 'rows': 4}))
+    adjunto = forms.FileField(required=False, widget=forms.FileInput(attrs={'class': f"form-control {design}"}))
+    notas = forms.CharField(widget=forms.Textarea(attrs={'class': f"form-input {design}", 'rows': 4}))
 
     prefix = "IOC Automatico"
     
@@ -78,23 +87,23 @@ class Cambio_De_Ruta_Form(forms.Form):
     )
     gateway = forms.CharField(
         label="Gateway",
-        widget=forms.TextInput(attrs={'class': 'form-input', 'placeholder': 'Ej. 192.168.1.1'}),
+        widget=forms.TextInput(attrs={'class': f"form-control {design}", 'placeholder': 'Ej. 192.168.1.1'}),
         required=True
+    )
+    prefijo_interfaz = forms.ChoiceField(
+        choices=opciones_id_ruta,
+        label="Prefijo de Interfaz de Salida",
+        widget=forms.Select(attrs={'class': f"form-select {design}"}),
+        required=False
     )
     interfaz_salida = forms.CharField(
         label="Interfaz de Salida",
-        widget=forms.TextInput(attrs={'class': 'form-input', 'placeholder': 'Ej. eth0'}),
+        widget=forms.TextInput(attrs={'class': f"form-control {design}", 'placeholder': 'Ej. eth0'}),
         required=True
-    )
-    prefijo_id_ruta = forms.ChoiceField(
-        choices=opciones_id_ruta,
-        label="Prefijo de ID de Ruta",
-        widget=forms.Select(attrs={'class': 'form-select'}),
-        required=False
     )
     id_ruta = forms.IntegerField(
         label="ID de Ruta",
-        widget=forms.NumberInput(attrs={'class': 'form-input', 'placeholder': 'Ej. 123'}),
+        widget=forms.NumberInput(attrs={'class': f"form-control {design}", 'placeholder': 'Ej. 123'}),
         required=False
     )
 
@@ -137,8 +146,8 @@ class FiltrodeFormulariosForm(forms.Form):
     lista_formularios = forms.MultipleChoiceField(widget=forms.CheckboxSelectMultiple, choices=opciones)
 
 class CambioClaveAdminForm(forms.Form):
-    nueva_contraseña = forms.CharField(widget=forms.PasswordInput(attrs={"class": design}), min_length=6)
-    confirmar_nueva_contraseña = forms.CharField(widget=forms.PasswordInput(attrs={"class": design}))
+    nueva_contraseña = forms.CharField(widget=forms.PasswordInput(attrs={"class": f"form-control {design}"}), min_length=6)
+    confirmar_nueva_contraseña = forms.CharField(widget=forms.PasswordInput(attrs={"class": f"form-control {design}"}))
 
     def clean(self):
         cleaned_data = super().clean()
@@ -180,12 +189,12 @@ class CrearUsuarioForm(forms.ModelForm):
             "is_staff"
         ]
         widgets = {
-            "nombre_usuario": forms.TextInput(attrs={"class": "design", "id": "id_nombre_usuario"}),
-            "email": forms.EmailInput(attrs={"class": "design", "id": "id_email"}),
-            "password": forms.PasswordInput(attrs={"class": "design", "id": "id_password"}),
-            "telefono": forms.TextInput(attrs={"class": "design", "id": "id_telefono"}),
-            "cargo": forms.TextInput(attrs={"class": "design", "id": "id_cargo"}),
-            "horario_atencion": forms.TextInput(attrs={"class": "design", "id": "id_horario_atencion"}),
+            "nombre_usuario": forms.TextInput(attrs={"class": f"form-control {design}", "id": "id_nombre_usuario"}),
+            "email": forms.EmailInput(attrs={"class": f"form-control {design}", "id": "id_email"}),
+            "password": forms.PasswordInput(attrs={"class": f"form-control {design}", "id": "id_password"}),
+            "telefono": forms.TextInput(attrs={"class": f"form-control {design}", "id": "id_telefono"}),
+            "cargo": forms.TextInput(attrs={"class": f"form-control {design}", "id": "id_cargo"}),
+            "horario_atencion": forms.TextInput(attrs={"class": f"form-control {design}", "id": "id_horario_atencion"}),
         }
 
 class EditarUsuarioForm(forms.ModelForm):
@@ -200,8 +209,8 @@ class EditarUsuarioForm(forms.ModelForm):
             "is_staff"
         ]
         widgets = {
-            "nombre_usuario": forms.TextInput(attrs={"id": "id_nombre", "class": "form-control"}),
-            "telefono": forms.TextInput(attrs={"id": "id_telefono", "class": "form-control"}),
-            "cargo": forms.TextInput(attrs={"id": "id_cargo", "class": "form-control"}),
-            "horario_atencion": forms.TextInput(attrs={"id": "id_horario_atencion", "class": "form-control"}),
+            "nombre_usuario": forms.TextInput(attrs={"id": "id_nombre", "class": f"form-control {design}"}),
+            "telefono": forms.TextInput(attrs={"id": "id_telefono", "class": f"form-control {design}"}),
+            "cargo": forms.TextInput(attrs={"id": "id_cargo", "class": f"form-control {design}"}),
+            "horario_atencion": forms.TextInput(attrs={"id": "id_horario_atencion", "class": f"form-control {design}"}),
         }
