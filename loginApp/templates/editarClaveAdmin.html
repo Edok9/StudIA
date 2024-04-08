@@ -1,23 +1,94 @@
 {% extends "base.html" %}
 
 {% block content %}
-<div class="flex flex-col justify-center items-center space-y-4">
-    <h1 class="text-2xl font-bold text-[#005CFF]">Cambiar Contraseña</h1>
-    <h2 class="text-xl font-bold text-[#005CFF]">Usuario: {{usuario.nombre_usuario}}</h2>
-    <form method="post"> {% csrf_token %}
-        {% for campo in formulario %}
-        <div class="space-y-2">
-            <label class="text-sm font-medium" for="{{campo.id_for_label}}">
-                {{campo.label}}
-            </label>
-            {{campo}}
+
+<div class="container-fluid mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8 bg-dark text-light p-4 rounded">
+            <h3 class="text-center mb-4">Cambiar Contraseña</h3>
+            <form id="cambiarContraseñaForm" method="post">
+                {% csrf_token %}
+                <div class="formulario-container">
+                    <div class="form-group">
+                        {% for campo in formulario %}
+                        <div class="mb-3" style="display: flex; align-items: center;">
+                            <label for="{{ campo.id_for_label }}" class="form-label text-gray-400" style="display: inline-block; width: 200px; text-align: right;">{{ campo.label }}:</label>
+                            <div style="margin-left: 40px;">  <!-- Ajusta el margen izquierdo aquí -->
+                                {{ campo }}
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    <div class="buttons-container">
+                        <div class="row justify-content-center">
+                            <div class="col-sm-8 offset-sm-4">
+                                <button type="button" id="guardarCambiosBtn" class="btn btn-primary w-full">
+                                    <i class="fas fa-user-plus mr-2"></i> Guardar Cambios
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </form>
         </div>
-        {% endfor %}
-        <button
-            class="inline-flex items-center justify-center text-sm font-medium h-10 px-4 py-2 my-4 bg-[#FF3D00] text-white rounded-full"
-            type="submit">
-            Guardar Cambios
-        </button>
-    </form>
+    </div>
 </div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    document.getElementById('guardarCambiosBtn').addEventListener('click', function() {
+        var nuevaContraseña = document.getElementById('id_nueva_contraseña').value;
+        var confirmarNuevaContraseña = document.getElementById('id_confirmar_nueva_contraseña').value;
+
+        // Validación de campos no vacíos
+        if (nuevaContraseña.trim() === '' || confirmarNuevaContraseña.trim() === '') {
+            alert('Por favor, complete todos los campos.');
+            return;
+        }
+
+        // Validación de coincidencia de contraseñas
+        if (nuevaContraseña !== confirmarNuevaContraseña) {
+            alert('Las contraseñas no coinciden.');
+            return;
+        }
+
+        // Validación de complejidad de contraseña
+        if (!validarContraseña(nuevaContraseña)) {
+            alert('La contraseña debe tener al menos 6 caracteres, incluyendo al menos 2 números, una mayúscula y un punto.');
+            return;
+        }
+
+        // Obtener el formulario
+        var cambioContraseñaForm = document.getElementById('cambiarContraseñaForm');
+
+        // Verificar si el formulario existe antes de enviarlo
+        if (cambioContraseñaForm) {
+            cambioContraseñaForm.submit(); // Enviar el formulario
+        } else {
+            alert('Error: El formulario no se encontró.');
+        }
+    });
+});
+
+function validarContraseña(contraseña) {
+    // Longitud mínima de 6 caracteres
+    if (contraseña.length < 6) {
+        return false;
+    }
+    // Al menos 2 números
+    if ((contraseña.match(/[0-9]/g) || []).length < 2) {
+        return false;
+    }
+    // Al menos una mayúscula
+    if (!/[A-Z]/.test(contraseña)) {
+        return false;
+    }
+    // Al menos un punto
+    if (!/\./.test(contraseña)) {
+        return false;
+    }
+    return true;
+}
+</script>
+
 {% endblock %}

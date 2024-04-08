@@ -1,0 +1,49 @@
+{% extends 'base.html' %}
+
+
+    <title>{% block title %}Estado{% endblock %}</title>
+    
+
+
+<body>
+    {% block content %}
+    <br><br><br><br><br>
+<div class="container bg-dark text-light p-4 rounded">
+    <div class="solicitudes-container">
+        <h3>Estado de solicitudes</h3>
+        <hr class="bg-light"></hr>
+        <div class="input-group mb-3">
+            <input type="text" id="searchInput" placeholder="Buscar solicitudes..." class="form-control">
+            <button onclick="searchFunction()" class="btn btn-light">Buscar</button>
+        </div>
+        <hr class="bg-light">
+        <div class="table-responsive">
+            <table class="table table-dark table-striped">
+                <thead>
+                    <tr>
+                        <th>Estado</th>
+                        <th>Solicitud</th>
+                        <th>Fecha de solicitud</th>
+                        <th>Notas</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    
+                    
+                    <tr>
+                        <td>En Proceso</td>
+                        <td>8642</td>
+                        <td>06-03-2024</td>
+                        <td>Urgente: revisar</td>
+                        <td>Enviado a producción</td>
+                    </tr>
+                    
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div> <!-- Fin del contenedor principal -->
+{% endblock %}
+</body>
+</html>

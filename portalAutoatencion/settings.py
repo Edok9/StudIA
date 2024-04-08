@@ -26,7 +26,7 @@ SECRET_KEY = 'django-insecure-w+*cbtuky&ghmcctne!wlo24-5+839qm$takon9w3a25^*@i)^
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['*']
 
 
 # Application definition
@@ -98,11 +98,12 @@ DATABASES = {
         'ENGINE': 'django_tenants.postgresql_backend',
         'NAME': 'postgres',
         'USER': 'postgres',
-        'PASSWORD': 'postgres',
+        'PASSWORD': 'vale1819',
         'HOST': 'localhost',
         'PORT': 5432
     }
 }
+
 
 DATABASE_ROUTERS = (
     'django_tenants.routers.TenantSyncRouter',
@@ -146,6 +147,8 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/5.0/howto/static-files/
 
 STATIC_URL = 'static/'
+
+STATICFILES_DIRS = (os.path.join(BASE_DIR, 'loginApp/static'),)
 
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 

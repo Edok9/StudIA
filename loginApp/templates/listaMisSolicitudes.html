@@ -1,69 +1,67 @@
 {% extends "base.html" %}
 
 {% block content %}
-<div class="flex flex-col justify-center items-center space-y-4">
-    <h1 class="text-2xl font-bold text-[#005CFF]">Mis Solicitudes</h1>
-    <table class="w-full caption-bottom text-sm">
-        <thead class="[&amp;_tr]:border-b">
-            <tr class="border-b transition-colors hover:bg-muted/50 data-[state=selected]:bg-muted">
-                <th class="h-12 px-4 text-left align-middle font-medium w-[100px]">
-                    Estado</th>
-                <th class="h-12 px-4 text-left align-middle font-medium">
-                    Solicitud</th>
-                <th class="h-12 px-4 text-left align-middle font-medium">
-                    Fecha de Solicitud</th>
-                <th class="h-12 px-4 align-middle font-medium w-[160px] text-middle">
-                    Acciones
-                </th>
-            </tr>
-        </thead>
-        <tbody>
-            {% if solicitudes %}
-            {% for solicitud in solicitudes %}
-            <tr>
-                <td class="p-4 align-middle font-medium">{{solicitud.estado_sol}}</td>
-                <td class="p-4 align-middle">{{solicitud.tipo_sol}}</td>
-                <td class="p-4 align-middle">{{solicitud.created_at }}</td>
-                <td class="p-4 align-middle text-center">
-                    <button class="inline-flex items-center justify-center h-10 w-10 rounded-full" title="Ver"
-                        type="button" onclick="location.href='{% url 'verSolicitud' pk=solicitud.id_sol %}'">
-                        <svg data-testid="geist-icon" height="16" stroke-linejoin="round" viewBox="0 0 16 16"
-                        width="16" style="color: currentcolor;">
-                        <path fill-rule="evenodd" clip-rule="evenodd"
-                        d="M4.02168 4.76932C6.11619 2.33698 9.88374 2.33698 11.9783 4.76932L14.7602 7.99999L11.9783 11.2307C9.88374 13.663 6.1162 13.663 4.02168 11.2307L1.23971 7.99999L4.02168 4.76932ZM13.1149 3.79054C10.422 0.663244 5.57797 0.663247 2.88503 3.79054L-0.318359 7.5106V8.48938L2.88503 12.2094C5.57797 15.3367 10.422 15.3367 13.1149 12.2094L16.3183 8.48938V7.5106L13.1149 3.79054ZM6.49997 7.99999C6.49997 7.17157 7.17154 6.49999 7.99997 6.49999C8.82839 6.49999 9.49997 7.17157 9.49997 7.99999C9.49997 8.82842 8.82839 9.49999 7.99997 9.49999C7.17154 9.49999 6.49997 8.82842 6.49997 7.99999ZM7.99997 4.99999C6.34311 4.99999 4.99997 6.34314 4.99997 7.99999C4.99997 9.65685 6.34311 11 7.99997 11C9.65682 11 11 9.65685 11 7.99999C11 6.34314 9.65682 4.99999 7.99997 4.99999Z"
-                        fill="currentColor">
-                        </path>
-                    </svg>
-                    </button>
-                    {% if request.user.is_staff %}
-                    <button class="inline-flex items-center justify-center h-10 w-10 rounded-full" title="Editar"
-                        type="button" onclick="location.href='{% url 'editarSolicitud' pk=solicitud.id_sol %}'">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
-                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
-                            class="w-4 h-4">
-                            <path d="M4 13.5V4a2 2 0 0 1 2-2h8.5L20 7.5V20a2 2 0 0 1-2 2h-5.5">
-                            </path>
-                            <polyline points="14 2 14 8 20 8"></polyline>
-                            <path d="M10.42 12.61a2.1 2.1 0 1 1 2.97 2.97L7.95 21 4 22l.99-3.95 5.43-5.44Z">
-                            </path>
-                        </svg>
-                    </button>
-                    {% endif %}
-                    <button class="inline-flex items-center justify-center h-10 w-10 rounded-full" title="Borrar"
-                        type="button" onclick="location.href='{% url 'borrarSolicitud' pk=solicitud.id_sol %}'">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
-                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
-                            class="w-4 h-4">
-                            <path d="M3 6h18"></path>
-                            <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"></path>
-                            <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"></path>
-                        </svg>
-                    </button>
-                </td>
-            </tr>
-            {% endfor %}
-            {% endif %}
-        </tbody>
-    </table>
+<!-- Contenedor principal para centrar y manejar el margen con el footer -->
+<div class="container mt-3 pb-20 md:pb-10 min-vh-100 d-flex flex-column justify-content-center">
+    <div class="row justify-content-center pt-6 pb-20">
+        <div class="col-md-8 col-lg-10">
+            <div class="bg-dark text-white p-4 rounded">
+                    <h1 class="text-2xl font-bold text-[#005CFF]">Mis Solicitudes</h1>
+                    <hr class="bg-[#005CFF] my-2">
+                    <div class="flex justify-center mb-4">
+                        <input type="text" id="searchInput" placeholder="Buscar por estado o tipo..." class="form-control">
+                    </div>
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-sm table-dark">
+                            <thead>
+                                <tr>
+                                    <th class="h-12 px-4 text-left align-middle font-medium w-[100px]">Estado</th>
+                                    <th class="h-12 px-4 text-left align-middle font-medium">Solicitud</th>
+                                    <th class="h-12 px-4 text-left align-middle font-medium">Fecha de Solicitud</th>
+                                    <th class="h-12 px-4 align-middle font-medium w-[160px] text-center">Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% if solicitudes %}
+                                    {% for solicitud in solicitudes %}
+                                        <tr class="border-t border-gray-700">
+                                            <td class="p-4 align-middle font-medium">{{ solicitud.estado_sol }}</td>
+                                            <td class="p-4 align-middle">{{ solicitud.tipo_sol }}</td>
+                                            <td class="p-4 align-middle">{{ solicitud.created_at }}</td>
+                                            <td class="p-4 align-middle text-center">
+                                                <button class="btn btn-info" onclick="location.href='{% url 'verSolicitud' pk=solicitud.id_sol %}'">
+                                                    <i class="fas fa-eye"></i> Ver
+                                                </button>
+                                            </td>
+                                        </tr>
+                                    {% endfor %}
+                                {% endif %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const searchInput = document.getElementById('searchInput');
+        
+        searchInput.addEventListener('keyup', function() {
+            const term = searchInput.value.toLowerCase();
+            const rows = document.querySelectorAll("tbody tr");
+            
+            rows.forEach(row => {
+                const estado = row.cells[0].textContent.toLowerCase();
+                const tipo = row.cells[1].textContent.toLowerCase();
+                if (estado.includes(term) || tipo.includes(term)) {
+                    row.style.display = '';
+                } else {
+                    row.style.display = 'none';
+                }
+            });
+        });
+    });
+    </script>
 {% endblock %}

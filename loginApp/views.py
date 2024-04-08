@@ -1,4 +1,4 @@
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect , get_object_or_404
 from django.http import HttpResponse
 from django.contrib import messages
 from django.contrib.auth import authenticate, login, logout, update_session_auth_hash
@@ -11,10 +11,74 @@ from .scripts.formularios import procesar_form, revision_form
 from loginApp.forms import CrearUsuarioForm, EditarUsuarioForm, CambioClaveAdminForm, ReporteriaForm, FiltrodeFormulariosForm, form_dict
 from loginApp.models import Usuario
 from solicitudesManager.models import Solicitud
+from django.http import JsonResponse
+from datetime import date
+import json 
+
+
+@login_required
+def nueva_solicitud(request):
+    if request.method == "POST":
+        usuario = request.user
+        tipo_solicitud = request.POST.get("tipoSolicitud")
+        
+        # Trabajar con el diccionario de campos, excluyendo campos no necesarios
+        campos_sol = {key: value for key, value in request.POST.items() if key not in ["csrfmiddlewaretoken", "tipoSolicitud"]}
+
+        # Crear una nueva instancia de Solicitud sin guardarla aún
+        nueva_solicitud = Solicitud(
+            tipo_sol=tipo_solicitud,
+            campos_sol=campos_sol,
+            id_usuario=usuario
+        )
+
+        # Verificar si hay un archivo adjunto y guardarlo
+        if 'adjunto' in request.FILES:
+            nueva_solicitud.adjunto_sol = request.FILES['adjunto']
+        
+        # Guardar la nueva solicitud con todos los datos
+        nueva_solicitud.save()
+
+        return redirect("infoSolicitudes")
+    else:
+        return render(request, "nueva_solicitud.html")
+    
+@login_required    
+def estado_solicitudes(request):
+    search_term = request.GET.get('search', '').strip()
+    if search_term:
+        solicitudes = Solicitud.objects.filter(estado_sol__icontains=search_term) | Solicitud.objects.filter(tipo_sol__icontains=search_term)
+    else:
+        solicitudes = Solicitud.objects.all()
+    
+    return render(request, 'infoSolicitudes.html', {'solicitudes': solicitudes})
+
+def solicitudes_empresa(request):
+    return render(request,'solicitudes_empresa.html')
+
+def casos_de_uso(request):
+    return render(request,'casos_de_uso.html')
+
+def entel(request):
+    return render(request,'entel.html')
+
+def estado(request):
+    return render(request,'estado.html')
+
+def pruebas(request):
+    return render(request,'pruebas.html')
+
+
+def solicitudes(request):
+    return render(request,'solicitudes.html')
+
+def administrar(request):
+    return render(request,'administrar.html')
+
 
 def index(request):
     if request.user.is_authenticated:
-        return redirect("home")
+        return redirect("solicitudes")
     if request.method == "POST":
         email = request.POST["email"]
         clave = request.POST["clave"]
@@ -39,30 +103,49 @@ def index(request):
             return render(request, "login.html", errores)
     else:
         return render(request, "login.html")
+    
+
 
 @login_required
 def home(request):
+    usuario = request.user  
+    form = None
+    tipo_form = None
+   
+    empresa = request.tenant  
+    casos_empresa = empresa.casos_disponibles if hasattr(empresa, 'casos_disponibles') else []
+
     if request.method == "POST":
-        sol = Solicitud()
-        usuario = Usuario.objects.get(pk=request.user.id_usuario)
-        sol.tipo_sol = request.POST["tipo_sol"]
-        sol.id_usuario = usuario
-        if sol.tipo_sol in form_dict:
-            tipo_form = form_dict[sol.tipo_sol]
-            form = tipo_form(request.POST, request.FILES) if request.FILES else tipo_form(request.POST)
-            lista_sol = Solicitud.objects.all().filter(estado_sol = "Pendiente", tipo_sol = sol.tipo_sol)
-            sol = procesar_form(form, sol)
-            if not revision_form(sol, lista_sol):
-                messages.error(request, "Una solicitud similar existe en curso")
-                return redirect("home")        
-            sol.save()
+        tipo_form = request.POST.get("tipo_sol")
+        if tipo_form in form_dict:
+            form_class = form_dict[tipo_form]
+            form = form_class(request.POST, request.FILES) if request.FILES else form_class(request.POST)
+
+            if form.is_valid():
+                sol = Solicitud(tipo_sol=tipo_form, id_usuario=usuario)
+                sol = procesar_form(form, sol)
+
+                lista_sol = Solicitud.objects.filter(estado_sol="Pendiente", tipo_sol=tipo_form)
+                if revision_form(sol, lista_sol):
+                    sol.save()
+                    messages.success(request, "Solicitud guardada con éxito")
+                    return redirect("home")
+                else:
+                    messages.error(request, "Una solicitud similar existe en curso")
+            else:
+                messages.error(request, "Por favor corrija los errores en el formulario.")
         else:
-            return redirect("home")
-        
-    empresa = Empresa.objects.get(pk=request.tenant.id_empresa)
-    casos_empresa = empresa.casos_disponibles
-    form_list = [f for n,f in form_dict.items() if n in casos_empresa]
-    return render(request, "home.html", {"formularios": form_list})
+            messages.error(request, "Tipo de solicitud no válido.")
+
+    form_list = [f() for name, f in form_dict.items() if name in casos_empresa]
+
+    context = {
+        "formularios": form_list,
+        "current_form": form,  # Pasar el formulario actual (puede ser None)
+        "tipo_form": tipo_form,  # Ayuda a mantener seleccionado el formulario actual después de un POST fallido
+    }
+    return render(request, "home.html", context)
+
 
 @login_required
 def verSolicitud(request, pk):
@@ -95,6 +178,8 @@ def solicitudesUsuario(request):
     except Solicitud.DoesNotExist:
         return redirect('home')
     
+
+    
 @login_required
 def borrarSolicitud(request, pk):
     solicitud = Solicitud.objects.get(id_sol = pk)
@@ -107,7 +192,7 @@ def usuarios(request):
     usuarios = Usuario.objects.all().order_by('id_usuario')
     datos = {"solicitudes": solicitudes,
              "usuarios": usuarios}
-    return render(request, "listaUsuarios.html", datos)
+    return render(request, "administrar.html", datos)
 
 @staff_member_required(redirect_field_name=None, login_url=reverse_lazy("home"))
 def crearUsuario(request):
@@ -171,31 +256,49 @@ def borrarUsuario(request, pk):
 
 @staff_member_required(redirect_field_name=None, login_url=reverse_lazy("home"))
 def editarSolicitud(request, pk):
+    sol = get_object_or_404(Solicitud, id_sol=pk)
+    estados_posibles = ['Pendiente', 'En Proceso', 'Completo']  # Ejemplo de estados
+
     if request.method == "POST":
-        sol = Solicitud.objects.get(id_sol = pk)
-        form = request.POST
-        if form["tipo_solicitud"] in form_dict:
-            tipo_form = form_dict[sol.tipo_sol]
-            form = tipo_form(request.POST, request.FILES) if request.FILES else tipo_form(request.POST)
-            sol = procesar_form(form, sol)
-            sol.save()
-        return redirect("estadoSolicitudes")
-    try:
-        sol = Solicitud.objects.get(id_sol = pk)
-        if(sol.adjunto_sol):
-            sol.campos_sol["adjunto"] = sol.adjunto_sol
+        # Obtener el estado de la solicitud del formulario
+        estado_sol = request.POST.get('estado_sol')
+
+        tipo_form = sol.tipo_sol  # Usar el tipo de solicitud ya existente
+        if tipo_form in form_dict and estado_sol in estados_posibles:
+            form_class = form_dict[tipo_form]
+            form = form_class(request.POST, request.FILES, initial=sol.campos_sol)
+
+            if form.is_valid():
+                # Actualizar el estado de la solicitud con el nuevo valor
+                sol.estado_sol = estado_sol
+
+                # Procesar y actualizar la instancia de Solicitud con los nuevos datos del formulario
+                sol = procesar_form(form, sol)
+                lista_sol = Solicitud.objects.filter(estado_sol="Pendiente", tipo_sol=tipo_form).exclude(id_sol=pk)
+
+                if revision_form(sol, lista_sol):
+                    sol.save()
+                    messages.success(request, "Solicitud actualizada con éxito")
+                    return redirect("estadoSolicitudes")
+                else:
+                    messages.error(request, "Una solicitud similar existe en curso")
+            else:
+                messages.error(request, "Por favor corrija los errores en el formulario.")
+        else:
+            messages.error(request, "Tipo de solicitud no válido o estado de solicitud no válido.")
+    else:
+        # Prellenar el formulario con datos existentes de la solicitud, incluido su estado
         if sol.tipo_sol in form_dict:
             tipo_form = form_dict[sol.tipo_sol]
             form = tipo_form(initial=sol.campos_sol)
-        else:
-            return redirect("home")
-        datos = {
-            "formulario": form,
-            "tipo_formulario": sol.tipo_sol
-        }
-        return render(request, "editarSolicitud.html", datos)
-    except Solicitud.DoesNotExist:
-        return redirect("estadoSolicitudes")
+
+    context = {
+        'formulario': form,
+        'tipo_formulario': sol.tipo_sol,
+        'estado_sol': sol.estado_sol,
+        'estados_posibles': estados_posibles,
+    }
+    return render(request, "editarSolicitud.html", context)
     
 @staff_member_required(redirect_field_name=None, login_url=reverse_lazy("home"))
 def casosDeUso(request):
@@ -229,6 +332,7 @@ def reportes(request):
 def logoutProcess(request):
     logout(request)
     return render(request, "logout.html")
+
 
 # Create your views here.
 

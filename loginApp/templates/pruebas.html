@@ -1,0 +1,158 @@
+{% extends "base.html" %}
+{% load static %}
+{% block content %}
+
+<div class="container-fluid mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-4 bg-dark text-light p-4 rounded">
+            <div class="nueva-solicitud-container">
+                <h3>Nueva Solicitud:</h3>
+                <form id="nuevaSolicitudForm" method="post" action="{% url 'nueva_solicitud' %}">
+                    {% csrf_token %}
+                    <div class="mb-3">
+                        <label for="tipoSolicitud" class="form-label">Tipo de Solicitud:</label>
+                        <select class="form-control" id="tipoSolicitud" name="tipoSolicitud" required>
+                            <option value="">-- Seleccione --</option>
+                            <option value="ISE VPN">ISE VPN</option>
+                            <option value="IOC AUTOMATICO">IOC AUTOMATICO</option>
+                            <option value="CAMBIO DE RUTA">CAMBIO DE RUTA</option>
+                        </select>
+                    </div>
+                    <div id="campos-dinamicos" class="mb-3">
+                        <!-- Aquí se cargarán los campos dinámicos -->
+                    </div>
+                    <div class="form-group">
+                        <br>
+                        <button type="submit" class="btn btn-primary">Enviar</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.getElementById('tipoSolicitud').addEventListener('change', function() {
+        var tipoSeleccionado = this.value;
+        mostrarCamposDinamicos(tipoSeleccionado);
+    });
+    
+    function mostrarCamposDinamicos(tipo) {
+        var camposDinamicos = document.getElementById('campos-dinamicos');
+        camposDinamicos.innerHTML = ''; // Limpiar campos dinámicos anteriores
+    
+        if (tipo === 'ISE VPN') {
+            camposDinamicos.innerHTML += `
+                <div class="mb-3">
+                    <label for="accion" class="form-label">Acción:</label>
+                    <select class="form-control" id="accion" name="accion" required>
+                        <option value="">-- Seleccione --</option>
+                        <option value="Extensión de cuenta">Extensión de cuenta</option>
+                        <option value="Cambio de contraseña">Cambio de contraseña</option>
+                        <option value="Deshabilitación de cuenta">Deshabilitación de cuenta</option>
+                    </select>
+                </div>
+                <div class="mb-3" id="usuario-correo-container" style="display: none;">
+                    <label for="usuario" class="form-label">Usuario:</label>
+                    <input type="text" class="form-control" id="usuario" name="usuario" required>
+                </div>
+                <div class="mb-3" id="correo-container" style="display: none;">
+                    <label for="correo" class="form-label">Correo de usuario:</label>
+                    <input type="email" class="form-control" id="correo" name="correo" required>
+                    <div id="correoError" class="text-danger"></div>
+                </div>
+                <div class="mb-3" id="fecha-expiracion-container" style="display: none;">
+                    <label for="fecha-expiracion" class="form-label">Fecha de expiración:</label>
+                    <input type="date" class="form-control" id="fecha-expiracion" name="fecha-expiracion">
+                </div>`;
+        } else if (tipo === 'IOC AUTOMATICO') {
+            camposDinamicos.innerHTML += `
+                <div class="input-group mb-3">
+                    <label>Adjunto (si se requiere):</label>
+                    <input type="file" id="adjunto" name="adjunto">
+                </div>
+                <div class="input-group mb-3">
+                    <label>Notas:</label>
+                    <textarea id="notas" name="notas" rows="4" cols="50"></textarea>
+                </div>`;
+        } else if (tipo === 'CAMBIO DE RUTA') {
+            camposDinamicos.innerHTML += `
+                <div class="mb-3">
+                    <label for="gateway" class="form-label">Gateway:</label>
+                    <input type="text" class="form-control" id="gateway" name="gateway" required>
+                </div>
+                <div class="mb-3">
+                    <label for="interfaz" class="form-label">Interfaz de salida:</label>
+                    <input type="text" class="form-control" id="interfaz" name="interfaz" required>
+                </div>`;
+        }
+    
+        var accionElement = document.getElementById('accion');
+        if (accionElement) {
+            accionElement.addEventListener('change', function() {
+                var accionSeleccionada = this.value;
+                mostrarCamposUsuarioCorreo(accionSeleccionada);
+            });
+        }
+    }
+    
+    function mostrarCamposUsuarioCorreo(accion) {
+        var usuarioCorreoContainer = document.getElementById('usuario-correo-container');
+        var correoContainer = document.getElementById('correo-container');
+        var fechaExpiracionContainer = document.getElementById('fecha-expiracion-container');
+    
+        if (accion === 'Extensión de cuenta' || accion === 'Cambio de contraseña' || accion === 'Deshabilitación de cuenta') {
+            if (usuarioCorreoContainer) usuarioCorreoContainer.style.display = 'block';
+            if (correoContainer) correoContainer.style.display = 'block';
+        } else {
+            if (usuarioCorreoContainer) usuarioCorreoContainer.style.display = 'none';
+            if (correoContainer) correoContainer.style.display = 'none';
+        }if (accion === 'Extensión de cuenta') {
+        if (fechaExpiracionContainer) fechaExpiracionContainer.style.display = 'block';
+    } else {
+        if (fechaExpiracionContainer) fechaExpiracionContainer.style.display = 'none';
+    }
+}
+
+document.getElementById('nuevaSolicitudForm').addEventListener('submit', function(event) {
+    event.preventDefault(); // Evitar el envío automático del formulario
+
+    var tipoSolicitud = document.getElementById('tipoSolicitud').value;
+    var camposValidos = true;
+
+    if (tipoSolicitud === "") {
+        alert("Por favor, seleccione un tipo de solicitud.");
+        camposValidos = false;
+    }
+
+    if (tipoSolicitud === "ISE VPN" && camposValidos) {
+        var accion = document.getElementById('accion') ? document.getElementById('accion').value : "";
+        var usuario = document.getElementById('usuario') ? document.getElementById('usuario').value : "";
+        var correo = document.getElementById('correo') ? document.getElementById('correo').value : "";
+
+        if (accion === "") {
+            alert("Por favor, seleccione una acción.");
+            camposValidos = false;
+        }
+
+        if ((accion === "Extensión de cuenta" || accion === "Cambio de contraseña" || accion === "Deshabilitación de cuenta") && usuario === "") {
+            alert("Por favor, ingrese el usuario.");
+            camposValidos = false;
+        }
+
+        if ((accion === "Extensión de cuenta" || accion === "Cambio de contraseña" || accion === "Deshabilitación de cuenta") && correo === "") {
+            alert("Por favor, ingrese el correo de usuario.");
+            camposValidos = false;
+        }
+
+        // Podrías incluir aquí más validaciones específicas para otros campos si fuera necesario.
+    }
+
+    // Si todas las validaciones pasan, enviar el formulario
+    if (camposValidos) {
+        this.submit();
+    }
+});
+</script>
+
+{% endblock %}

@@ -1,35 +1,19 @@
+{% extends 'fondo.html' %}
 {% load static %}
-<!DOCTYPE html>
-<html lang="en">
 
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sesion cerrada</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-</head>
+<title>{% block title %}Sesion cerrada{% endblock %}</title>
 
-<body>
-    <div class="flex justify-center m-4 py-4">
-        <img src="{% static "logo_entel.svg" %}" alt="">
+<body class="flex flex-col justify-between min-h-screen"> <!-- Asegura que el contenido se distribuya entre header y footer -->
+    {% block content %}
+    <div class="flex justify-center mt-4 py-4">
+        <img src="{% static 'logo_entel.svg' %}" alt="" width="100" height="75"> <!-- Asegúrate de usar la tag estática para cargar recursos -->
     </div>
-    <!--
-// v0 by Vercel.
-// https://v0.dev/t/qeujZ1tYEtT
--->
-    <div class="flex flex-col items-center justify-center w-full min-h-[400px] gap-2 text-center">
-        <div class="space-y-4 text-center mx-2">
-            <h1 class="text-3xl font-bold tracking-tighter text-[#005CFF] sm:text-4xl">Era</h1>
-            <p class="text-gray-500 dark:text-gray-400">
-                Nos vemos
-            </p>
-            <p class="text-gray-500 dark:text-gray-400">
-                Si lo siguiente se ve feo, funciono el logout: {{request.user}}
-            </p>
-            <a class="inline-flex items-center justify-center text-sm font-medium h-10 px-4 py-2 w-full bg-[#FF3D00] text-white rounded-full"
-            href="{% url 'index' %}">Volver</a>
+    <div class="flex-1 flex flex-col items-center justify-center gap-2 text-center px-4"> <!-- flex-1 permite que el contenido use el espacio disponible -->
+        <div class="rounded-lg border bg-blue-100 text-black py-4 px-6"> <!-- Ajusta el padding según necesites -->
+            <h1 class="text-3xl font-bold mb-4">Sesión Finalizada</h1> <!-- mb (margin-bottom) para espaciado vertical -->
+            <p>Gracias por usar el portal de autoatención.</p>
+            <a href="{% url 'index' %}" class="inline-block mt-4 bg-[#FF3D00] text-white font-medium py-2 px-4 rounded-full">Login</a>
         </div>
     </div>
+    {% endblock %}
 </body>
-
-</html>

@@ -1,36 +1,62 @@
 {% extends "base.html" %}
-
+{% load static %}
 {% block content %}
-<div class="flex flex-col justify-center items-center space-y-4">
-    <h1 class="text-2xl font-bold text-[#005CFF]">Nueva Solicitud</h1>
-    {% if messages %}
-        <ul class="messages">
-            {% for message in messages %}
-                <li{% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message }}</li>
-            {% endfor %}
-        </ul>
-    {% endif %}
-    <form id="dynamic-form" method="post" enctype="multipart/form-data"> {% csrf_token %}
-        <div class="space-y-2">Tipo de Reporte: <select id="tipo_sol" name="tipo_sol"></div>
-            <option value="">------</option>
-            {% for form in formularios %}
-            <option value="{{form.prefix}}">{{form.prefix}}</option>
-            {% endfor %}
-        </select>
-        <div id="campos-formulario" class="space-y-2"></div>
-        <button
-            class="inline-flex items-center justify-center text-sm font-medium h-10 px-4 py-2 my-4 bg-[#FF3D00] text-white rounded-full"
-            type="submit">
-            Crear Solicitud
-        </button>
-    </form>
+
+
+<div class="container-fluid mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-4 bg-dark text-light p-4 rounded">
+            <div class="flex flex-col justify-center items-center space-y-4">
+                <h1 class="text-2xl font-bold text-[#005CFF]">Nueva Solicitud</h1>
+                {% if messages %}
+                    <ul class="messages">
+                        {% for message in messages %}
+                            <li{% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message }}</li>
+                        {% endfor %}
+                    </ul>
+                {% endif %}
+                <form id="dynamic-form" method="post" enctype="multipart/form-data">
+                    {% csrf_token %}
+                    <div class="form-group mb-3">
+                        <label for="tipo_sol" class="form-label text-gray-400">Tipo de Solicitud:</label>
+                        <select id="tipo_sol" name="tipo_sol" class="form-control">
+                            <option value="">--Seleccione--</option>
+                            {% for form in formularios %}
+                                <option value="{{form.prefix}}"
+                                {% if tipo_form and tipo_form == form.prefix %}
+                                selected
+                                {% endif %}>{{form.prefix}}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div id="campos-formulario" class="mb-3">
+                        <!-- Aquí se insertarán los campos dinámicos -->
+                    {% if current_form %}
+                        {% for field in current_form %}
+                            <div class="form-group">
+                                {{ field.label_tag }}
+                                {{ field }}
+                                {% if field.errors %}
+                                    {% for error in field.errors %}
+                                        <div class="alert alert-danger">{{ error }}</div>
+                                    {% endfor %}
+                                {% endif %}
+                            </div>
+                        {% endfor %}
+                    {% endif %}
+                    </div>
+                    <button class="btn btn-primary w-full mt-4" type="submit">
+                        <i class="fas fa-plus-circle mr-2"></i> Crear Solicitud
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
 </div>
 <script>
-
     document.getElementById('tipo_sol').addEventListener('change', function() {
         var opcion = this.value;
         var camposForm = document.getElementById('campos-formulario');
-
         // Lógica para mostrar los campos adicionales según la opción seleccionada
         switch (opcion) {
             {% for form in formularios %}
@@ -89,7 +115,9 @@
         }
 
     });
+
     
 </script>
 {% endblock %}
+
 
