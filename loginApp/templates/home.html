@@ -2,6 +2,45 @@
 {% load static %}
 {% block content %}
 
+<style>
+.messages {
+    list-style-type: none; 
+    padding: 0;
+    margin: 0;
+}
+
+.messages li {
+    margin-bottom: 10px; 
+    padding: 10px;
+    border-radius: 5px; 
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1); 
+    transition: all 0.3s ease; 
+}
+
+.messages li:hover {
+    box-shadow: 0 4px 8px rgba(0,0,0,0.15); 
+}
+
+.messages li.info {
+    background-color: #007BFF; 
+    color: white;
+}
+
+.messages li.success {
+    background-color: #28A745; 
+    color: white;
+}
+
+.messages li.warning {
+    background-color: #FFC107; 
+    color: black; 
+}
+
+.messages li.error {
+    background-color: #DC3545; 
+    color: white;
+}
+</style>
 
 <div class="container-fluid mt-5">
     <div class="row justify-content-center">
@@ -11,7 +50,18 @@
                 {% if messages %}
                     <ul class="messages">
                         {% for message in messages %}
-                            <li{% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message }}</li>
+                            <li{% if message.tags %} class="{{ message.tags }}"{% endif %}>
+                                {% if message.tags == 'success' %}
+                                    <i class="fas fa-check-circle"></i>
+                                {% elif message.tags == 'error' %}
+                                    <i class="fas fa-times-circle"></i>
+                                {% elif message.tags == 'warning' %}
+                                    <i class="fas fa-exclamation-circle"></i>
+                                {% elif message.tags == 'info' %}
+                                    <i class="fas fa-info-circle"></i>
+                                {% endif %}
+                                {{ message }}
+                            </li>
                         {% endfor %}
                     </ul>
                 {% endif %}
