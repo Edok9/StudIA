@@ -11,58 +11,6 @@ from .scripts.formularios import procesar_form, revision_form
 from loginApp.forms import CrearUsuarioForm, EditarUsuarioForm, CambioClaveAdminForm, ReporteriaForm, FiltrodeFormulariosForm, form_dict
 from loginApp.models import Usuario
 from solicitudesManager.models import Solicitud
-from django.http import JsonResponse
-from datetime import date
-import json 
-
-
-@login_required
-def nueva_solicitud(request):
-    if request.method == "POST":
-        usuario = request.user
-        tipo_solicitud = request.POST.get("tipoSolicitud")
-        
-        # Trabajar con el diccionario de campos, excluyendo campos no necesarios
-        campos_sol = {key: value for key, value in request.POST.items() if key not in ["csrfmiddlewaretoken", "tipoSolicitud"]}
-
-        # Crear una nueva instancia de Solicitud sin guardarla aún
-        nueva_solicitud = Solicitud(
-            tipo_sol=tipo_solicitud,
-            campos_sol=campos_sol,
-            id_usuario=usuario
-        )
-
-        # Verificar si hay un archivo adjunto y guardarlo
-        if 'adjunto' in request.FILES:
-            nueva_solicitud.adjunto_sol = request.FILES['adjunto']
-        
-        # Guardar la nueva solicitud con todos los datos
-        nueva_solicitud.save()
-
-        return redirect("infoSolicitudes")
-    else:
-        return render(request, "nueva_solicitud.html")
-    
-@login_required    
-def estado_solicitudes(request):
-    search_term = request.GET.get('search', '').strip()
-    if search_term:
-        solicitudes = Solicitud.objects.filter(estado_sol__icontains=search_term) | Solicitud.objects.filter(tipo_sol__icontains=search_term)
-    else:
-        solicitudes = Solicitud.objects.all()
-    
-    return render(request, 'infoSolicitudes.html', {'solicitudes': solicitudes})
-
-def solicitudes_empresa(request):
-    return render(request,'solicitudes_empresa.html')
-
-def casos_de_uso(request):
-    return render(request,'casos_de_uso.html')
-
-
-def administrar(request):
-    return render(request,'administrar.html')
-
 
 def index(request):
     if request.user.is_authenticated:
@@ -119,6 +67,8 @@ def home(request):
                     messages.success(request, "Solicitud guardada con éxito")
                     return redirect("home")
                 else:
+                    # Nota personal: agregar esto como error "Una solicitud similar existe para el usuario (usuario) con la acción (accion)"
+                    # Como idea, filtrar por tipo de formulario... algo asi
                     messages.error(request, "Una solicitud similar existe en curso")
             else:
                 messages.error(request, "Por favor corrija los errores en el formulario.")

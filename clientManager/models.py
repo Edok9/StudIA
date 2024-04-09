@@ -7,7 +7,7 @@ class Empresa(TenantMixin):
     nombre_empresa = models.CharField(max_length=25, verbose_name="Nombre de la Empresa")
     created_at = models.DateTimeField(auto_now_add=True)
     estado = models.CharField(max_length=1, verbose_name="Estado")
-    nombre_sn = models.CharField(max_length=30, verbose_name="Nombre del Socio de Negocio")
+    nombre_sn = models.CharField(max_length=30, verbose_name="Nombre de ServiceNow")
     casos_disponibles = ArrayField(models.TextField(), editable=False, default=list)
 class Dominio(DomainMixin):
     pass
