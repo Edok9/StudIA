@@ -67,6 +67,8 @@ def home(request):
                     messages.success(request, "Solicitud guardada con éxito")
                     return redirect("home")
                 else:
+                    # Nota personal: agregar esto como error "Una solicitud similar existe para el usuario (usuario) con la acción (accion)"
+                    # Como idea, filtrar por tipo de formulario... algo asi
                     messages.error(request, "Una solicitud similar existe en curso")
             else:
                 messages.error(request, "Por favor corrija los errores en el formulario.")
