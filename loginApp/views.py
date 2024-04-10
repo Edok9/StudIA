@@ -16,10 +16,8 @@ def index(request):
     if request.user.is_authenticated:
         return redirect("solicitudes")
     if request.method == "POST":
-        email = request.POST["email"]
-        clave = request.POST["clave"]
-        error_email = "Email no encontrado"
-        error_clave = "Contraseña incorrecta"
+        email, clave = request.POST["email"], request.POST["clave"]
+        error_email, error_clave = "Email no encontrado", "Contraseña incorrecta"
         errores = {}
         usuario = authenticate(request, email=email, clave=clave)
         if usuario is not None:
@@ -40,14 +38,10 @@ def index(request):
     else:
         return render(request, "login.html")
     
-
-
 @login_required
 def home(request):
     usuario = request.user  
-    form = None
-    tipo_form = None
-   
+    form = tipo_form = None
     empresa = request.tenant  
     casos_empresa = empresa.casos_disponibles if hasattr(empresa, 'casos_disponibles') else []
 
@@ -67,9 +61,13 @@ def home(request):
                     messages.success(request, "Solicitud guardada con éxito")
                     return redirect("home")
                 else:
-                    # Nota personal: agregar esto como error "Una solicitud similar existe para el usuario (usuario) con la acción (accion)"
-                    # Como idea, filtrar por tipo de formulario... algo asi
-                    messages.error(request, "Una solicitud similar existe en curso")
+                    # Mensajes de error de enviado
+                    # Cambiar por switch en un futuro si fuera necesario mensajes para cada tipo de formulario
+                    if sol.tipo_sol == "Servicio VPN":
+                        usuario, accion = sol.campos_sol["usuario"], sol.campos_sol["accion"]
+                        messages.error(request, f"Una solicitud similar existe para el usuario {usuario} con la acción {accion}")
+                    else:
+                        messages.error(request, "Una solicitud similar existe en curso")
             else:
                 messages.error(request, "Por favor corrija los errores en el formulario.")
         else:
@@ -84,17 +82,12 @@ def home(request):
     }
     return render(request, "home.html", context)
 
-
 @login_required
 def verSolicitud(request, pk):
     solicitud = Solicitud.objects.get(pk=pk)
     tipo_solicitud = solicitud.tipo_sol
     if tipo_solicitud in form_dict:
-        form = form_dict[tipo_solicitud](initial=solicitud.campos_sol)
-        campos_form = form.fields
-        if "fecha_expiracion" in solicitud.campos_sol:
-            # Arreglar de date a datetime para mostrarlo
-            pass
+        form, campos_form = form_dict[tipo_solicitud](initial=solicitud.campos_sol), form.fields
         if solicitud.adjunto_sol:
             solicitud.campos_sol["adjunto"] = solicitud.adjunto_sol
         for c in campos_form:
@@ -115,9 +108,7 @@ def solicitudesUsuario(request):
         return render(request, "listaMisSolicitudes.html", {"solicitudes": solicitudes})
     except Solicitud.DoesNotExist:
         return redirect('home')
-    
-
-    
+     
 @login_required
 def borrarSolicitud(request, pk):
     solicitud = Solicitud.objects.get(id_sol = pk)
@@ -253,10 +244,8 @@ def casosDeUso(request):
 @staff_member_required(redirect_field_name=None, login_url=reverse_lazy("home"))
 def reportes(request):
     if request.method == "POST":
-        form = request.POST
-        response = HttpResponse()
-        periodo = form["periodo_reportes"]
-        formato = form["formato_reportes"]
+        form, response = request.POST, HttpResponse()
+        periodo, formato = form["periodo_reportes"], form["formato_reportes"]
         if formato == "pdf":
             response['Content-Disposition'] = "attachment; filename=reporte.pdf"
         else:
@@ -270,9 +259,3 @@ def reportes(request):
 def logoutProcess(request):
     logout(request)
     return render(request, "logout.html")
-
-
-# Create your views here.
-
- 
-

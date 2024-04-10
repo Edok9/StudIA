@@ -6,8 +6,6 @@ from django.utils.translation import gettext_lazy as _
 import re
 
 design = "w-100 mb-2 p-2 border border-1"
-design_comboBox = "form-select w-100 mb-2 p-2 border border-1"
-design_bigInput = "form-input"
 
 
 class CambioClaveUsuarioForm(forms.Form):
