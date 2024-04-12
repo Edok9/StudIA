@@ -24,3 +24,4 @@ textarea.form-input {
     resize: vertical; /* Permite al usuario ajustar la altura verticalmente */
     /* No es necesario añadir un margen inferior aquí si ya se aplica a .form-input */
 }
+

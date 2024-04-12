@@ -216,3 +216,4 @@ class EditarUsuarioForm(forms.ModelForm):
             "cargo": forms.TextInput(attrs={"id": "id_cargo", "class": f"form-control {design}"}),
             "horario_atencion": forms.TextInput(attrs={"id": "id_horario_atencion", "class": f"form-control {design}"}),
         }
+        
