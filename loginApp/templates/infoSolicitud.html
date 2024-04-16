@@ -9,15 +9,15 @@
                     <h2 class="card-title text-white mt-2 mb-3">Detalle de Solicitud</h2>
                     <hr class="border-white mb-4">
                 </div>
-                <div class="card-body pt-2 pb-4">
+                <div class="container">
+                    {% if form %}
                     <form>
-                        {% for field in solicitud %}
+                        {% for field in form %}
                         <div class="mb-3">
                             <label class="form-label text-white">{{ field.label }}</label>
                             {% if field.name == "adjunto" %}
                                 {% if field.value %}
                                 <div class="p-2 bg-white text-dark rounded">
-                                    <!-- Aquí mostramos el nombre del archivo adjunto si está presente -->
                                     Archivo adjunto presente: {{ field.value.name }}
                                 </div>
                                 {% else %}
@@ -29,6 +29,9 @@
                         </div>
                         {% endfor %}
                     </form>
+                    {% else %}
+                    <p>Formulario no disponible.</p>
+                    {% endif %}
                 </div>
             </div>
         </div>

@@ -41,10 +41,11 @@
     color: white;
 }
 </style>
+<link rel="stylesheet" href="{% static 'css/estilosForm.css' %}">
 
 <div class="container-fluid mt-5">
     <div class="row justify-content-center">
-        <div class="col-md-6 bg-dark text-light p-4 rounded">
+        <div class="col-md-4 bg-dark text-light p-4 rounded">
             <div class="flex flex-col justify-center items-center space-y-4">
                 <h1 class="text-2xl font-bold text-[#005CFF]">Nueva Solicitud</h1>
                 {% if messages %}
@@ -80,7 +81,6 @@
                         </select>
                     </div>
                     <div id="campos-formulario" class="mb-3">
-                        <!-- Aquí se insertarán los campos dinámicos -->
                     {% if current_form %}
                         {% for field in current_form %}
                             <div class="form-group">

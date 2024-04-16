@@ -1,13 +1,43 @@
-{% extends "fondoLogin.html" %}
 {% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="{% static 'css/login.css' %}" type="text/css">
+    <link href="https://fonts.googleapis.com/css2?family=Barlow:SemiBold&display=swap" rel="stylesheet">
+    <title></title>
+</head>
+<body> 
+    <style>
+        html, body {
+            margin: 0;
+            padding: 0;
+            font-family: montserrat;
+            background-image: url('{% static "img/new_background_desktop.png" %}');
+            background-size: 100% auto;
+            background-position: center top; 
+            background-repeat: no-repeat;
+            background-attachment: fixed;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+    </style>
+    <div class="content">
 
-{% block content %}
+<header>
+    <div class="header-content">
+        <img src="{% static 'img/logo_entel.png' %}" alt="Icono Entel" class="header-icon">
+        <span>Bienvenido al portal de Autoatención</span>
+    </div>
+</header>
 
 <div class="formulario">
     <h1>Login {{ request.tenant.nombre_empresa }}</h1>
     <form method="post" class="form">
         {% csrf_token %}
-        <!-- Campo email añadido -->
+       
         <div class="username">
             <label for="email">Email</label>
             <input type="email" name="email" id="email" required placeholder="jperez@entel.cl">
@@ -16,7 +46,6 @@
             {% endif %}
         </div>
 
-        <!-- Campo contraseña -->
         <div class="username">
             <label for="clave">Contraseña</label>
             <input type="password" name="clave" id="clave" required placeholder="********">
@@ -32,4 +61,12 @@
         </div>
     </form>
 </div>
-{% endblock content %}
+</div>
+<footer>
+    <div class="footer-content">
+        Copyright Empresa Nacional de Telecomunicaciones S.A. Todos los derechos reservados.
+    </div>
+</footer>
+
+</body>
+</html>

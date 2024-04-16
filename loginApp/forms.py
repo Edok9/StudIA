@@ -47,14 +47,12 @@ class Ise_Vpn_Form(forms.Form):
     
     def clean_usuario(self):
         usuario = self.cleaned_data['usuario']
-        # Validación específica para el campo usuario
         if not re.match(r'^[a-zA-Z]{3,}$', usuario):
             raise ValidationError(_('El usuario debe contener al menos 3 letras y no números.'))
         return usuario
 
     def clean_correo_usuario(self):
         correo_usuario = self.cleaned_data['correo_usuario']
-        # Aquí podrías añadir tu validación específica para el correo
         if not re.match(r'^\S+@\S+\.\S+$', correo_usuario):
             raise ValidationError(_('Por favor, ingrese una dirección de correo válida. Ej: Nombre@example.com'))
         return correo_usuario
@@ -113,7 +111,6 @@ class Cambio_De_Ruta_Form(forms.Form):
     
     def clean_id_ruta(self):
         id_ruta = self.cleaned_data.get('id_ruta')
-        # La validación como número ya se realizó por ser IntegerField
         return str(id_ruta) if id_ruta is not None else id_ruta
 
     def clean_gateway(self):
@@ -124,7 +121,6 @@ class Cambio_De_Ruta_Form(forms.Form):
 
     def clean_interfaz_salida(self):
         interfaz_salida = self.cleaned_data.get('interfaz_salida')
-        # Asumimos que cualquier string no vacío es válido.
         if not interfaz_salida.strip():
             raise ValidationError("Este campo no puede estar vacío.")
         return interfaz_salida
@@ -136,7 +132,6 @@ class Cambio_De_Ruta_Form(forms.Form):
             return all(0 <= int(octeto) <= 255 for octeto in octetos)
         return False
         
-# Cambiar el resto de cosas para usar el diccionario si queda mas comodo de trabajar
 form_dict = {
     Ise_Vpn_Form().prefix: Ise_Vpn_Form,
     Ioc_Automatico_Form().prefix: Ioc_Automatico_Form,
@@ -159,21 +154,16 @@ class CambioClaveAdminForm(forms.Form):
         if nueva_contraseña and confirmar_nueva_contraseña and nueva_contraseña != confirmar_nueva_contraseña:
             raise forms.ValidationError("Las contraseñas no coinciden.")
 
-        # Verificar la complejidad de la nueva contraseña
         if nueva_contraseña and not self.validar_contraseña(nueva_contraseña):
             raise forms.ValidationError("La contraseña debe tener al menos 6 caracteres, incluyendo al menos 2 números, una mayúscula y un punto.")
 
     def validar_contraseña(self, contraseña):
-        # Longitud mínima de 6 caracteres
         if len(contraseña) < 6:
             return False
-        # Al menos 2 números
         if sum(c.isdigit() for c in contraseña) < 2:
             return False
-        # Al menos una mayúscula
         if not any(c.isupper() for c in contraseña):
             return False
-        # Al menos un punto
         if '.' not in contraseña:
             return False
         return True
@@ -181,39 +171,80 @@ class CambioClaveAdminForm(forms.Form):
 class CrearUsuarioForm(forms.ModelForm):
     class Meta:
         model = Usuario
-        fields = [
-            "nombre_usuario",
-            "email",
-            "password",
-            "telefono",
-            "cargo",
-            "horario_atencion",
-            "is_staff"
-        ]
+        fields = ["nombre_usuario", "email", "password", "telefono", "cargo", "horario_atencion", "is_staff"]
         widgets = {
-            "nombre_usuario": forms.TextInput(attrs={"class": f"form-control {design}", "id": "id_nombre_usuario"}),
-            "email": forms.EmailInput(attrs={"class": f"form-control {design}", "id": "id_email"}),
-            "password": forms.PasswordInput(attrs={"class": f"form-control {design}", "id": "id_password"}),
-            "telefono": forms.TextInput(attrs={"class": f"form-control {design}", "id": "id_telefono"}),
-            "cargo": forms.TextInput(attrs={"class": f"form-control {design}", "id": "id_cargo"}),
-            "horario_atencion": forms.TextInput(attrs={"class": f"form-control {design}", "id": "id_horario_atencion"}),
+            "nombre_usuario": forms.TextInput(attrs={"class": "form-control", "id": "id_nombre_usuario"}),
+            "email": forms.EmailInput(attrs={"class": "form-control", "id": "id_email"}),
+            "password": forms.PasswordInput(attrs={"class": "form-control", "id": "id_password"}),
+            "telefono": forms.TextInput(attrs={"class": "form-control", "id": "id_telefono"}),
+            "cargo": forms.TextInput(attrs={"class": "form-control", "id": "id_cargo"}),
+            "horario_atencion": forms.TextInput(attrs={"class": "form-control", "id": "id_horario_atencion"}),
         }
+
+    def clean_nombre_usuario(self):
+        nombre_usuario = self.cleaned_data['nombre_usuario']
+        if len(nombre_usuario) < 3 or re.search(r'\d', nombre_usuario):
+            raise ValidationError('El nombre de usuario debe tener al menos 3 caracteres y no puede contener números.')
+        return nombre_usuario
+
+    def clean_email(self):
+        email = self.cleaned_data['email']
+        if "@" not in email:
+            raise ValidationError('Por favor, ingrese un correo electrónico válido.')
+        return email
+
+    def clean_password(self):
+        password = self.cleaned_data['password']
+        if len(password) < 6 or not re.search(r'[A-Z]', password) or len(re.findall(r'\d', password)) < 2 or '.' not in password:
+            raise ValidationError('La contraseña debe tener al menos 6 caracteres, incluyendo al menos una letra mayúscula, dos números y un punto.')
+        return password
+
+    def clean_telefono(self):
+        telefono = self.cleaned_data.get('telefono')
+        if telefono is not None: 
+            telefono_str = str(telefono) 
+            if not telefono_str.isdigit():
+                raise ValidationError('El número de teléfono solo puede contener números.')
+        else:
+            raise ValidationError('Este campo es obligatorio.')
+        return telefono
 
 class EditarUsuarioForm(forms.ModelForm):
     class Meta:
         model = Usuario
-        fields = [
-            "nombre_usuario",
-            "telefono",
-            "cargo",
-            "horario_atencion",
-            "is_active",
-            "is_staff"
-        ]
+        fields = ["nombre_usuario", "telefono", "cargo", "horario_atencion", "is_active", "is_staff"]
         widgets = {
-            "nombre_usuario": forms.TextInput(attrs={"id": "id_nombre", "class": f"form-control {design}"}),
-            "telefono": forms.TextInput(attrs={"id": "id_telefono", "class": f"form-control {design}"}),
-            "cargo": forms.TextInput(attrs={"id": "id_cargo", "class": f"form-control {design}"}),
-            "horario_atencion": forms.TextInput(attrs={"id": "id_horario_atencion", "class": f"form-control {design}"}),
+            "nombre_usuario": forms.TextInput(attrs={"id": "id_nombre", "class": "form-control"}),
+            "telefono": forms.TextInput(attrs={"id": "id_telefono", "class": "form-control"}),
+            "cargo": forms.TextInput(attrs={"id": "id_cargo", "class": "form-control"}),
+            "horario_atencion": forms.TextInput(attrs={"id": "id_horario_atencion", "class": "form-control"}),
         }
+
+    def clean_nombre_usuario(self):
+        nombre = self.cleaned_data.get('nombre_usuario')
+        if not nombre:
+            raise ValidationError('Por favor, complete el campo nombre.')
+        if not re.match(r'^[a-zA-Z\s]+$', nombre):
+            raise ValidationError('El nombre solo puede contener letras y espacios.')
+        return nombre
+    
+    def clean_telefono(self):
+        telefono = str(self.cleaned_data.get('telefono')) 
+        if not telefono:
+            raise ValidationError('Por favor, complete el campo de teléfono.')
+        if not re.match(r'^\d+$', telefono):
+          raise ValidationError('El teléfono solo puede contener números.')
+        return telefono
+
+    def clean_cargo(self):
+        cargo = self.cleaned_data.get('cargo')
+        if not cargo:
+            raise ValidationError('Por favor, complete el campo de cargo.')
+        return cargo
+
+    def clean_horario_atencion(self):
+        horario = self.cleaned_data.get('horario_atencion')
+        if not horario:
+            raise ValidationError('Por favor, complete el campo de horario de atención.')
+        return horario
         

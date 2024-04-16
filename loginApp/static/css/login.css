@@ -66,11 +66,11 @@ footer {
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
-    width: 300px;
+    width: 340px;
     background: #ffffff;
     border-radius: 10px;
     box-shadow: 0 15px 15px rgba(0, 0, 0, 0.2); 
-    padding: 10px;
+    padding: 20px;
 }
 
 .formulario h1{
@@ -79,10 +79,11 @@ footer {
     border-bottom: 1px solid #002EFF; 
     font-family: 'Barlow', sans-serif;
     font-weight: 600;
+    padding-bottom: 15px; 
 }
 
 .formulario form{
-    padding: 0 10px;
+    padding: 0 15px;
     box-sizing: border-box;
 }
 
@@ -95,8 +96,8 @@ form .username{
 .username input{
     width: 100%;
     padding: 0 5px;
-    height: 30px;
-    font-size: 14px; 
+    height: 25px;
+    font-size: 12px; 
     border: none;
     background: none;
     outline: none;
@@ -126,11 +127,11 @@ form .username{
 
 input[type="submit"]{
     width: 100%;
-    height: 50px;
+    height: 40px;
     border: 1px solid #002EFF; 
     background: #002EFF; 
-    border-radius: 25px;
-    font-size: 18px;
+    border-radius: 20px;
+    font-size: 16px;
     color: white;
     cursor: pointer;
     outline: none;
@@ -143,7 +144,7 @@ input[type="submit"]:hover{
 }
 
 .registrarse{
-    margin: 30px 0 ;
+    margin: 20px 0 ;
     text-align: center;
     font-size: 16px;
     color: black;
@@ -156,20 +157,19 @@ input[type="submit"]:hover{
     color: #002EFF; 
 }
 
-/* Estilo para los mensajes de error */
 
 
 .field-container {
     position: relative;
-    margin-bottom: 50px;  /* Asegúrate de que haya suficiente espacio para el mensaje de error */
+    margin-bottom: 50px;  
 }
 
 .error-message {
     position: absolute;
-    bottom: -30px;  /* Posiciona el mensaje justo debajo del campo */
+    bottom: -30px;  
     left: 0;
-    width: 100%;  /* Asegúrate de que el mensaje use todo el ancho del contenedor */
-    color: #E8200C;  /* Rojo para errores */
-    font-size: 12px;  /* Tamaño de fuente más pequeño para los mensajes de error */
-    text-align: left;  /* Alineación del texto a la izquierda */
+    width: 100%;  
+    color: #E8200C; 
+    font-size: 12px;  
+    text-align: left;  
 }

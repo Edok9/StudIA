@@ -1,12 +1,13 @@
 {% extends "base.html" %}
-
+{% load static %}
 {% block content %}
-<div class="container mt-5"> <!-- Añadir un margen en la parte superior del contenedor -->
+
+<div class="container mt-5">
     <div class="row justify-content-center">
         <div class="col-md-4 bg-dark text-light p-4 rounded">
             <div class="flex flex-col justify-center items-center space-y-4">
                 <h1 class="text-4xl font-bold text-[#005CFF] mb-6">Reportería</h1>
-                <hr class="w-16 border-t border-[#005CFF] mb-6"> <!-- Línea debajo del título -->
+                <hr class="w-16 border-t border-[#005CFF] mb-6">
                 <form method="post" class="formulario-container">
                     {% csrf_token %}
                     {% for campo in formulario %}
@@ -17,9 +18,9 @@
                         {{campo}}
                     </div>
                     {% endfor %}
-                    <div class="flex justify-center items-center space-x-2"> <!-- Centrar el botón en el contenedor -->
+                    <div class="flex justify-center items-center space-x-2"> 
                         <button class="btn btn-primary flex items-center" type="submit">
-                            <i class="fas fa-download mr-2"></i> <!-- Icono de Font Awesome -->
+                            <i class="fas fa-download mr-2"></i> 
                             Extraer Reporte
                         </button>
                     </div>
