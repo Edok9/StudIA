@@ -2,12 +2,10 @@ services:
   - type: web
     name: portal-autoatencion
     env: python
-    runtime: python-3.11.9
+    runtime: python-3.11
     buildCommand: pip install --upgrade pip setuptools wheel && pip install -r requirements.txt && python manage.py collectstatic --noinput
     startCommand: gunicorn portalAutoatencion.wsgi:application --bind 0.0.0.0:$PORT
     envVars:
-      - key: PYTHON_VERSION
-        value: 3.11.9
       - key: DATABASE_URL
         fromDatabase:
           name: portal-db
