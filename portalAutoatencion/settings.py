@@ -132,12 +132,17 @@ WSGI_APPLICATION = 'portalAutoatencion.wsgi.application'
 
 # Configuración de base de datos
 # Soporta tanto variables de entorno individuales como DATABASE_URL
-import dj_database_url
+# Intentar importar dj_database_url (solo necesario en producción)
+try:
+    import dj_database_url
+    DJ_DATABASE_URL_AVAILABLE = True
+except ImportError:
+    DJ_DATABASE_URL_AVAILABLE = False
 
 # Intentar usar DATABASE_URL primero (para Render, Railway, etc.)
 database_url = os.getenv('DATABASE_URL')
-if database_url:
-    # Si hay DATABASE_URL, usarla pero mantener el engine de django-tenants
+if database_url and DJ_DATABASE_URL_AVAILABLE:
+    # Si hay DATABASE_URL y el módulo está disponible, usarla
     db_config = dj_database_url.config(
         default=database_url,
         conn_max_age=600,
