@@ -137,3 +137,16 @@ GitHub.sublime-settings
 !.vscode/launch.json 
 !.vscode/extensions.json 
 .history
+
+# Archivos de producción y despliegue
+staticfiles/
+*.env
+.env.local
+.env.production
+
+# Archivos de base de datos local
+*.sqlite3
+*.db
+
+# Archivos de Docker
+docker-compose.override.yml
