@@ -2,7 +2,7 @@ def procesar_form(form, sol):
     if form.is_valid():
         sol.campos_sol = form.cleaned_data
         match sol.tipo_sol:
-            case "Servicio VPN":
+            case "Solicitud de hora":
                 # Arreglar el formato de fecha para mostrarlo correctamente al ver el formulario
                 if "fecha_expiracion" in sol.campos_sol and sol.campos_sol["fecha_expiracion"] is not None:
                     sol.campos_sol["fecha_expiracion"] = sol.campos_sol["fecha_expiracion"].strftime("%Y-%m-%d")

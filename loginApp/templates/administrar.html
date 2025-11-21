@@ -28,7 +28,15 @@
                                             <td class="align-middle text-center">{{ usuario.id_usuario }}</td>
                                             <td class="align-middle text-center">{{ usuario.nombre_usuario }}</td>
                                             <td class="align-middle text-center">{{ usuario.email }}</td>
-                                            <td class="align-middle text-center">{% if usuario.is_staff %}Administrador{% else %}Usuario{% endif %}</td>
+                                            <td class="align-middle text-center">
+                                                {% if usuario.is_staff %}
+                                                    <span class="badge bg-danger">Administrador</span>
+                                                {% elif usuario.is_tutor %}
+                                                    <span class="badge bg-warning">Tutor</span>
+                                                {% else %}
+                                                    <span class="badge bg-primary">Estudiante</span>
+                                                {% endif %}
+                                            </td>
                                             <td class="align-middle text-center">{% if usuario.is_active %}Activo{% else %}Inactivo{% endif %}</td>
                                             <td class="align-middle text-center">
                                                 <div class="d-flex justify-content-center">

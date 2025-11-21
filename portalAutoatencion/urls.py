@@ -16,6 +16,10 @@ Including another URLconf
 """
 from django.urls import path, include
 
+# IMPORTANTE: Las URLs de globalAdmin deben ir ANTES para que se procesen
+# antes de que el middleware de tenants intente identificar el tenant
 urlpatterns = [
+    path('global/', include('globalAdmin.urls')),
+    path('api/mobile/', include('api_mobile.urls')),  # API móvil para estudiantes
     path('', include('loginApp.urls')),
 ]

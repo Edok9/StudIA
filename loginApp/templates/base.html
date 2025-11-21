@@ -16,7 +16,7 @@
     position: relative;
     padding-bottom: 4em;
     font-family: Arial, sans-serif;
-    background-image: url('{% static "img/new_background_desktop.png" %}');
+    background-image: url('{% static "img/duocWpp.jpg" %}');
     background-repeat: no-repeat;
     background-size: cover; 
     background-position: center center; 
@@ -36,8 +36,10 @@
                     <span class="navbar-text text-light">Bienvenido: {{ request.user }}</span>
                     {% if request.user.is_staff %}
                     <div class="navbar-text text-light"><i class="fas fa-user-cog"></i> Rol: Administrador</div>
+                    {% elif request.user.is_tutor %}
+                    <div class="navbar-text text-light"><i class="fas fa-chalkboard-teacher"></i> Rol: Tutor</div>
                     {% else %}
-                    <div class="navbar-text text-light"><i class="fas fa-users"></i> Empresa:{{ request.tenant.nombre_empresa }}</div>
+                    <div class="navbar-text text-light"><i class="fas fa-user-graduate"></i> Rol: Estudiante</div>
                     {% endif %}
                 </div>
 
@@ -47,27 +49,61 @@
 
                 <div class="collapse navbar-collapse justify-content-center" id="navbarNav">
                     <ul class="navbar-nav">
+                        <!-- Enlaces comunes para todos los usuarios -->
                         <li class="nav-item">
-                            <a href="{% url 'home' %}" class="nav-link"><i class="fas fa-envelope"></i> Solicitudes</a>
+                            <a href="{% url 'bienvenida' %}" class="nav-link"><i class="fas fa-hand-paper"></i> Bienvenida</a>
                         </li>
-                        <li class="nav-item dropdown">
-                            <a href="#" class="nav-link dropdown-toggle" data-bs-toggle="dropdown"><i class="fas fa-list-alt"></i> Estado Solicitudes</a>
-                            <ul class="dropdown-menu dropdown-menu-dark">
-                                <li><a href="{% url 'infoSolicitudes' %}" class="dropdown-item">Mis solicitudes</a></li>
-                                <li><a href="{% url 'solicitudes_empresa' %}" class="dropdown-item">Solicitudes de empresa</a></li>
-                            </ul>
+                        <li class="nav-item">
+                            <a href="{% url 'test_api_feriados' %}" class="nav-link"><i class="fas fa-flask"></i> Test</a>
                         </li>
+                        <li class="nav-item">
+                            <a href="{% url 'test_mapa_sedes' %}" class="nav-link"><i class="fas fa-map"></i> Test 2</a>
+                        </li>
+                        
+                        <!-- Enlaces específicos para ESTUDIANTES -->
+                        {% if not request.user.is_staff and not request.user.is_tutor %}
+                        <li class="nav-item">
+                            <a href="{% url 'estudiante_asignaturas' %}" class="nav-link"><i class="fas fa-book"></i> Asignaturas</a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="{% url 'estudiante_mis_ayudantias' %}" class="nav-link"><i class="fas fa-calendar-check"></i> Mis Ayudantías</a>
+                        </li>
+                        <!-- Solicitudes y Estado Solicitudes ocultos para estudiantes -->
+                        {% endif %}
+                        
+                        <!-- Enlaces específicos para TUTORES -->
+                        {% if request.user.is_tutor %}
+                        <li class="nav-item">
+                            <a href="{% url 'tutor_mis_ayudantias' %}" class="nav-link"><i class="fas fa-chalkboard-teacher"></i> Mis Ayudantías</a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="{% url 'tutor_logs' %}" class="nav-link"><i class="fas fa-file-alt"></i> Logs</a>
+                        </li>
+                        <!-- Dashboard y Solicitudes ocultos para tutores -->
+                        {% endif %}
+                        
+                        <!-- Enlaces específicos para ADMINISTRADORES -->
                         {% if request.user.is_staff %}
                         <li class="nav-item">
-                            <a href="{% url 'reporteria' %}" class="nav-link"><i class="fas fa-chart-bar"></i> Reportería</a>
+                            <a href="{% url 'usuarios' %}" class="nav-link"><i class="fas fa-users"></i> Usuarios</a>
                         </li>
                         <li class="nav-item dropdown">
-                            <a href="#" class="nav-link dropdown-toggle" data-bs-toggle="dropdown"><i class="fas fa-user-cog"></i> Administración</a>
+                            <a href="#" class="nav-link dropdown-toggle" data-bs-toggle="dropdown"><i class="fas fa-book"></i> Asignaturas</a>
                             <ul class="dropdown-menu dropdown-menu-dark">
-                                <li><a href="{% url 'usuarios' %}" class="dropdown-item">Gestionar Usuarios</a></li>
-                                <li><a href="{% url 'casosDeUso' %}" class="dropdown-item">Gestionar Casos de Uso</a></li>
+                                <li><a href="{% url 'admin_asignaturas' %}" class="dropdown-item">Gestionar Asignaturas</a></li>
                             </ul>
                         </li>
+                        <li class="nav-item dropdown">
+                            <a href="#" class="nav-link dropdown-toggle" data-bs-toggle="dropdown"><i class="fas fa-chalkboard-teacher"></i> Ayudantías</a>
+                            <ul class="dropdown-menu dropdown-menu-dark">
+                                <li><a href="{% url 'admin_ayudantias' %}" class="dropdown-item">Ver Todas</a></li>
+                                <li><a href="{% url 'admin_crear_ayudantia' %}" class="dropdown-item">Crear Nueva</a></li>
+                            </ul>
+                        </li>
+                        <li class="nav-item">
+                            <a href="{% url 'admin_logs' %}" class="nav-link"><i class="fas fa-file-alt"></i> Logs</a>
+                        </li>
+                        <!-- Reportería, Solicitudes y Configuración ocultos para administradores -->
                         {% endif %}
                     </ul>
                 </div>
@@ -86,8 +122,8 @@
         {% endblock %}
     </main>
     <div class="spacer" style="height: 50px;"></div> 
-    <footer class="footer flex-shrink-0 w-100 py-4 position-absolute bottom-0 text-white text-center" style="background-color: #333333;">
-        Copyright Empresa Nacional de Telecomunicaciones S.A. Todos los derechos reservados.
+    <footer class="footer flex-shrink-0 w-100 py-4 position-fixed bg-dark fixed-bottom text-white text-center">
+        StudIA - Portal de Gestión de Ayudantías.
     </footer>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>

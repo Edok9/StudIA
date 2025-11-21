@@ -119,50 +119,7 @@
                 break;
         }
 
-        //Ajustes para Formularios mas dinamicos
-        //  - Servicio VPN (Rico desorden con tantos foreach XD)
-        var selectorVpn = document.getElementById('id_Servicio VPN-accion')
-        var camposVpn = document.querySelectorAll('[name^="Servicio VPN"]')
-        camposVpn.forEach(campo => {
-            if(!campo.parentElement.hidden && campo.tagName!=="SELECT"){
-                campo.parentElement.hidden = true
-            }
-        });
-        if (selectorVpn){
-            selectorVpn.addEventListener('change', function() {        
-                let tareaVpn = this.value
-                let campo_fecha = document.querySelector('[name="Servicio VPN-fecha_expiracion"]')
-                campo_fecha.required = true
-                campo_fecha.disabled = false
-                camposVpn.forEach(campo => {
-                    if(campo.parentElement.hidden){
-                        campo.parentElement.hidden = false
-                    }
-                });
-                switch(tareaVpn) {
-                    case "Nada":
-                        //Esconder todo del formulario
-                        camposVpn.forEach(campo => {
-                            if(!campo.parentElement.hidden && campo.tagName!=="SELECT"){
-                                campo.parentElement.hidden = true
-                            }
-                        });
-                        break
-                    case "Extension de cuenta":
-                    //No hacemos nada, de paso para evitar algun bug
-                        break
-                    default:
-                        //Esconder el campo de fecha de expiracion y hacerlo no necesario por temas de javascript
-                        if(!campo_fecha.parentElement.hidden){
-                            campo_fecha.parentElement.hidden = true
-                        }
-                        campo_fecha.required = false
-                        campo_fecha.disabled = true
-                        break
-                }
-                }
-            )
-        }
+       
 
     });
 

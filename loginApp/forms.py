@@ -1,6 +1,6 @@
 from django import forms
-from .models import Usuario
-from datetime import date
+from .models import Usuario, Asignatura, Ayudantia, Inscripcion
+from datetime import date, datetime
 from django.core.exceptions import ValidationError
 from django.utils.translation import gettext_lazy as _
 import re
@@ -27,23 +27,25 @@ class ReporteriaForm(forms.Form):
 class Ise_Vpn_Form(forms.Form):
     acciones = (
         ("Nada", "------"),
-        ("Extension de cuenta", "Extension de cuenta"),
-        ("Cambio de contraseña", "Cambio de contraseña"),
-        ("Deshabilitación de cuenta", "Deshabilitación de cuenta"),
+        ("Ayudantía de Matemáticas", "Ayudantía de Matemáticas"),
+        ("Ayudantía de Base de datos", "Ayudantía de base de datos"),
+        ("Ayudantía de programación web", "Ayudantía de programación web"),
+        ("Ayudantía de Aplicaciones Móviles", "Ayudantía de Aplicaciones Móviles"),
+  
     )
     accion = forms.ChoiceField(choices=acciones, label="Accion",
                                widget=forms.Select(attrs={'class': f"form-select {design}"}))
 
-    usuario = forms.CharField(label="Usuario de VPN",
+    usuario = forms.CharField(label="Usuario",
                               widget=forms.TextInput(attrs={"class": f"form-control {design}"}))
 
     correo_usuario = forms.EmailField(label="Correo del Usuario",
                                       widget=forms.EmailInput(attrs={"class": f"form-control {design}"}))
 
     fecha_expiracion = forms.DateField(widget=forms.DateInput(attrs={'type': 'date', "class": f"form-control {design}"}),
-                                       label="Fecha de Expiración", required=False)
+                                       label="Fecha", required=False)
 
-    prefix = "Servicio VPN"
+    prefix = "Solicitud de hora"
     
     def clean_usuario(self):
         usuario = self.cleaned_data['usuario']
@@ -62,80 +64,9 @@ class Ise_Vpn_Form(forms.Form):
         if fecha_expiracion and fecha_expiracion <= date.today():
             raise ValidationError(_('La fecha debe ser a partir del siguiente día en adelante.'))
         return fecha_expiracion
-
-class Ioc_Automatico_Form(forms.Form):
-    adjunto = forms.FileField(required=False, widget=forms.FileInput(attrs={'class': 'form-input'}))
-    notas = forms.CharField(widget=forms.Textarea(attrs={
-        'class': 'form-input', 
-        'rows': 4, 
-        'placeholder': 'Ingrese detalle de su solicitud...'
-    }))
-
-    prefix = "IOC Automatico"
-    
-    def clean_notas(self):
-        notas = self.cleaned_data['notas']
-        if not notas.strip():
-            raise ValidationError(_('Este campo no puede estar vacío.'))
-        return notas
-
-class Cambio_De_Ruta_Form(forms.Form):
-    opciones_id_ruta = (
-        ("", "Ninguno"),
-        ("PORT", "PORT"),
-        ("VLAN", "VLAN"),
-    )
-    gateway = forms.CharField(
-        label="Gateway",
-        widget=forms.TextInput(attrs={'class': f"form-control {design}", 'placeholder': 'Ej. 192.168.1.1'}),
-        required=True
-    )
-    prefijo_interfaz = forms.ChoiceField(
-        choices=opciones_id_ruta,
-        label="Prefijo de Interfaz de Salida",
-        widget=forms.Select(attrs={'class': f"form-select {design}"}),
-        required=False
-    )
-    interfaz_salida = forms.CharField(
-        label="Interfaz de Salida",
-        widget=forms.TextInput(attrs={'class': f"form-control {design}", 'placeholder': 'Ej. 5'}),
-        required=True
-    )
-    ids_ruta = forms.CharField(
-        label="IDs de Ruta",
-        widget=forms.TextInput(attrs={'class': f"form-control {design}", 'placeholder': 'Ej. 12, 34, 56'}),
-        required=False
-    )
-
-    prefix = "Cambio de Ruta"
-    
-    def clean_id_ruta(self):
-        id_ruta = self.cleaned_data.get('id_ruta')
-        return str(id_ruta) if id_ruta is not None else id_ruta
-
-    def clean_gateway(self):
-        gateway = self.cleaned_data.get('gateway')
-        if not self.validar_direccion_ip(gateway):
-            raise ValidationError("Ingrese una dirección IP válida para el gateway.")
-        return gateway
-
-    def clean_interfaz_salida(self):
-        interfaz_salida = self.cleaned_data.get('interfaz_salida')
-        if not interfaz_salida.strip():
-            raise ValidationError("Este campo no puede estar vacío.")
-        return interfaz_salida
-
-    def validar_direccion_ip(self, ip):
-        ip_pattern = re.compile(r'^(\d{1,3}\.){3}\d{1,3}$')
-        if ip_pattern.match(ip):
-            octetos = ip.split('.')
-            return all(0 <= int(octeto) <= 255 for octeto in octetos)
-        return False
         
 form_dict = {
     Ise_Vpn_Form().prefix: Ise_Vpn_Form,
-    Ioc_Automatico_Form().prefix: Ioc_Automatico_Form,
-    Cambio_De_Ruta_Form().prefix: Cambio_De_Ruta_Form
 }
 
 class FiltrodeFormulariosForm(forms.Form):
@@ -171,14 +102,15 @@ class CambioClaveAdminForm(forms.Form):
 class CrearUsuarioForm(forms.ModelForm):
     class Meta:
         model = Usuario
-        fields = ["nombre_usuario", "email", "password", "telefono", "cargo", "horario_atencion", "is_staff"]
+        fields = ["nombre_usuario", "email", "password", "telefono", "cargo", "is_staff", "is_tutor"]
         widgets = {
             "nombre_usuario": forms.TextInput(attrs={"class": "form-control", "id": "id_nombre_usuario"}),
             "email": forms.EmailInput(attrs={"class": "form-control", "id": "id_email"}),
             "password": forms.PasswordInput(attrs={"class": "form-control", "id": "id_password"}),
             "telefono": forms.TextInput(attrs={"class": "form-control", "id": "id_telefono"}),
             "cargo": forms.TextInput(attrs={"class": "form-control", "id": "id_cargo"}),
-            "horario_atencion": forms.TextInput(attrs={"class": "form-control", "id": "id_horario_atencion"}),
+            "is_staff": forms.CheckboxInput(attrs={"class": "form-check-input", "id": "id_is_staff"}),
+            "is_tutor": forms.CheckboxInput(attrs={"class": "form-check-input", "id": "id_is_tutor"}),
         }
 
     def clean_nombre_usuario(self):
@@ -212,12 +144,14 @@ class CrearUsuarioForm(forms.ModelForm):
 class EditarUsuarioForm(forms.ModelForm):
     class Meta:
         model = Usuario
-        fields = ["nombre_usuario", "telefono", "cargo", "horario_atencion", "is_active", "is_staff"]
+        fields = ["nombre_usuario", "telefono", "cargo", "horario_atencion", "is_active", "is_staff", "is_tutor"]
         widgets = {
             "nombre_usuario": forms.TextInput(attrs={"id": "id_nombre", "class": "form-control"}),
             "telefono": forms.TextInput(attrs={"id": "id_telefono", "class": "form-control"}),
             "cargo": forms.TextInput(attrs={"id": "id_cargo", "class": "form-control"}),
             "horario_atencion": forms.TextInput(attrs={"id": "id_horario_atencion", "class": "form-control"}),
+            "is_staff": forms.CheckboxInput(attrs={"class": "form-check-input", "id": "id_is_staff"}),
+            "is_tutor": forms.CheckboxInput(attrs={"class": "form-check-input", "id": "id_is_tutor"}),
         }
 
     def clean_nombre_usuario(self):
@@ -247,4 +181,71 @@ class EditarUsuarioForm(forms.ModelForm):
         if not horario:
             raise ValidationError('Por favor, complete el campo de horario de atención.')
         return horario
+
+# ========== FORMULARIOS PARA AYUDANTÍAS ==========
+
+class AsignaturaForm(forms.ModelForm):
+    class Meta:
+        model = Asignatura
+        fields = ["nombre", "codigo", "carrera", "descripcion"]
+        widgets = {
+            "nombre": forms.TextInput(attrs={"class": "form-control", "id": "id_nombre"}),
+            "codigo": forms.TextInput(attrs={"class": "form-control", "id": "id_codigo"}),
+            "carrera": forms.TextInput(attrs={"class": "form-control", "id": "id_carrera"}),
+            "descripcion": forms.Textarea(attrs={"class": "form-control", "id": "id_descripcion", "rows": 3}),
+        }
+    
+    def clean_nombre(self):
+        nombre = self.cleaned_data.get('nombre')
+        if nombre:
+            # Verificar si ya existe una asignatura con el mismo nombre
+            queryset = Asignatura.objects.filter(nombre__iexact=nombre)
+            if self.instance.pk:  # Si estamos editando
+                queryset = queryset.exclude(pk=self.instance.pk)
+            if queryset.exists():
+                raise forms.ValidationError('Ya existe una asignatura con este nombre.')
+        return nombre
+    
+    def clean_codigo(self):
+        codigo = self.cleaned_data.get('codigo')
+        if codigo:
+            # Verificar si ya existe una asignatura con el mismo código
+            queryset = Asignatura.objects.filter(codigo__iexact=codigo)
+            if self.instance.pk:  # Si estamos editando
+                queryset = queryset.exclude(pk=self.instance.pk)
+            if queryset.exists():
+                raise forms.ValidationError('Ya existe una asignatura con este código.')
+        return codigo
+
+class AyudantiaForm(forms.ModelForm):
+    class Meta:
+        model = Ayudantia
+        fields = ["asignatura", "tutor", "titulo", "descripcion", "sala", "fecha", "horario", "duracion", "cupos_totales"]
+        widgets = {
+            "asignatura": forms.Select(attrs={"class": "form-control", "id": "id_asignatura"}),
+            "tutor": forms.Select(attrs={"class": "form-control", "id": "id_tutor"}),
+            "titulo": forms.TextInput(attrs={"class": "form-control", "id": "id_titulo"}),
+            "descripcion": forms.Textarea(attrs={"class": "form-control", "id": "id_descripcion", "rows": 4}),
+            "sala": forms.TextInput(attrs={"class": "form-control", "id": "id_sala"}),
+            "fecha": forms.DateInput(attrs={"class": "form-control", "id": "id_fecha", "type": "date"}),
+            "horario": forms.TimeInput(attrs={"class": "form-control", "id": "id_horario", "type": "time"}),
+            "duracion": forms.NumberInput(attrs={"class": "form-control", "id": "id_duracion", "min": "30", "max": "180"}),
+            "cupos_totales": forms.NumberInput(attrs={"class": "form-control", "id": "id_cupos_totales", "min": "5", "max": "20"}),
+        }
+
+    def clean_fecha(self):
+        fecha = self.cleaned_data.get('fecha')
+        if fecha and fecha < date.today():
+            raise ValidationError('La fecha debe ser a partir de hoy en adelante.')
+        return fecha
+
+    def clean_cupos_totales(self):
+        cupos = self.cleaned_data.get('cupos_totales')
+        if cupos is None:
+            raise ValidationError('El campo de cupos totales es obligatorio.')
+        if cupos < 5:
+            raise ValidationError('Debe haber al menos 5 cupos disponibles.')
+        if cupos > 20:
+            raise ValidationError('No se pueden crear más de 20 cupos por ayudantía.')
+        return cupos
         

@@ -15,24 +15,45 @@ from pathlib import Path
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 import os
+from dotenv import load_dotenv
+
+load_dotenv(os.path.join(BASE_DIR, '.env'))
 
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.0/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-w+*cbtuky&ghmcctne!wlo24-5+839qm$takon9w3a25^*@i)^'
+SECRET_KEY = os.getenv('SECRET_KEY', 'django-insecure-w+*cbtuky&ghmcctne!wlo24-5+839qm$takon9w3a25^*@i)^')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = os.getenv('DEBUG', 'True') == 'True'
 
-ALLOWED_HOSTS = ['*']
+ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS', '*').split(',') if os.getenv('ALLOWED_HOSTS') else ['*']
+
+# CSRF trusted origins - necesario para que el panel global funcione correctamente
+# En producción, se configura desde variables de entorno
+csrf_origins = os.getenv('CSRF_TRUSTED_ORIGINS', '')
+if csrf_origins:
+    CSRF_TRUSTED_ORIGINS = csrf_origins.split(',')
+else:
+    # Valores por defecto para desarrollo
+    CSRF_TRUSTED_ORIGINS = [
+        'http://localhost:8000',
+        'http://127.0.0.1:8000',
+        'http://public-admin-panel.localhost:8000',
+        'http://duoc.localhost:8000',
+        'http://dsa.localhost:8000',
+        'http://inacap.localhost:8000',
+        'http://Inacap.localhost:8000',  # Agregar otros tenants según sea necesario
+    ]
 
 
 # Application definition
 
 AUTHENTICATION_BACKENDS = [
     'loginApp.backend.UsuarioBackend',
+    'globalAdmin.backends.AdministradorGlobalBackend',
     'django.contrib.auth.backends.ModelBackend'
 ]
 
@@ -40,24 +61,36 @@ AUTHENTICATION_BACKENDS = [
 SHARED_APPS = [
     'django_tenants',
     'clientManager',
+    'globalAdmin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
-    'django.contrib.staticfiles'
+    'django.contrib.staticfiles',
+    'corsheaders',
+    'rest_framework',
+    'rest_framework_simplejwt',
 ]
 
 TENANT_APPS = [
     'loginApp',
-    'solicitudesManager'
+    'solicitudesManager',
+    'api_mobile',
 ]
 
 INSTALLED_APPS = SHARED_APPS + [app for app in TENANT_APPS if app not in SHARED_APPS]
 
 MIDDLEWARE = [
+    'corsheaders.middleware.CorsMiddleware',  # Debe ir al principio
+    'api_mobile.middleware.ApiMobileTenantMiddleware',  # Para identificar tenant en API móvil
+    'globalAdmin.middleware.ForcePublicSchemaMiddleware',  # Debe ir ANTES de TenantMainMiddleware
     'django_tenants.middleware.main.TenantMainMiddleware',
+    'globalAdmin.middleware.PublicSchemaMiddleware',
+    'globalAdmin.middleware.TenantThemeMiddleware',
     'django.middleware.security.SecurityMiddleware',
-    'django.contrib.sessions.middleware.SessionMiddleware',
+    'whitenoise.middleware.WhiteNoiseMiddleware',  # Para servir archivos estáticos en producción
+    'django.contrib.sessions.middleware.SessionMiddleware',  # Debe ejecutarse ANTES de PublicSchemaAuthMiddleware
+    'globalAdmin.middleware.PublicSchemaAuthMiddleware',  # ANTES de AuthenticationMiddleware, DESPUÉS de SessionMiddleware
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
@@ -71,13 +104,17 @@ TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
         'DIRS': [],
-        'APP_DIRS': True,
+        'APP_DIRS': False,  # Desactivado para usar loaders personalizados
         'OPTIONS': {
             'context_processors': [
                 'django.template.context_processors.debug',
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
+            ],
+            'loaders': [
+                'globalAdmin.template_loaders.TenantThemeLoader',
+                'django.template.loaders.app_directories.Loader',
             ],
         },
     },
@@ -93,16 +130,40 @@ WSGI_APPLICATION = 'portalAutoatencion.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/5.0/ref/settings/#databases
 
-DATABASES = {
-    'default': {
-        'ENGINE': 'django_tenants.postgresql_backend',
-        'NAME': 'postgres',
-        'USER': 'postgres',
-        'PASSWORD': 'vale1819',
-        'HOST': 'localhost',
-        'PORT': 5432
+# Configuración de base de datos
+# Soporta tanto variables de entorno individuales como DATABASE_URL
+import dj_database_url
+
+# Intentar usar DATABASE_URL primero (para Render, Railway, etc.)
+database_url = os.getenv('DATABASE_URL')
+if database_url:
+    # Si hay DATABASE_URL, usarla pero mantener el engine de django-tenants
+    db_config = dj_database_url.config(
+        default=database_url,
+        conn_max_age=600,
+        conn_health_checks=True,
+    )
+    # Forzar el engine de django-tenants
+    db_config['ENGINE'] = 'django_tenants.postgresql_backend'
+    db_config.setdefault('OPTIONS', {})['client_encoding'] = 'utf8'
+    DATABASES = {
+        'default': db_config
     }
-}
+else:
+    # Fallback a variables individuales (desarrollo local)
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django_tenants.postgresql_backend',
+            'NAME': os.getenv('DB_NAME', 'postgres'),
+            'USER': os.getenv('DB_USER', 'postgres'),
+            'PASSWORD': os.getenv('DB_PASSWORD', 'postgres'),
+            'HOST': os.getenv('DB_HOST', 'localhost'),
+            'PORT': os.getenv('DB_PORT', '5432'),
+            'OPTIONS': {
+                'client_encoding': 'utf8'
+            }
+        }
+    }
 
 
 DATABASE_ROUTERS = (
@@ -153,6 +214,20 @@ STATICFILES_DIRS = (os.path.join(BASE_DIR, 'loginApp/static'),)
 
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 
+# Configuración de WhiteNoise para servir archivos estáticos en producción
+if not DEBUG:
+    STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
+
+# Static files finders para theming por tenant
+STATICFILES_FINDERS = [
+    'globalAdmin.static_loaders.TenantStaticFinder',
+    'django.contrib.staticfiles.finders.FileSystemFinder',
+    'django.contrib.staticfiles.finders.AppDirectoriesFinder',
+]
+
+# Tema por defecto del tenant (se actualiza dinámicamente por el middleware)
+CURRENT_TENANT_THEME = 'default'
+
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.0/ref/settings/#default-auto-field
 
@@ -161,3 +236,107 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 TENANT_MODEL = 'clientManager.Empresa'
 
 TENANT_DOMAIN_MODEL = 'clientManager.Dominio'
+
+# Configuración para forzar schema público en ciertas URLs
+# Las URLs que empiezan con /global/ siempre se procesan en el schema público
+SHOW_PUBLIC_IF_NO_TENANT_FOUND = True
+
+# URLs que deben procesarse en el schema público (sin identificar tenant)
+PUBLIC_SCHEMA_URLCONF = None  # Usaremos middleware personalizado
+
+# ========== CONFIGURACIÓN DE REST FRAMEWORK PARA API MÓVIL ==========
+
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': (
+        'api_mobile.authentication.CustomJWTAuthentication',
+        'rest_framework.authentication.SessionAuthentication',
+    ),
+    'DEFAULT_PERMISSION_CLASSES': (
+        'rest_framework.permissions.IsAuthenticated',
+    ),
+    'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
+    'PAGE_SIZE': 20,
+    'DEFAULT_RENDERER_CLASSES': (
+        'rest_framework.renderers.JSONRenderer',
+    ),
+    'DEFAULT_PARSER_CLASSES': (
+        'rest_framework.parsers.JSONParser',
+        'rest_framework.parsers.FormParser',
+        'rest_framework.parsers.MultiPartParser',
+    ),
+}
+
+# Configuración de JWT
+from datetime import timedelta
+
+SIMPLE_JWT = {
+    'ACCESS_TOKEN_LIFETIME': timedelta(hours=24),
+    'REFRESH_TOKEN_LIFETIME': timedelta(days=7),
+    'ROTATE_REFRESH_TOKENS': True,
+    'BLACKLIST_AFTER_ROTATION': True,
+    'UPDATE_LAST_LOGIN': True,
+    'ALGORITHM': 'HS256',
+    'SIGNING_KEY': SECRET_KEY,
+    'AUTH_HEADER_TYPES': ('Bearer',),
+    'AUTH_HEADER_NAME': 'HTTP_AUTHORIZATION',
+    'USER_ID_FIELD': 'id_usuario',
+    'USER_ID_CLAIM': 'user_id',
+}
+
+# ========== CONFIGURACIÓN DE CORS PARA API MÓVIL ==========
+
+CORS_ALLOWED_ORIGINS = [
+    "http://localhost:19000",  # Expo web
+    "http://localhost:19006",  # Expo alternativo
+    "http://127.0.0.1:19000",
+    "http://127.0.0.1:19006",
+    "exp://192.168.100.25:19000",  # Expo en tu red local
+    "exp://localhost:19000",
+]
+
+# Permitir todas las solicitudes desde la app móvil en desarrollo
+# En producción, configurar CORS_ALLOWED_ORIGINS desde variables de entorno
+cors_allowed_origins_env = os.getenv('CORS_ALLOWED_ORIGINS', '')
+if cors_allowed_origins_env:
+    CORS_ALLOWED_ORIGINS = cors_allowed_origins_env.split(',')
+    CORS_ALLOW_ALL_ORIGINS = False
+else:
+    CORS_ALLOW_ALL_ORIGINS = True  # Solo en desarrollo
+
+# Permitir headers personalizados para la API móvil
+CORS_ALLOW_HEADERS = [
+    'accept',
+    'accept-encoding',
+    'authorization',
+    'content-type',
+    'dnt',
+    'origin',
+    'user-agent',
+    'x-csrftoken',
+    'x-requested-with',
+    'x-tenant-schema',  # Header personalizado para identificar el tenant
+    'X-Tenant-Schema',  # También en mayúsculas
+]  # Solo para desarrollo, cambiar en producción
+
+CORS_ALLOW_CREDENTIALS = True
+
+CORS_ALLOW_METHODS = [
+    'DELETE',
+    'GET',
+    'OPTIONS',
+    'PATCH',
+    'POST',
+    'PUT',
+]
+
+# ========== CONFIGURACIÓN DE SEGURIDAD PARA PRODUCCIÓN ==========
+if not DEBUG:
+    SECURE_SSL_REDIRECT = os.getenv('SECURE_SSL_REDIRECT', 'True') == 'True'
+    SESSION_COOKIE_SECURE = True
+    CSRF_COOKIE_SECURE = True
+    SECURE_BROWSER_XSS_FILTER = True
+    SECURE_CONTENT_TYPE_NOSNIFF = True
+    X_FRAME_OPTIONS = 'DENY'
+    SECURE_HSTS_SECONDS = 31536000  # 1 año
+    SECURE_HSTS_INCLUDE_SUBDOMAINS = True
+    SECURE_HSTS_PRELOAD = True

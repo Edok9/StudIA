@@ -3,6 +3,8 @@
 import os
 import sys
 
+os.environ['PGCLIENTENCODING'] = 'utf-8'
+
 
 def main():
     """Run administrative tasks."""

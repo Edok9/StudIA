@@ -78,17 +78,26 @@
                     {% csrf_token %}
                     {% for campo in formulario %}
                     <div class="form-group">
+                        {% if campo.field.widget.input_type == 'checkbox' %}
+                        <div class="form-check">
+                            {{ campo }}
+                            <label class="form-check-label text-light" for="{{ campo.id_for_label }}">
+                                {{ campo.label }}
+                            </label>
+                        </div>
+                        {% else %}
                         <label class="form-label" for="{{ campo.id_for_label }}">{{ campo.label }}</label>
                         <div class="input-wrapper">
                             {{ campo }}
-                            {% if campo.errors %}
-                            <ul class="error-messages">
-                                {% for error in campo.errors %}
-                                <li>{{ error }}</li>
-                                {% endfor %}
-                            </ul>
-                            {% endif %}
                         </div>
+                        {% endif %}
+                        {% if campo.errors %}
+                        <ul class="error-messages">
+                            {% for error in campo.errors %}
+                            <li>{{ error }}</li>
+                            {% endfor %}
+                        </ul>
+                        {% endif %}
                     </div>
                     {% endfor %}
                     <div class="text-center">
