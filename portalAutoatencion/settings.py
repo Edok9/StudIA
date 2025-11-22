@@ -164,6 +164,7 @@ if database_url and DJ_DATABASE_URL_AVAILABLE and not _is_build_process:
 elif _is_build_process:
     # Durante el build, usar una configuración de PostgreSQL dummy
     # django-tenants requiere PostgreSQL, pero no intentaremos conectarnos realmente
+    # Usamos un host inválido para que falle rápido si intenta conectarse
     DATABASES = {
         'default': {
             'ENGINE': 'django_tenants.postgresql_backend',
@@ -171,12 +172,21 @@ elif _is_build_process:
             'USER': 'build_dummy',
             'PASSWORD': 'build_dummy',
             'HOST': '127.0.0.1',
-            'PORT': '5432',
+            'PORT': '5433',  # Puerto diferente para que falle rápido
             'OPTIONS': {
-                'connect_timeout': 0.1,  # Timeout muy corto
-            }
+                'connect_timeout': 0.01,  # Timeout muy corto (10ms)
+            },
+            'CONN_MAX_AGE': 0,  # No mantener conexiones
         }
     }
+    # Deshabilitar la conexión automática durante el build
+    # Esto evita que django-tenants intente conectarse al importar modelos
+    import django.db.backends.base.base as db_base
+    original_ensure_connection = db_base.BaseDatabaseWrapper.ensure_connection
+    def noop_ensure_connection(self):
+        # No hacer nada durante el build
+        pass
+    db_base.BaseDatabaseWrapper.ensure_connection = noop_ensure_connection
 else:
     # Fallback a variables individuales (desarrollo local)
     DATABASES = {
