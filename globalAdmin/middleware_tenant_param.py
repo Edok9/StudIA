@@ -26,6 +26,14 @@ class TenantParamMiddleware(MiddlewareMixin):
         if not (host.startswith('studia-8dmp.onrender.com') or host.startswith('localhost')):
             return None
         
+        # NO procesar si estamos accediendo al panel de administración global
+        # Estas rutas deben funcionar sin tenant
+        if request.path.startswith('/global/'):
+            # Limpiar tenant_schema_name de la sesión si existe para evitar conflictos
+            if hasattr(request, 'session') and 'tenant_schema_name' in request.session:
+                del request.session['tenant_schema_name']
+            return None
+        
         # 1. Intentar detectar desde query parameter: ?tenant=DUOC%20UC
         tenant_param = request.GET.get('tenant', None)
         

@@ -361,6 +361,11 @@ def logoutProcess(request):
     
     logout(request)
     
+    # Limpiar el tenant_schema_name de la sesión para evitar redirecciones automáticas
+    # después del logout (solo si existe en la sesión)
+    if hasattr(request, 'session') and 'tenant_schema_name' in request.session:
+        del request.session['tenant_schema_name']
+    
     # Pasar la información del tenant como contexto al template
     return render(request, "logout.html", {
         'tenant_schema': tenant_schema,
