@@ -144,12 +144,12 @@ class CrearUsuarioForm(forms.ModelForm):
 class EditarUsuarioForm(forms.ModelForm):
     class Meta:
         model = Usuario
-        fields = ["nombre_usuario", "telefono", "cargo", "horario_atencion", "is_active", "is_staff", "is_tutor"]
+        fields = ["nombre_usuario", "telefono", "cargo", "is_active", "is_staff", "is_tutor"]
         widgets = {
             "nombre_usuario": forms.TextInput(attrs={"id": "id_nombre", "class": "form-control"}),
             "telefono": forms.TextInput(attrs={"id": "id_telefono", "class": "form-control"}),
             "cargo": forms.TextInput(attrs={"id": "id_cargo", "class": "form-control"}),
-            "horario_atencion": forms.TextInput(attrs={"id": "id_horario_atencion", "class": "form-control"}),
+            "is_active": forms.CheckboxInput(attrs={"class": "form-check-input", "id": "id_is_active"}),
             "is_staff": forms.CheckboxInput(attrs={"class": "form-check-input", "id": "id_is_staff"}),
             "is_tutor": forms.CheckboxInput(attrs={"class": "form-check-input", "id": "id_is_tutor"}),
         }
@@ -175,12 +175,6 @@ class EditarUsuarioForm(forms.ModelForm):
         if not cargo:
             raise ValidationError('Por favor, complete el campo de cargo.')
         return cargo
-
-    def clean_horario_atencion(self):
-        horario = self.cleaned_data.get('horario_atencion')
-        if not horario:
-            raise ValidationError('Por favor, complete el campo de horario de atención.')
-        return horario
 
 # ========== FORMULARIOS PARA AYUDANTÍAS ==========
 

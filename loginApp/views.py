@@ -249,7 +249,11 @@ def editarUsuario(request, pk):
     if request.method == "POST":
         form = EditarUsuarioForm(request.POST, instance=usuario) 
         if form.is_valid():
-            form.save() 
+            usuario_actualizado = form.save(commit=False)
+            # Si is_active está desmarcado, desactivar el usuario
+            if not form.cleaned_data.get('is_active', False):
+                usuario_actualizado.is_active = False
+            usuario_actualizado.save()
             return redirect("usuarios")
         else:
             return render(request, "editarUsuario.html", {"formulario": form})
