@@ -9,6 +9,9 @@ class UsuarioBackend(ModelBackend): # Gracias Chatgpt
             return None
         else:
             if user.check_password(clave):
+                # Verificar que el usuario esté activo
+                if not user.is_active:
+                    return None
                 return user
     
     def get_user(self, id_usuario): # Gracias documentacion de django
