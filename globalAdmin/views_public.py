@@ -1,6 +1,7 @@
 """
 Vistas públicas para cuando no se identifica un tenant.
 """
+import sys
 from django.shortcuts import render, redirect
 from django.http import HttpResponse
 
@@ -10,7 +11,23 @@ def public_index(request):
     Vista pública para la raíz cuando no se identifica un tenant.
     Redirige al panel de administración global.
     """
-    return redirect('/global/login/')
+    import sys
+    sys.stdout.write('[PUBLIC INDEX] Vista ejecutada\n')
+    sys.stdout.flush()
+    
+    # Devolver una respuesta simple con un link al panel global
+    return HttpResponse("""
+    <html>
+    <head>
+        <meta http-equiv="refresh" content="0; url=/global/login/">
+        <title>Portal de Autoatención</title>
+    </head>
+    <body>
+        <h1>Redirigiendo...</h1>
+        <p>Si no eres redirigido automáticamente, <a href="/global/login/">haz click aquí</a>.</p>
+    </body>
+    </html>
+    """, status=302, headers={'Location': '/global/login/'})
 
 
 def public_welcome(request):
