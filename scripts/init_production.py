@@ -29,6 +29,19 @@ def init_production():
     
     print("[INIT] Iniciando inicialización de producción...")
     
+    # 0. Ejecutar migraciones si es necesario
+    try:
+        print("[INIT] Ejecutando migraciones del schema público...")
+        call_command('migrate_schemas', '--shared', verbosity=0)
+        print("[INIT] ✓ Migraciones del schema público completadas")
+        
+        print("[INIT] Ejecutando migraciones de tenants...")
+        call_command('migrate_schemas', verbosity=0)
+        print("[INIT] ✓ Migraciones de tenants completadas")
+    except Exception as e:
+        print(f"[INIT] ⚠ Error ejecutando migraciones: {str(e)}")
+        print("[INIT] ⚠ Continuando con la inicialización...")
+    
     # 1. Verificar/crear administrador global
     with schema_context(public_schema):
         admin_email = os.getenv('GLOBAL_ADMIN_EMAIL', '')
