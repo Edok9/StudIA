@@ -52,28 +52,49 @@ class TenantParamMiddleware(MiddlewareMixin):
                     # Buscar el tenant por schema_name
                     tenant = Empresa.objects.get(schema_name=tenant_param)
                     
-                    # Obtener el primer dominio del tenant
-                    dominio = tenant.domains.filter(is_primary=True).first()
+                    # Lista de tenants que deben usar el método de parámetro de query (sin modificar hostname)
+                    # Estos tenants no tienen subdominios funcionales en Render.com
+                    tenants_con_parametro = ['DUOC UC', 'INACAP']
                     
-                    if dominio:
-                        # Guardar el hostname original
-                        request._original_host = host
+                    # Verificar si el tenant debe usar el método de parámetro de query
+                    usar_parametro = (
+                        tenant.schema_name in tenants_con_parametro or 
+                        tenant.nombre_empresa in tenants_con_parametro
+                    )
+                    
+                    if usar_parametro:
+                        # Para estos tenants, establecer el tenant directamente sin modificar el hostname
+                        # Esto permite que TenantMainMiddleware lo detecte correctamente
+                        request.tenant = tenant
                         
                         # Guardar el tenant en la sesión para mantenerlo en requests posteriores
-                        # Solo si la sesión está disponible (SessionMiddleware ya se ejecutó)
                         if hasattr(request, 'session'):
                             request.session['tenant_schema_name'] = tenant.schema_name
                         
-                        # Modificar el hostname para que TenantMainMiddleware lo detecte
-                        request.META['HTTP_HOST'] = dominio.domain
-                        request.META['SERVER_NAME'] = dominio.domain.split(':')[0]  # Sin puerto
-                        
-                        sys.stdout.write(f'[TENANT PARAM] Tenant detectado: {tenant.schema_name} via parámetro/sesión\n')
-                        sys.stdout.write(f'[TENANT PARAM] Hostname modificado a: {dominio.domain}\n')
+                        sys.stdout.write(f'[TENANT PARAM] Tenant detectado: {tenant.schema_name} via parámetro (método directo)\n')
                         sys.stdout.flush()
                     else:
-                        sys.stdout.write(f'[TENANT PARAM] Tenant {tenant.schema_name} no tiene dominio configurado\n')
-                        sys.stdout.flush()
+                        # Para otros tenants, usar el método original con modificación de hostname
+                        dominio = tenant.domains.filter(is_primary=True).first()
+                        
+                        if dominio:
+                            # Guardar el hostname original
+                            request._original_host = host
+                            
+                            # Guardar el tenant en la sesión para mantenerlo en requests posteriores
+                            if hasattr(request, 'session'):
+                                request.session['tenant_schema_name'] = tenant.schema_name
+                            
+                            # Modificar el hostname para que TenantMainMiddleware lo detecte
+                            request.META['HTTP_HOST'] = dominio.domain
+                            request.META['SERVER_NAME'] = dominio.domain.split(':')[0]  # Sin puerto
+                            
+                            sys.stdout.write(f'[TENANT PARAM] Tenant detectado: {tenant.schema_name} via parámetro/sesión\n')
+                            sys.stdout.write(f'[TENANT PARAM] Hostname modificado a: {dominio.domain}\n')
+                            sys.stdout.flush()
+                        else:
+                            sys.stdout.write(f'[TENANT PARAM] Tenant {tenant.schema_name} no tiene dominio configurado\n')
+                            sys.stdout.flush()
                         
             except Empresa.DoesNotExist:
                 sys.stdout.write(f'[TENANT PARAM] Tenant no encontrado: {tenant_param}\n')
