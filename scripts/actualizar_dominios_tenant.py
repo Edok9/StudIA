@@ -43,9 +43,11 @@ def actualizar_dominios_tenant():
         for tenant in tenants:
             print(f"[DOMINIOS] Procesando tenant: {tenant.schema_name}")
             
-            # Usar el dominio principal directamente (sin subdominios)
-            # Esto permite que el middleware TenantParamMiddleware detecte el tenant
-            nuevo_dominio = DOMINIO_BASE
+            # Crear un dominio único para cada tenant
+            # Aunque no exista en DNS, el middleware lo detectará desde el parámetro
+            # y modificará el hostname para que coincida con este dominio
+            subdominio = tenant.schema_name.lower().replace(' ', '').replace('_', '')
+            nuevo_dominio = f"{subdominio}.{DOMINIO_BASE}"
             
             # Eliminar dominios antiguos que no coincidan
             dominios_antiguos = tenant.domains.exclude(domain=nuevo_dominio)

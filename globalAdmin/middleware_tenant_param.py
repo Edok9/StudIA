@@ -11,7 +11,7 @@ from clientManager.models import Empresa, Dominio
 class TenantParamMiddleware(MiddlewareMixin):
     """
     Middleware que detecta el tenant desde un parámetro de query string o path.
-    Se ejecuta DESPUÉS de TenantMainMiddleware para establecer el tenant si no se detectó.
+    Se ejecuta ANTES de TenantMainMiddleware para modificar el hostname.
     
     Soporta:
     - ?tenant=DUOC%20UC (query parameter)
@@ -19,10 +19,17 @@ class TenantParamMiddleware(MiddlewareMixin):
     """
     
     def process_request(self, request):
-        # Guardar el parámetro del tenant en el request para usarlo después
+        # Solo procesar si estamos en el dominio principal
+        host = request.get_host()
+        
+        # Si ya estamos en un subdominio que funciona, no hacer nada
+        if not (host.startswith('studia-8dmp.onrender.com') or host.startswith('localhost')):
+            return None
+        
+        # 1. Intentar detectar desde query parameter: ?tenant=DUOC%20UC
         tenant_param = request.GET.get('tenant', None)
         
-        # Intentar detectar desde path: /tenant/duoc/
+        # 2. Intentar detectar desde path: /tenant/duoc/
         if not tenant_param and request.path.startswith('/tenant/'):
             path_parts = request.path.split('/')
             if len(path_parts) >= 3 and path_parts[1] == 'tenant':
@@ -36,32 +43,35 @@ class TenantParamMiddleware(MiddlewareMixin):
                     pass
         
         if tenant_param:
-            request._tenant_param = tenant_param
-        
-        return None
-    
-    def process_response(self, request, response):
-        # Si hay un parámetro de tenant y no se detectó un tenant, establecerlo
-        if hasattr(request, '_tenant_param') and not hasattr(request, 'tenant'):
             try:
                 with schema_context(get_public_schema_name()):
-                    tenant = Empresa.objects.get(schema_name=request._tenant_param)
-                    # Establecer el tenant en el request
-                    request.tenant = tenant
-                    # Establecer el schema en la conexión de base de datos
-                    from django.db import connection
-                    from django_tenants.postgresql_backend.base import DatabaseWrapper
-                    if isinstance(connection, DatabaseWrapper):
-                        connection.set_tenant(tenant)
+                    # Buscar el tenant por schema_name
+                    tenant = Empresa.objects.get(schema_name=tenant_param)
                     
-                    sys.stdout.write(f'[TENANT PARAM] Tenant establecido: {tenant.schema_name}\n')
-                    sys.stdout.flush()
+                    # Obtener el primer dominio del tenant
+                    dominio = tenant.domains.filter(is_primary=True).first()
+                    
+                    if dominio:
+                        # Guardar el hostname original
+                        request._original_host = host
+                        
+                        # Modificar el hostname para que TenantMainMiddleware lo detecte
+                        request.META['HTTP_HOST'] = dominio.domain
+                        request.META['SERVER_NAME'] = dominio.domain.split(':')[0]  # Sin puerto
+                        
+                        sys.stdout.write(f'[TENANT PARAM] Tenant detectado: {tenant.schema_name} via parámetro\n')
+                        sys.stdout.write(f'[TENANT PARAM] Hostname modificado a: {dominio.domain}\n')
+                        sys.stdout.flush()
+                    else:
+                        sys.stdout.write(f'[TENANT PARAM] Tenant {tenant.schema_name} no tiene dominio configurado\n')
+                        sys.stdout.flush()
+                        
             except Empresa.DoesNotExist:
-                sys.stdout.write(f'[TENANT PARAM] Tenant no encontrado: {request._tenant_param}\n')
+                sys.stdout.write(f'[TENANT PARAM] Tenant no encontrado: {tenant_param}\n')
                 sys.stdout.flush()
             except Exception as e:
                 sys.stdout.write(f'[TENANT PARAM] Error: {str(e)}\n')
                 sys.stdout.flush()
         
-        return response
+        return None
 
