@@ -15,6 +15,11 @@ class PublicRootMiddleware(MiddlewareMixin):
     para poder detectar cuando no se encontró un tenant.
     """
     def process_request(self, request):
+        # Log para verificar que el middleware se ejecuta
+        if request.path == '/':
+            sys.stdout.write(f'[PUBLIC ROOT] process_request ejecutado para path: {request.path}\n')
+            sys.stdout.flush()
+        
         # Si estamos en la raíz, verificar si estamos en el schema público
         if request.path == '/' and not request.path.startswith('/global/'):
             # Verificar si estamos en el schema público o no hay tenant

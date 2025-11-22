@@ -13,7 +13,7 @@ services:
       - key: SECRET_KEY
         generateValue: true
       - key: DEBUG
-        value: "False"
+        value: "True"  # Temporalmente True para debugging
       - key: ALLOWED_HOSTS
         value: studia-8dmp.onrender.com,*.onrender.com
       - key: CSRF_TRUSTED_ORIGINS
