@@ -42,8 +42,8 @@ class TenantParamMiddleware(MiddlewareMixin):
                 except (Empresa.DoesNotExist, Empresa.MultipleObjectsReturned):
                     pass
         
-        # 3. Intentar leer desde la sesión (si ya se estableció antes)
-        if not tenant_param:
+        # 3. Intentar leer desde la sesión (si ya se estableció antes y la sesión está disponible)
+        if not tenant_param and hasattr(request, 'session'):
             tenant_param = request.session.get('tenant_schema_name', None)
         
         if tenant_param:
@@ -60,7 +60,9 @@ class TenantParamMiddleware(MiddlewareMixin):
                         request._original_host = host
                         
                         # Guardar el tenant en la sesión para mantenerlo en requests posteriores
-                        request.session['tenant_schema_name'] = tenant.schema_name
+                        # Solo si la sesión está disponible (SessionMiddleware ya se ejecutó)
+                        if hasattr(request, 'session'):
+                            request.session['tenant_schema_name'] = tenant.schema_name
                         
                         # Modificar el hostname para que TenantMainMiddleware lo detecte
                         request.META['HTTP_HOST'] = dominio.domain
