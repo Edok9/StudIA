@@ -40,6 +40,8 @@ services:
         fromDatabase:
           name: portal-db
           property: port
+      - key: PYTHON_VERSION
+        value: "3.11.1"
 
 databases:
   - name: portal-db
