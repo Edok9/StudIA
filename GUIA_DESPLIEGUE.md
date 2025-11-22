@@ -37,7 +37,12 @@ Esta guía te ayudará a desplegar tu aplicación Django con multi-tenancy en in
 - `requirements.txt` - Actualizado con dependencias necesarias
 - `settings.py` - Configurado para producción
 
-1. **El archivo `render.yaml`** ya está creado en la raíz del proyecto:
+1. **El archivo `runtime.txt`** ya está creado en la raíz del proyecto para forzar Python 3.11.9:
+   ```
+   python-3.11.9
+   ```
+
+2. **El archivo `render.yaml`** ya está creado en la raíz del proyecto:
 
 ```yaml
 services:
@@ -109,37 +114,121 @@ git push -u origin main
 4. Configura:
    - **Name**: `portal-autoatencion`
    - **Environment**: `Python 3`
-   - **Build Command**: `pip install -r requirements.txt && python manage.py collectstatic --noinput`
+   - **Build Command**: `pip install --upgrade pip setuptools wheel && pip install -r requirements.txt && python manage.py collectstatic --noinput`
    - **Start Command**: `gunicorn portalAutoatencion.wsgi:application`
 5. Click en "Add Database" → PostgreSQL (Free)
 6. Agregar variables de entorno:
    - `SECRET_KEY`: Genera una nueva clave secreta
    - `DEBUG`: `False`
-   - `ALLOWED_HOSTS`: `tu-app.onrender.com`
-   - `CSRF_TRUSTED_ORIGINS`: `https://tu-app.onrender.com`
+   - `ALLOWED_HOSTS`: `tu-app.onrender.com,*.onrender.com` (el `*` permite subdominios para tenants)
+   - `CSRF_TRUSTED_ORIGINS`: `https://tu-app.onrender.com,https://*.onrender.com` (permite subdominios)
+   - `CORS_ALLOWED_ORIGINS`: `https://tu-app.onrender.com,https://*.onrender.com` (si usas API móvil)
 7. Click "Create Web Service"
 
 #### 5. Ejecutar migraciones
 
-Una vez desplegado, ejecuta las migraciones desde el shell de Render:
+**✅ Las migraciones se ejecutan automáticamente** durante el despliegue en el `buildCommand`.
 
-1. Ve a tu servicio en Render
-2. Click en "Shell" (en la barra lateral)
-3. Ejecuta:
+Si necesitas ejecutarlas manualmente o desde local:
 
+**Opción A: Desde tu máquina local (GRATIS)**
+
+1. Obtén las credenciales de la base de datos de Render:
+   - En Render.com → Tu base de datos → "Info"
+   - Copia el `Internal Database URL` o las credenciales individuales
+
+2. Configura las variables de entorno localmente:
+```bash
+# En PowerShell
+$env:DATABASE_URL="postgresql://usuario:password@host:puerto/database"
+$env:SECRET_KEY="tu-secret-key-de-render"
+$env:DEBUG="False"
+```
+
+3. Ejecuta las migraciones:
 ```bash
 python manage.py migrate_schemas --shared
 python manage.py migrate_schemas
 ```
 
+**Opción B: Las migraciones ya se ejecutaron automáticamente**
+
+El `buildCommand` en `render.yaml` ya incluye las migraciones, así que deberían estar aplicadas.
+
 **Importante:** Si ya tienes tenants creados localmente, necesitarás:
 1. Exportar los datos de tu base de datos local
 2. Importarlos en la base de datos de Render
 
-O crear los tenants nuevamente usando:
-```bash
-python manage.py create_tenant
+O crear los tenants nuevamente usando el panel de administración global (después de crear el admin).
+
+#### 6. Configurar Dominios de Tenants en Producción
+
+Después de las migraciones, necesitas actualizar los dominios de tus tenants para que funcionen con los subdominios de Render:
+
+1. En el Shell de Render, ejecuta:
+```python
+python manage.py shell
 ```
+
+2. Actualiza los dominios (ejemplo para DUOC):
+```python
+from clientManager.models import Empresa, Dominio
+
+# Obtener el tenant
+duoc = Empresa.objects.get(schema_name='DUOC UC')
+
+# Eliminar dominio localhost si existe
+Dominio.objects.filter(tenant=duoc, domain__contains='localhost').delete()
+
+# Crear dominio de producción
+Dominio.objects.create(
+    domain='duoc.tu-app.onrender.com',  # Reemplaza 'tu-app' con tu nombre real
+    tenant=duoc,
+    is_primary=True
+)
+```
+
+3. Repite para cada tenant (INACAP, DSA, etc.)
+
+**Nota**: Render.com redirige automáticamente todos los subdominios (`*.onrender.com`) a tu aplicación, así que no necesitas configuración adicional en Render.
+
+**Ver documentación completa**: Ver `TENANTS_EN_PRODUCCION.md` para más detalles.
+
+#### 7. Crear Administrador Global
+
+**Opción A: Usando Variables de Entorno (RECOMENDADA - Automático)**
+
+1. Ve a tu servicio en Render.com → "Environment"
+2. Agrega estas variables:
+   - `GLOBAL_ADMIN_EMAIL`: `tu-email@ejemplo.com`
+   - `GLOBAL_ADMIN_PASSWORD`: `tu-password-segura`
+   - `GLOBAL_ADMIN_NOMBRE`: `Administrador Global`
+3. Reinicia el servicio (o haz un nuevo deploy)
+4. El script `scripts/init_production.py` creará automáticamente el administrador
+
+**Opción B: Desde tu máquina local (GRATIS)**
+
+1. Obtén las credenciales de la base de datos de Render (ver paso 5)
+2. Configura las variables de entorno localmente:
+```bash
+$env:DATABASE_URL="postgresql://usuario:password@host:puerto/database"
+$env:SECRET_KEY="tu-secret-key-de-render"
+$env:DEBUG="False"
+```
+3. Ejecuta:
+```bash
+python manage.py create_global_admin tu-email@ejemplo.com "Tu Nombre" tu-password --superuser
+```
+
+4. Accede al panel en:
+```
+https://tu-app.onrender.com/global/login/
+```
+
+**Ver documentación completa**: 
+- `PANEL_ADMINISTRACION_PRODUCCION.md` - Panel de administración
+- `SOLUCION_SIN_SHELL_RENDER.md` - Solución sin shell de Render
+- `GUIA_TRANSFERIR_DATOS_RENDER.md` - **Guía completa para transferir datos desde local a Render**
 
 ---
 

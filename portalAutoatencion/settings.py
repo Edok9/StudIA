@@ -247,7 +247,8 @@ TENANT_DOMAIN_MODEL = 'clientManager.Dominio'
 SHOW_PUBLIC_IF_NO_TENANT_FOUND = True
 
 # URLs que deben procesarse en el schema público (sin identificar tenant)
-PUBLIC_SCHEMA_URLCONF = None  # Usaremos middleware personalizado
+# Cuando no se identifica un tenant, usar estas URLs
+PUBLIC_SCHEMA_URLCONF = 'globalAdmin.urls_public'
 
 # ========== CONFIGURACIÓN DE REST FRAMEWORK PARA API MÓVIL ==========
 
