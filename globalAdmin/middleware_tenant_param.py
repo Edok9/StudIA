@@ -71,24 +71,42 @@ class TenantParamMiddleware(MiddlewareMixin):
                     
                     if usar_parametro:
                         # Para estos tenants, necesitamos modificar el hostname para que TenantMainMiddleware lo reconozca
-                        # Siempre crear un dominio temporal basado en el schema_name para evitar problemas con dominios no funcionales
-                        # Esto es solo para que TenantMainMiddleware lo reconozca internamente
-                        dominio_temporal = tenant.schema_name.lower().replace(' ', '-').replace('_', '-')
-                        dominio_domain = f"{dominio_temporal}.studia-8dmp.onrender.com"
+                        # Primero intentar usar un dominio existente del tenant
+                        dominio = tenant.domains.filter(is_primary=True).first()
                         
-                        # Verificar si este dominio existe en la BD, si no, crearlo temporalmente en memoria
-                        # pero no lo guardamos, solo lo usamos para modificar el hostname
-                        dominio = tenant.domains.filter(domain__iexact=dominio_domain).first()
                         if not dominio:
-                            # El dominio no existe en BD, pero lo usaremos temporalmente solo para el hostname
-                            sys.stdout.write(f'[TENANT PARAM] Usando dominio temporal: {dominio_domain}\n')
-                            sys.stdout.flush()
+                            # Si no hay dominio, crear uno temporal basado en el schema_name
+                            dominio_temporal = tenant.schema_name.lower().replace(' ', '-').replace('_', '-')
+                            dominio_domain = f"{dominio_temporal}.studia-8dmp.onrender.com"
+                            
+                            # Verificar si este dominio ya existe en la BD
+                            dominio_existente = tenant.domains.filter(domain__iexact=dominio_domain).first()
+                            
+                            if not dominio_existente:
+                                # Crear el dominio temporalmente en la BD para que TenantMainMiddleware lo reconozca
+                                # Esto es necesario porque TenantMainMiddleware busca dominios en la BD
+                                try:
+                                    dominio_existente = Dominio.objects.create(
+                                        domain=dominio_domain,
+                                        tenant=tenant,
+                                        is_primary=True
+                                    )
+                                    sys.stdout.write(f'[TENANT PARAM] Dominio temporal creado en BD: {dominio_domain}\n')
+                                    sys.stdout.flush()
+                                except Exception as e:
+                                    sys.stdout.write(f'[TENANT PARAM] Error al crear dominio temporal: {str(e)}\n')
+                                    sys.stdout.flush()
+                                    # Si falla, usar el dominio temporal de todas formas
+                            
+                            dominio_domain = dominio_existente.domain if dominio_existente else dominio_domain
+                        else:
+                            dominio_domain = dominio.domain
                         
                         # Guardar el hostname original
                         request._original_host = host
                         
                         # Modificar el hostname para que TenantMainMiddleware lo detecte
-                        # Aunque el dominio no sea funcional en DNS, TenantMainMiddleware lo reconocerá
+                        # Aunque el dominio no sea funcional en DNS, TenantMainMiddleware lo reconocerá desde la BD
                         request.META['HTTP_HOST'] = dominio_domain
                         request.META['SERVER_NAME'] = dominio_domain.split(':')[0]  # Sin puerto
                         
