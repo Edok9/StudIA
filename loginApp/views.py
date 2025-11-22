@@ -4,7 +4,7 @@ from django.contrib import messages
 from django.contrib.auth import authenticate, login, logout, update_session_auth_hash
 from django.contrib.auth.decorators import login_required
 from django.contrib.admin.views.decorators import staff_member_required
-from django.urls import reverse_lazy
+from django.urls import reverse_lazy, reverse
 from django.db import models
 from django.utils import timezone
 from functools import wraps
@@ -86,6 +86,19 @@ def index(request):
             login(request, usuario)
             # Parche para redirecciones del decorador login_required, revisar si hay una mejor solucion
             next_url = request.GET.get('next', '')
+            
+            # Si hay un parámetro tenant en la sesión o en la URL, mantenerlo en el redirect
+            tenant_param = request.GET.get('tenant') or request.session.get('tenant_schema_name')
+            if tenant_param:
+                if next_url:
+                    # Agregar el parámetro tenant a la URL de next
+                    separator = '&' if '?' in next_url else '?'
+                    next_url = f"{next_url}{separator}tenant={tenant_param}"
+                    return HttpResponse(status=302, headers={'Location': next_url})
+                else:
+                    # Redirigir a home con el parámetro tenant
+                    return redirect(f"{reverse('home')}?tenant={tenant_param}")
+            
             if next_url:
                 return HttpResponse(status=302, headers={'Location': next_url})
             else:

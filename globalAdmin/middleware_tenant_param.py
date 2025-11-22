@@ -42,6 +42,10 @@ class TenantParamMiddleware(MiddlewareMixin):
                 except (Empresa.DoesNotExist, Empresa.MultipleObjectsReturned):
                     pass
         
+        # 3. Intentar leer desde la sesión (si ya se estableció antes)
+        if not tenant_param:
+            tenant_param = request.session.get('tenant_schema_name', None)
+        
         if tenant_param:
             try:
                 with schema_context(get_public_schema_name()):
@@ -55,11 +59,14 @@ class TenantParamMiddleware(MiddlewareMixin):
                         # Guardar el hostname original
                         request._original_host = host
                         
+                        # Guardar el tenant en la sesión para mantenerlo en requests posteriores
+                        request.session['tenant_schema_name'] = tenant.schema_name
+                        
                         # Modificar el hostname para que TenantMainMiddleware lo detecte
                         request.META['HTTP_HOST'] = dominio.domain
                         request.META['SERVER_NAME'] = dominio.domain.split(':')[0]  # Sin puerto
                         
-                        sys.stdout.write(f'[TENANT PARAM] Tenant detectado: {tenant.schema_name} via parámetro\n')
+                        sys.stdout.write(f'[TENANT PARAM] Tenant detectado: {tenant.schema_name} via parámetro/sesión\n')
                         sys.stdout.write(f'[TENANT PARAM] Hostname modificado a: {dominio.domain}\n')
                         sys.stdout.flush()
                     else:
