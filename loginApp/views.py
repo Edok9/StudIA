@@ -352,8 +352,20 @@ def reportes(request):
     return render(request, "reporteria.html", {"formulario":formulario})
 
 def logoutProcess(request):
+    # Guardar información del tenant antes del logout para usarlo en el template
+    tenant_schema = None
+    tenant_nombre = None
+    if hasattr(request, 'tenant') and request.tenant:
+        tenant_schema = request.tenant.schema_name
+        tenant_nombre = request.tenant.nombre_empresa
+    
     logout(request)
-    return render(request, "logout.html")
+    
+    # Pasar la información del tenant como contexto al template
+    return render(request, "logout.html", {
+        'tenant_schema': tenant_schema,
+        'tenant_nombre': tenant_nombre
+    })
 
 
 def bienvenida(request):

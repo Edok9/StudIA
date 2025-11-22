@@ -6,7 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="{% static 'css/login.css' %}" type="text/css">
     <link href="https://fonts.googleapis.com/css2?family=Barlow:SemiBold&display=swap" rel="stylesheet">
-    <title>Logout - {{ request.tenant.nombre_empresa }}</title>
+    <title>Logout - {{ tenant_nombre }}</title>
 </head>
 <body> 
     <style>
@@ -33,7 +33,7 @@
 
 <header>
     <div class="header-content">
-        <img src="{% static 'img/inacap.jpg' %}" alt="Logo {{ request.tenant.nombre_empresa }}" class="header-icon">
+        <img src="{% static 'img/inacap.jpg' %}" alt="Logo {{ tenant_nombre }}" class="header-icon">
         <span>Saliendo del portal de Ayudantías</span>
     </div>
 </header>
@@ -41,14 +41,14 @@
 <div class="mt-14 flex-1 flex flex-col items-center justify-center gap-2 text-center px-4 "> 
     <div class="rounded-lg border bg-white text-black py-4 px-6"> 
         <h1 class="text-3xl font-bold mb-4">Sesión Finalizada</h1> 
-        <p>Gracias por usar el portal de ayudantías de {{ request.tenant.nombre_empresa }}.</p>
-        <a href="{% url 'index' %}" class="inline-block mt-4 bg-[#e9b303] text-black font-medium py-2 px-4 rounded-full">Login</a>
+        <p>Gracias por usar el portal de ayudantías de {{ tenant_nombre }}.</p>
+        <a href="/?tenant={{ tenant_schema|urlencode }}" class="inline-block mt-4 bg-[#e9b303] text-black font-medium py-2 px-4 rounded-full">Login</a>
     </div>
 </div>
 </div>
 <footer>
     <div class="footer-content">
-        Copyright {{ request.tenant.nombre_empresa }}, Todos los derechos reservados.
+        Copyright {{ tenant_nombre }}, Todos los derechos reservados.
     </div>
 </footer>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>

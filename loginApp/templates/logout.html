@@ -43,7 +43,7 @@
     <div class="rounded-lg border bg-white text-black py-4 px-6"> 
         <h1 class="text-3xl font-bold mb-4">Sesión Finalizada</h1> 
         <p>Gracias por usar el portal de ayudantías.</p>
-        <a href="{% url 'index' %}" class="inline-block mt-4 bg-[#e9b303] text-black font-medium py-2 px-4 rounded-full">Login</a>
+        <a href="/?tenant={{ tenant_schema|urlencode }}" class="inline-block mt-4 bg-[#e9b303] text-black font-medium py-2 px-4 rounded-full">Login</a>
     </div>
 </div>
 </div>
