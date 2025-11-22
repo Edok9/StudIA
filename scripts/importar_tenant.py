@@ -34,7 +34,16 @@ def importar_tenant(schema_name, fixture_file):
             print(f"[IMPORT] ✗ Error: El archivo '{fixture_file}' no existe")
             return False
         
-        # Importar datos dentro del schema del tenant
+        # 1. Primero ejecutar migraciones del tenant para asegurar que las tablas existan
+        print(f"[IMPORT] Ejecutando migraciones del tenant '{schema_name}'...")
+        try:
+            call_command('migrate_schemas', '--schema', schema_name, verbosity=1)
+            print(f"[IMPORT] ✓ Migraciones del tenant completadas")
+        except Exception as e:
+            print(f"[IMPORT] ⚠ Advertencia al ejecutar migraciones: {str(e)}")
+            print(f"[IMPORT] Continuando con la importación de datos...")
+        
+        # 2. Importar datos dentro del schema del tenant
         with schema_context(schema_name):
             print(f"[IMPORT] Ejecutando loaddata dentro del schema '{schema_name}'...")
             call_command('loaddata', fixture_file, verbosity=2)
