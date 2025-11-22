@@ -401,6 +401,8 @@ def tenant_impersonate(request, tenant_id):
     """
     Impersonar (entrar como) un tenant específico.
     """
+    from urllib.parse import quote
+    
     with schema_context(get_public_schema_name()):
         tenant = get_object_or_404(Empresa, id_empresa=tenant_id)
     
@@ -408,6 +410,17 @@ def tenant_impersonate(request, tenant_id):
     request.session['impersonated_tenant_id'] = tenant.id_empresa
     request.session['impersonated_tenant_schema'] = tenant.schema_name
     
+    # Si el tenant es "DUOC UC", redirigir usando el parámetro ?tenant=DUOC%20UC
+    if tenant.schema_name == 'DUOC UC' or tenant.nombre_empresa == 'DUOC UC':
+        protocol = 'https' if request.is_secure() else 'http'
+        host = request.get_host()
+        # Construir la URL con el parámetro tenant
+        tenant_param = quote(tenant.schema_name)
+        tenant_url = f"{protocol}://{host}/?tenant={tenant_param}"
+        messages.success(request, f'Redirigiendo a tenant: {tenant.nombre_empresa}')
+        return redirect(tenant_url)
+    
+    # Para otros tenants, usar el método original con dominios
     # Obtener el puerto del request actual
     port = request.get_port()
     if port not in [80, 443]:
