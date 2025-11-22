@@ -410,9 +410,18 @@ def tenant_impersonate(request, tenant_id):
     request.session['impersonated_tenant_id'] = tenant.id_empresa
     request.session['impersonated_tenant_schema'] = tenant.schema_name
     
-    # Si el tenant es "DUOC UC", redirigir usando el parámetro ?tenant=DUOC%20UC
-    if tenant.schema_name == 'DUOC UC' or tenant.nombre_empresa == 'DUOC UC':
-        # Usar directamente la URL de Render para DUOC UC
+    # Lista de tenants que deben usar el método de parámetro de query (útil para Render.com)
+    # Estos tenants no tienen subdominios configurados o se acceden vía parámetro
+    tenants_con_parametro = ['DUOC UC', 'INACAP']
+    
+    # Verificar si el tenant debe usar el método de parámetro de query
+    usar_parametro = (
+        tenant.schema_name in tenants_con_parametro or 
+        tenant.nombre_empresa in tenants_con_parametro
+    )
+    
+    if usar_parametro:
+        # Usar directamente la URL de Render con parámetro de query
         tenant_param = quote(tenant.schema_name)
         tenant_url = f"https://studia-8dmp.onrender.com/?tenant={tenant_param}"
         messages.success(request, f'Redirigiendo a tenant: {tenant.nombre_empresa}')
