@@ -166,10 +166,11 @@ try:
 except ImportError:
     DJ_DATABASE_URL_AVAILABLE = False
 
-# Detectar si estamos en un proceso de build (collectstatic, migrate, etc.)
+# Detectar si estamos en un proceso de build (solo collectstatic)
 # Durante el build, las variables de entorno de la base de datos pueden no estar disponibles
+# NOTA: No incluimos 'migrate' o 'migrate_schemas' porque necesitan conectarse a la BD
 import sys
-_is_build_process = any(arg in sys.argv for arg in ['collectstatic', 'migrate', 'migrate_schemas', 'makemigrations'])
+_is_build_process = 'collectstatic' in sys.argv
 
 # Intentar usar DATABASE_URL primero (para Render, Railway, etc.)
 database_url = os.getenv('DATABASE_URL')
