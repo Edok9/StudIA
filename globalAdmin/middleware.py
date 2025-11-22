@@ -18,6 +18,9 @@ class ForcePublicSchemaMiddleware(MiddlewareMixin):
     También establece el schema público en la conexión de base de datos.
     """
     def process_request(self, request):
+        import sys
+        sys.stdout.write(f'[FORCE PUBLIC] Procesando: {request.path}\n')
+        sys.stdout.flush()
         # Si la URL empieza con /global/, forzar el schema público
         if request.path.startswith('/global/'):
             # Primero, establecer el schema público en la conexión de base de datos
@@ -72,6 +75,15 @@ class ForcePublicSchemaMiddleware(MiddlewareMixin):
             if hasattr(request, '_saved_get_host'):
                 request.get_host = request._saved_get_host
                 delattr(request, '_saved_get_host')
+        
+        # Si la respuesta es 404 en la raíz y no hay tenant, redirigir al panel global
+        if response.status_code == 404 and request.path == '/':
+            import sys
+            sys.stdout.write('[FORCE PUBLIC] Detectado 404 en raíz, redirigiendo a /global/login/\n')
+            sys.stdout.flush()
+            from django.http import HttpResponseRedirect
+            return HttpResponseRedirect('/global/login/')
+        
         return response
 
 

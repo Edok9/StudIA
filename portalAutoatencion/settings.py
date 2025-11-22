@@ -85,6 +85,7 @@ MIDDLEWARE = [
     'api_mobile.middleware.ApiMobileTenantMiddleware',  # Para identificar tenant en API móvil
     'globalAdmin.middleware.ForcePublicSchemaMiddleware',  # Debe ir ANTES de TenantMainMiddleware
     'django_tenants.middleware.main.TenantMainMiddleware',
+    'globalAdmin.middleware.PublicRootMiddleware',  # Capturar 404 en raíz cuando no hay tenant
     'globalAdmin.middleware.PublicSchemaMiddleware',
     'globalAdmin.middleware.TenantThemeMiddleware',
     'django.middleware.security.SecurityMiddleware',
