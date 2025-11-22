@@ -148,6 +148,18 @@ _is_build_process = any(arg in sys.argv for arg in ['collectstatic', 'migrate', 
 # Intentar usar DATABASE_URL primero (para Render, Railway, etc.)
 database_url = os.getenv('DATABASE_URL')
 
+# Logging para debug (solo en producción)
+if os.getenv('RENDER') or os.getenv('DATABASE_URL'):
+    import sys
+    sys.stdout.write(f'[DB CONFIG] _is_build_process: {_is_build_process}\n')
+    sys.stdout.write(f'[DB CONFIG] DATABASE_URL presente: {bool(database_url)}\n')
+    sys.stdout.write(f'[DB CONFIG] DJ_DATABASE_URL_AVAILABLE: {DJ_DATABASE_URL_AVAILABLE}\n')
+    if database_url:
+        # Mostrar solo los primeros y últimos caracteres por seguridad
+        masked_url = database_url[:20] + '...' + database_url[-20:] if len(database_url) > 40 else '***'
+        sys.stdout.write(f'[DB CONFIG] DATABASE_URL (masked): {masked_url}\n')
+    sys.stdout.flush()
+
 # Prioridad 1: Si es un proceso de build, usar configuración dummy
 if _is_build_process:
     # Durante el build, usar una configuración de PostgreSQL dummy
@@ -179,6 +191,10 @@ if _is_build_process:
 elif database_url:
     # Intentar usar dj_database_url si está disponible
     if DJ_DATABASE_URL_AVAILABLE:
+        if os.getenv('RENDER') or os.getenv('DATABASE_URL'):
+            import sys
+            sys.stdout.write('[DB CONFIG] Usando dj_database_url para parsear DATABASE_URL\n')
+            sys.stdout.flush()
         db_config = dj_database_url.config(
             default=database_url,
             conn_max_age=600,
@@ -190,26 +206,46 @@ elif database_url:
         DATABASES = {
             'default': db_config
         }
+        if os.getenv('RENDER') or os.getenv('DATABASE_URL'):
+            import sys
+            sys.stdout.write(f'[DB CONFIG] Configurado con dj_database_url - HOST: {db_config.get("HOST", "N/A")}\n')
+            sys.stdout.flush()
     else:
         # Parsear DATABASE_URL manualmente si dj_database_url no está disponible
         # Formato: postgresql://user:password@host:port/database
+        if os.getenv('RENDER') or os.getenv('DATABASE_URL'):
+            import sys
+            sys.stdout.write('[DB CONFIG] Parseando DATABASE_URL manualmente\n')
+            sys.stdout.flush()
         from urllib.parse import urlparse
         parsed = urlparse(database_url)
+        db_host = parsed.hostname or 'localhost'
+        db_port = parsed.port or '5432'
+        db_name = parsed.path[1:] if parsed.path else 'postgres'  # Remover el / inicial
         DATABASES = {
             'default': {
                 'ENGINE': 'django_tenants.postgresql_backend',
-                'NAME': parsed.path[1:] if parsed.path else 'postgres',  # Remover el / inicial
+                'NAME': db_name,
                 'USER': parsed.username or 'postgres',
                 'PASSWORD': parsed.password or '',
-                'HOST': parsed.hostname or 'localhost',
-                'PORT': parsed.port or '5432',
+                'HOST': db_host,
+                'PORT': str(db_port),
                 'OPTIONS': {
                     'client_encoding': 'utf8'
                 }
             }
         }
+        if os.getenv('RENDER') or os.getenv('DATABASE_URL'):
+            import sys
+            sys.stdout.write(f'[DB CONFIG] Configurado manualmente - HOST: {db_host}, PORT: {db_port}, NAME: {db_name}\n')
+            sys.stdout.flush()
 # Prioridad 3: Fallback a variables individuales (desarrollo local)
 else:
+    if os.getenv('RENDER') or os.getenv('DATABASE_URL'):
+        import sys
+        sys.stdout.write('[DB CONFIG] WARNING: Usando fallback a variables individuales (no se encontró DATABASE_URL)\n')
+        sys.stdout.write(f'[DB CONFIG] DB_HOST: {os.getenv("DB_HOST", "localhost")}\n')
+        sys.stdout.flush()
     DATABASES = {
         'default': {
             'ENGINE': 'django_tenants.postgresql_backend',
