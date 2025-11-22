@@ -49,31 +49,40 @@ class TenantParamMiddleware(MiddlewareMixin):
         if tenant_param:
             try:
                 with schema_context(get_public_schema_name()):
-                    # Buscar el tenant por schema_name
-                    tenant = Empresa.objects.get(schema_name=tenant_param)
+                    # Buscar el tenant por schema_name (case-insensitive)
+                    try:
+                        tenant = Empresa.objects.get(schema_name__iexact=tenant_param)
+                    except Empresa.DoesNotExist:
+                        # Si no se encuentra con iexact, intentar exacto
+                        tenant = Empresa.objects.get(schema_name=tenant_param)
                     
                     # Lista de tenants que deben usar el método de parámetro de query (sin modificar hostname)
                     # Estos tenants no tienen subdominios funcionales en Render.com
-                    tenants_con_parametro = ['DUOC UC', 'INACAP']
+                    # Normalizar a minúsculas para comparación case-insensitive
+                    tenants_con_parametro = ['duoc uc', 'inacap']
+                    schema_name_lower = tenant.schema_name.lower()
+                    nombre_empresa_lower = tenant.nombre_empresa.lower() if tenant.nombre_empresa else ''
                     
-                    # Verificar si el tenant debe usar el método de parámetro de query
+                    # Verificar si el tenant debe usar el método de parámetro de query (case-insensitive)
                     usar_parametro = (
-                        tenant.schema_name in tenants_con_parametro or 
-                        tenant.nombre_empresa in tenants_con_parametro
+                        schema_name_lower in tenants_con_parametro or 
+                        nombre_empresa_lower in tenants_con_parametro
                     )
                     
                     if usar_parametro:
                         # Para estos tenants, necesitamos modificar el hostname para que TenantMainMiddleware lo reconozca
-                        # Usaremos el dominio del tenant si existe, o crearemos uno basado en el schema_name
-                        dominio = tenant.domains.filter(is_primary=True).first()
+                        # Siempre crear un dominio temporal basado en el schema_name para evitar problemas con dominios no funcionales
+                        # Esto es solo para que TenantMainMiddleware lo reconozca internamente
+                        dominio_temporal = tenant.schema_name.lower().replace(' ', '-').replace('_', '-')
+                        dominio_domain = f"{dominio_temporal}.studia-8dmp.onrender.com"
                         
+                        # Verificar si este dominio existe en la BD, si no, crearlo temporalmente en memoria
+                        # pero no lo guardamos, solo lo usamos para modificar el hostname
+                        dominio = tenant.domains.filter(domain__iexact=dominio_domain).first()
                         if not dominio:
-                            # Si no hay dominio, crear uno temporal basado en el schema_name
-                            # Esto es solo para que TenantMainMiddleware lo reconozca
-                            dominio_temporal = tenant.schema_name.lower().replace(' ', '-').replace('_', '-')
-                            dominio_domain = f"{dominio_temporal}.studia-8dmp.onrender.com"
-                        else:
-                            dominio_domain = dominio.domain
+                            # El dominio no existe en BD, pero lo usaremos temporalmente solo para el hostname
+                            sys.stdout.write(f'[TENANT PARAM] Usando dominio temporal: {dominio_domain}\n')
+                            sys.stdout.flush()
                         
                         # Guardar el hostname original
                         request._original_host = host

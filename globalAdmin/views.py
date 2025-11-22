@@ -412,12 +412,15 @@ def tenant_impersonate(request, tenant_id):
     
     # Lista de tenants que deben usar el método de parámetro de query (útil para Render.com)
     # Estos tenants no tienen subdominios configurados o se acceden vía parámetro
-    tenants_con_parametro = ['DUOC UC', 'INACAP']
+    # Normalizar a minúsculas para comparación case-insensitive
+    tenants_con_parametro = ['duoc uc', 'inacap']
+    schema_name_lower = tenant.schema_name.lower()
+    nombre_empresa_lower = tenant.nombre_empresa.lower() if tenant.nombre_empresa else ''
     
-    # Verificar si el tenant debe usar el método de parámetro de query
+    # Verificar si el tenant debe usar el método de parámetro de query (case-insensitive)
     usar_parametro = (
-        tenant.schema_name in tenants_con_parametro or 
-        tenant.nombre_empresa in tenants_con_parametro
+        schema_name_lower in tenants_con_parametro or 
+        nombre_empresa_lower in tenants_con_parametro
     )
     
     if usar_parametro:
