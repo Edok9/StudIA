@@ -34,6 +34,12 @@ ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS', '*').split(',') if os.getenv('ALLOWED
 # CSRF trusted origins - necesario para que el panel global funcione correctamente
 # En producción, se configura desde variables de entorno
 csrf_origins = os.getenv('CSRF_TRUSTED_ORIGINS', '')
+is_render = os.getenv('RENDER') is not None
+
+# Inicializar lista de orígenes confiables
+CSRF_TRUSTED_ORIGINS = []
+
+# Si hay variable de entorno, parsearla
 if csrf_origins:
     # Limpiar espacios y filtrar wildcards (Django no soporta wildcards en CSRF_TRUSTED_ORIGINS)
     CSRF_TRUSTED_ORIGINS = [
@@ -41,13 +47,19 @@ if csrf_origins:
         for origin in csrf_origins.split(',') 
         if origin.strip() and not origin.strip().endswith('*')
     ]
-    # Si estamos en Render, agregar el dominio específico si no está presente
-    if os.getenv('RENDER'):
-        render_domain = os.getenv('RENDER_EXTERNAL_URL') or 'https://studia-8dmp.onrender.com'
-        if render_domain not in CSRF_TRUSTED_ORIGINS:
-            CSRF_TRUSTED_ORIGINS.append(render_domain)
-else:
-    # Valores por defecto para desarrollo
+
+# Si estamos en Render, asegurar que el dominio esté incluido
+if is_render:
+    render_domain = os.getenv('RENDER_EXTERNAL_URL') or 'https://studia-8dmp.onrender.com'
+    if render_domain not in CSRF_TRUSTED_ORIGINS:
+        CSRF_TRUSTED_ORIGINS.append(render_domain)
+    # Logging para debug
+    import sys
+    sys.stdout.write(f'[CSRF] Configurado para Render - Orígenes: {CSRF_TRUSTED_ORIGINS}\n')
+    sys.stdout.flush()
+
+# Si no hay orígenes configurados y no estamos en Render, usar valores por defecto de desarrollo
+if not CSRF_TRUSTED_ORIGINS and not is_render:
     CSRF_TRUSTED_ORIGINS = [
         'http://localhost:8000',
         'http://127.0.0.1:8000',
