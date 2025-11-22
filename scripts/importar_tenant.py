@@ -17,6 +17,7 @@ django.setup()
 
 from django.core.management import call_command
 from django_tenants.utils import schema_context
+from django.db import connection
 from clientManager.models import Empresa
 
 
@@ -34,7 +35,39 @@ def importar_tenant(schema_name, fixture_file):
             print(f"[IMPORT] ✗ Error: El archivo '{fixture_file}' no existe")
             return False
         
-        # 1. Primero ejecutar migraciones del tenant para asegurar que las tablas existan
+        # 0. Verificar si el schema físico existe y crearlo si no existe
+        print(f"[IMPORT] Verificando si el schema físico existe...")
+        with connection.cursor() as cursor:
+            # Verificar si el schema existe en PostgreSQL
+            cursor.execute("""
+                SELECT schema_name 
+                FROM information_schema.schemata 
+                WHERE schema_name = %s
+            """, [schema_name.lower()])
+            schema_exists = cursor.fetchone() is not None
+        
+        if not schema_exists:
+            print(f"[IMPORT] El schema físico no existe. Creándolo...")
+            try:
+                # Crear el schema usando el método del tenant
+                tenant.auto_create_schema = True
+                tenant.save()
+                print(f"[IMPORT] ✓ Schema físico creado")
+            except Exception as e:
+                print(f"[IMPORT] ✗ Error al crear el schema: {str(e)}")
+                # Intentar crear el schema manualmente
+                try:
+                    with connection.cursor() as cursor:
+                        # Crear el schema en PostgreSQL (normalizar a minúsculas)
+                        cursor.execute(f'CREATE SCHEMA IF NOT EXISTS "{schema_name.lower()}"')
+                    print(f"[IMPORT] ✓ Schema físico creado manualmente")
+                except Exception as e2:
+                    print(f"[IMPORT] ✗ Error al crear el schema manualmente: {str(e2)}")
+                    return False
+        else:
+            print(f"[IMPORT] ✓ El schema físico ya existe")
+        
+        # 1. Ejecutar migraciones del tenant para asegurar que las tablas existan
         print(f"[IMPORT] Ejecutando migraciones del tenant '{schema_name}'...")
         try:
             # Usar migrate_schemas con --schema para ejecutar migraciones en el schema específico
