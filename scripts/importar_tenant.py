@@ -36,14 +36,13 @@ def importar_tenant(schema_name, fixture_file):
         
         # 1. Primero ejecutar migraciones del tenant para asegurar que las tablas existan
         print(f"[IMPORT] Ejecutando migraciones del tenant '{schema_name}'...")
-        with schema_context(schema_name):
-            try:
-                # Dentro del schema_context, usar el comando migrate normal
-                call_command('migrate', verbosity=1, interactive=False)
-                print(f"[IMPORT] ✓ Migraciones del tenant completadas")
-            except Exception as e:
-                print(f"[IMPORT] ⚠ Advertencia al ejecutar migraciones: {str(e)}")
-                print(f"[IMPORT] Continuando con la importación de datos...")
+        try:
+            # Usar migrate_schemas con --schema para ejecutar migraciones en el schema específico
+            call_command('migrate_schemas', '--schema', schema_name, '--run-syncdb', verbosity=1)
+            print(f"[IMPORT] ✓ Migraciones del tenant completadas")
+        except Exception as e:
+            print(f"[IMPORT] ⚠ Advertencia al ejecutar migraciones: {str(e)}")
+            print(f"[IMPORT] Continuando con la importación de datos...")
         
         # 2. Importar datos dentro del schema del tenant
         with schema_context(schema_name):
