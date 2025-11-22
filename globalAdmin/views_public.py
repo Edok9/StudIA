@@ -10,7 +10,7 @@ def public_index(request):
     Vista pública para la raíz cuando no se identifica un tenant.
     Redirige al panel de administración global.
     """
-    return redirect('global_admin:login')
+    return redirect('/global/login/')
 
 
 def public_welcome(request):
