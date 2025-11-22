@@ -29,7 +29,17 @@ def init_production():
     
     print("[INIT] Iniciando inicialización de producción...")
     
-    # 0. Ejecutar migraciones si es necesario
+    # 0. Verificar conexión a la base de datos antes de ejecutar migraciones
+    try:
+        from django.db import connection
+        connection.ensure_connection()
+        print("[INIT] ✓ Conexión a la base de datos verificada")
+    except Exception as e:
+        print(f"[INIT] ⚠ No se puede conectar a la base de datos: {str(e)}")
+        print("[INIT] ⚠ Las migraciones se ejecutarán en el siguiente intento")
+        return  # Salir temprano si no hay conexión a la BD
+    
+    # 1. Ejecutar migraciones si es necesario
     try:
         print("[INIT] Ejecutando migraciones del schema público...")
         call_command('migrate_schemas', '--shared', verbosity=0)
@@ -42,7 +52,7 @@ def init_production():
         print(f"[INIT] ⚠ Error ejecutando migraciones: {str(e)}")
         print("[INIT] ⚠ Continuando con la inicialización...")
     
-    # 1. Verificar/crear administrador global
+    # 2. Verificar/crear administrador global
     with schema_context(public_schema):
         admin_email = os.getenv('GLOBAL_ADMIN_EMAIL', '')
         admin_password = os.getenv('GLOBAL_ADMIN_PASSWORD', '')
