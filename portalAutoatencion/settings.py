@@ -35,7 +35,17 @@ ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS', '*').split(',') if os.getenv('ALLOWED
 # En producción, se configura desde variables de entorno
 csrf_origins = os.getenv('CSRF_TRUSTED_ORIGINS', '')
 if csrf_origins:
-    CSRF_TRUSTED_ORIGINS = csrf_origins.split(',')
+    # Limpiar espacios y filtrar wildcards (Django no soporta wildcards en CSRF_TRUSTED_ORIGINS)
+    CSRF_TRUSTED_ORIGINS = [
+        origin.strip() 
+        for origin in csrf_origins.split(',') 
+        if origin.strip() and not origin.strip().endswith('*')
+    ]
+    # Si estamos en Render, agregar el dominio específico si no está presente
+    if os.getenv('RENDER'):
+        render_domain = os.getenv('RENDER_EXTERNAL_URL') or 'https://studia-8dmp.onrender.com'
+        if render_domain not in CSRF_TRUSTED_ORIGINS:
+            CSRF_TRUSTED_ORIGINS.append(render_domain)
 else:
     # Valores por defecto para desarrollo
     CSRF_TRUSTED_ORIGINS = [
