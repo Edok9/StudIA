@@ -109,6 +109,7 @@ INSTALLED_APPS = SHARED_APPS + [app for app in TENANT_APPS if app not in SHARED_
 MIDDLEWARE = [
     'corsheaders.middleware.CorsMiddleware',  # Debe ir al principio
     'api_mobile.middleware.ApiMobileTenantMiddleware',  # Para identificar tenant en API móvil
+    'globalAdmin.middleware_tenant_param.TenantParamMiddleware',  # Detectar tenant desde parámetro (ANTES de TenantMainMiddleware)
     'globalAdmin.middleware.ForcePublicSchemaMiddleware',  # Debe ir ANTES de TenantMainMiddleware
     'django_tenants.middleware.main.TenantMainMiddleware',
     'globalAdmin.middleware_public.PublicRootMiddleware',  # Capturar 404 en raíz cuando no hay tenant

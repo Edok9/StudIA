@@ -22,11 +22,14 @@ from clientManager.models import Empresa, Dominio
 def actualizar_dominios_tenant():
     """
     Actualiza los dominios de los tenants para que apunten a Render.
+    Como Render no soporta subdominios automáticamente, usamos el dominio principal.
     """
-    # Dominio base de Render
+    # Dominio base de Render (sin subdominios)
     DOMINIO_BASE = "studia-8dmp.onrender.com"
     
     print(f"[DOMINIOS] Actualizando dominios de tenants para: {DOMINIO_BASE}")
+    print("[DOMINIOS] NOTA: Render no soporta subdominios automáticamente.")
+    print("[DOMINIOS] Los tenants se accederán usando: ?tenant=SCHEMA_NAME o /tenant/SCHEMA_NAME/")
     print()
     
     # Obtener todos los tenants
@@ -40,10 +43,9 @@ def actualizar_dominios_tenant():
         for tenant in tenants:
             print(f"[DOMINIOS] Procesando tenant: {tenant.schema_name}")
             
-            # Crear el nuevo dominio basado en el schema_name
-            # Convertir "DUOC UC" a "duoc" (minúsculas, sin espacios)
-            subdominio = tenant.schema_name.lower().replace(' ', '').replace('_', '')
-            nuevo_dominio = f"{subdominio}.{DOMINIO_BASE}"
+            # Usar el dominio principal directamente (sin subdominios)
+            # Esto permite que el middleware TenantParamMiddleware detecte el tenant
+            nuevo_dominio = DOMINIO_BASE
             
             # Eliminar dominios antiguos que no coincidan
             dominios_antiguos = tenant.domains.exclude(domain=nuevo_dominio)
