@@ -147,21 +147,9 @@ _is_build_process = any(arg in sys.argv for arg in ['collectstatic', 'migrate', 
 
 # Intentar usar DATABASE_URL primero (para Render, Railway, etc.)
 database_url = os.getenv('DATABASE_URL')
-if database_url and DJ_DATABASE_URL_AVAILABLE and not _is_build_process:
-    # Si hay DATABASE_URL y el módulo está disponible, usarla
-    # Pero solo si no estamos en un proceso de build
-    db_config = dj_database_url.config(
-        default=database_url,
-        conn_max_age=600,
-        conn_health_checks=True,
-    )
-    # Forzar el engine de django-tenants
-    db_config['ENGINE'] = 'django_tenants.postgresql_backend'
-    db_config.setdefault('OPTIONS', {})['client_encoding'] = 'utf8'
-    DATABASES = {
-        'default': db_config
-    }
-elif _is_build_process:
+
+# Prioridad 1: Si es un proceso de build, usar configuración dummy
+if _is_build_process:
     # Durante el build, usar una configuración de PostgreSQL dummy
     # django-tenants requiere PostgreSQL, pero no intentaremos conectarnos realmente
     # Usamos un host inválido para que falle rápido si intenta conectarse
@@ -187,8 +175,41 @@ elif _is_build_process:
         # No hacer nada durante el build
         pass
     db_base.BaseDatabaseWrapper.ensure_connection = noop_ensure_connection
+# Prioridad 2: Si hay DATABASE_URL, usarla (producción)
+elif database_url:
+    # Intentar usar dj_database_url si está disponible
+    if DJ_DATABASE_URL_AVAILABLE:
+        db_config = dj_database_url.config(
+            default=database_url,
+            conn_max_age=600,
+            conn_health_checks=True,
+        )
+        # Forzar el engine de django-tenants
+        db_config['ENGINE'] = 'django_tenants.postgresql_backend'
+        db_config.setdefault('OPTIONS', {})['client_encoding'] = 'utf8'
+        DATABASES = {
+            'default': db_config
+        }
+    else:
+        # Parsear DATABASE_URL manualmente si dj_database_url no está disponible
+        # Formato: postgresql://user:password@host:port/database
+        from urllib.parse import urlparse
+        parsed = urlparse(database_url)
+        DATABASES = {
+            'default': {
+                'ENGINE': 'django_tenants.postgresql_backend',
+                'NAME': parsed.path[1:] if parsed.path else 'postgres',  # Remover el / inicial
+                'USER': parsed.username or 'postgres',
+                'PASSWORD': parsed.password or '',
+                'HOST': parsed.hostname or 'localhost',
+                'PORT': parsed.port or '5432',
+                'OPTIONS': {
+                    'client_encoding': 'utf8'
+                }
+            }
+        }
+# Prioridad 3: Fallback a variables individuales (desarrollo local)
 else:
-    # Fallback a variables individuales (desarrollo local)
     DATABASES = {
         'default': {
             'ENGINE': 'django_tenants.postgresql_backend',
