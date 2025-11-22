@@ -63,8 +63,27 @@ class TenantParamMiddleware(MiddlewareMixin):
                     )
                     
                     if usar_parametro:
-                        # Para estos tenants, establecer el tenant directamente sin modificar el hostname
-                        # Esto permite que TenantMainMiddleware lo detecte correctamente
+                        # Para estos tenants, necesitamos modificar el hostname para que TenantMainMiddleware lo reconozca
+                        # Usaremos el dominio del tenant si existe, o crearemos uno basado en el schema_name
+                        dominio = tenant.domains.filter(is_primary=True).first()
+                        
+                        if not dominio:
+                            # Si no hay dominio, crear uno temporal basado en el schema_name
+                            # Esto es solo para que TenantMainMiddleware lo reconozca
+                            dominio_temporal = tenant.schema_name.lower().replace(' ', '-').replace('_', '-')
+                            dominio_domain = f"{dominio_temporal}.studia-8dmp.onrender.com"
+                        else:
+                            dominio_domain = dominio.domain
+                        
+                        # Guardar el hostname original
+                        request._original_host = host
+                        
+                        # Modificar el hostname para que TenantMainMiddleware lo detecte
+                        # Aunque el dominio no sea funcional en DNS, TenantMainMiddleware lo reconocerá
+                        request.META['HTTP_HOST'] = dominio_domain
+                        request.META['SERVER_NAME'] = dominio_domain.split(':')[0]  # Sin puerto
+                        
+                        # También establecer el tenant directamente para asegurar que esté disponible
                         from django.db import connection
                         request.tenant = tenant
                         connection.set_tenant(tenant)
@@ -73,8 +92,8 @@ class TenantParamMiddleware(MiddlewareMixin):
                         if hasattr(request, 'session'):
                             request.session['tenant_schema_name'] = tenant.schema_name
                         
-                        sys.stdout.write(f'[TENANT PARAM] Tenant detectado: {tenant.schema_name} via parámetro (método directo)\n')
-                        sys.stdout.write(f'[TENANT PARAM] Tenant establecido directamente en request y connection\n')
+                        sys.stdout.write(f'[TENANT PARAM] Tenant detectado: {tenant.schema_name} via parámetro\n')
+                        sys.stdout.write(f'[TENANT PARAM] Hostname modificado a: {dominio_domain} (solo para TenantMainMiddleware)\n')
                         sys.stdout.flush()
                     else:
                         # Para otros tenants, usar el método original con modificación de hostname
