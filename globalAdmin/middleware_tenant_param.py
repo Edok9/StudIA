@@ -65,13 +65,16 @@ class TenantParamMiddleware(MiddlewareMixin):
                     if usar_parametro:
                         # Para estos tenants, establecer el tenant directamente sin modificar el hostname
                         # Esto permite que TenantMainMiddleware lo detecte correctamente
+                        from django.db import connection
                         request.tenant = tenant
+                        connection.set_tenant(tenant)
                         
                         # Guardar el tenant en la sesión para mantenerlo en requests posteriores
                         if hasattr(request, 'session'):
                             request.session['tenant_schema_name'] = tenant.schema_name
                         
                         sys.stdout.write(f'[TENANT PARAM] Tenant detectado: {tenant.schema_name} via parámetro (método directo)\n')
+                        sys.stdout.write(f'[TENANT PARAM] Tenant establecido directamente en request y connection\n')
                         sys.stdout.flush()
                     else:
                         # Para otros tenants, usar el método original con modificación de hostname
