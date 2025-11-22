@@ -140,10 +140,16 @@ try:
 except ImportError:
     DJ_DATABASE_URL_AVAILABLE = False
 
+# Detectar si estamos en un proceso de build (collectstatic, migrate, etc.)
+# Durante el build, las variables de entorno de la base de datos pueden no estar disponibles
+import sys
+_is_build_process = any(arg in sys.argv for arg in ['collectstatic', 'migrate', 'migrate_schemas', 'makemigrations'])
+
 # Intentar usar DATABASE_URL primero (para Render, Railway, etc.)
 database_url = os.getenv('DATABASE_URL')
-if database_url and DJ_DATABASE_URL_AVAILABLE:
+if database_url and DJ_DATABASE_URL_AVAILABLE and not _is_build_process:
     # Si hay DATABASE_URL y el módulo está disponible, usarla
+    # Pero solo si no estamos en un proceso de build
     db_config = dj_database_url.config(
         default=database_url,
         conn_max_age=600,
@@ -154,6 +160,14 @@ if database_url and DJ_DATABASE_URL_AVAILABLE:
     db_config.setdefault('OPTIONS', {})['client_encoding'] = 'utf8'
     DATABASES = {
         'default': db_config
+    }
+elif _is_build_process:
+    # Durante el build, usar una configuración dummy que no intente conectarse
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.sqlite3',
+            'NAME': ':memory:',
+        }
     }
 else:
     # Fallback a variables individuales (desarrollo local)
