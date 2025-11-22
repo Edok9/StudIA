@@ -2,7 +2,7 @@
 // Cambiar esta URL según el entorno (desarrollo/producción)
 export const API_BASE_URL = __DEV__ 
   ? 'http://192.168.100.25:8000/api/mobile'  // Desarrollo - IP local configurada
-  : 'https://portal-autoatencion.onrender.com/api/mobile'; // Producción - Render.com
+  : 'https://studia-8dmp.onrender.com/api/mobile'; // Producción - Render.com
 
 // Colores de la aplicación
 export const COLORS = {
