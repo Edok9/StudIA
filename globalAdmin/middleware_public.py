@@ -15,11 +15,35 @@ class PublicRootMiddleware(MiddlewareMixin):
     para poder detectar cuando no se encontró un tenant.
     """
     def process_request(self, request):
-        # Si estamos en la raíz y no se ha identificado un tenant aún,
-        # verificar después de que TenantMainMiddleware se ejecute
+        # Si estamos en la raíz, verificar si estamos en el schema público
         if request.path == '/' and not request.path.startswith('/global/'):
-            # Marcar para verificar después en process_response
-            request._check_public_root = True
+            # Verificar si estamos en el schema público o no hay tenant
+            from django_tenants.utils import get_public_schema_name
+            public_schema = get_public_schema_name()
+            
+            try:
+                # Verificar el tenant actual (debe estar establecido por TenantMainMiddleware)
+                if hasattr(request, 'tenant'):
+                    tenant_schema = getattr(request.tenant, 'schema_name', None)
+                    sys.stdout.write(f'[PUBLIC ROOT] Tenant schema: {tenant_schema}, Path: {request.path}\n')
+                    sys.stdout.flush()
+                    
+                    # Si estamos en el schema público o no hay tenant, redirigir inmediatamente
+                    if tenant_schema == public_schema or tenant_schema is None:
+                        sys.stdout.write('[PUBLIC ROOT] Redirigiendo a /global/login/ (process_request)\n')
+                        sys.stdout.flush()
+                        return HttpResponseRedirect('/global/login/')
+                else:
+                    # No hay tenant, redirigir al panel global
+                    sys.stdout.write('[PUBLIC ROOT] No hay tenant, redirigiendo a /global/login/ (process_request)\n')
+                    sys.stdout.flush()
+                    return HttpResponseRedirect('/global/login/')
+            except Exception as e:
+                sys.stdout.write(f'[PUBLIC ROOT] ERROR en process_request: {str(e)}\n')
+                sys.stdout.flush()
+                # En caso de error, marcar para verificar después
+                request._check_public_root = True
+        
         return None
     
     def process_response(self, request, response):
