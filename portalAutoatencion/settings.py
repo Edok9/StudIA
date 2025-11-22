@@ -239,26 +239,48 @@ elif database_url:
             import sys
             sys.stdout.write(f'[DB CONFIG] Configurado manualmente - HOST: {db_host}, PORT: {db_port}, NAME: {db_name}\n')
             sys.stdout.flush()
-# Prioridad 3: Fallback a variables individuales (desarrollo local)
+# Prioridad 3: Fallback a variables individuales
 else:
-    if os.getenv('RENDER') or os.getenv('DATABASE_URL'):
+    # Verificar si estamos en Render o si las variables individuales están disponibles
+    db_host = os.getenv('DB_HOST')
+    db_name = os.getenv('DB_NAME')
+    db_user = os.getenv('DB_USER')
+    db_password = os.getenv('DB_PASSWORD')
+    db_port = os.getenv('DB_PORT')
+    
+    # Si estamos en Render o las variables están disponibles, usarlas
+    is_render = os.getenv('RENDER') is not None
+    has_db_vars = all([db_host, db_name, db_user, db_password])
+    
+    if is_render or os.getenv('DATABASE_URL') or has_db_vars:
         import sys
-        sys.stdout.write('[DB CONFIG] WARNING: Usando fallback a variables individuales (no se encontró DATABASE_URL)\n')
-        sys.stdout.write(f'[DB CONFIG] DB_HOST: {os.getenv("DB_HOST", "localhost")}\n')
+        sys.stdout.write('[DB CONFIG] Usando fallback a variables individuales\n')
+        sys.stdout.write(f'[DB CONFIG] is_render: {is_render}, has_db_vars: {has_db_vars}\n')
+        sys.stdout.write(f'[DB CONFIG] DB_HOST: {db_host or "NO CONFIGURADO"}\n')
+        sys.stdout.write(f'[DB CONFIG] DB_NAME: {db_name or "NO CONFIGURADO"}\n')
+        sys.stdout.write(f'[DB CONFIG] DB_USER: {db_user or "NO CONFIGURADO"}\n')
+        sys.stdout.write(f'[DB CONFIG] DB_PORT: {db_port or "NO CONFIGURADO"}\n')
         sys.stdout.flush()
+    
+    # Usar las variables si están disponibles, de lo contrario usar valores por defecto
     DATABASES = {
         'default': {
             'ENGINE': 'django_tenants.postgresql_backend',
-            'NAME': os.getenv('DB_NAME', 'postgres'),
-            'USER': os.getenv('DB_USER', 'postgres'),
-            'PASSWORD': os.getenv('DB_PASSWORD', 'postgres'),
-            'HOST': os.getenv('DB_HOST', 'localhost'),
-            'PORT': os.getenv('DB_PORT', '5432'),
+            'NAME': db_name or 'postgres',
+            'USER': db_user or 'postgres',
+            'PASSWORD': db_password or 'postgres',
+            'HOST': db_host or 'localhost',
+            'PORT': db_port or '5432',
             'OPTIONS': {
                 'client_encoding': 'utf8'
             }
         }
     }
+    
+    if is_render or os.getenv('DATABASE_URL') or has_db_vars:
+        import sys
+        sys.stdout.write(f'[DB CONFIG] Configuración final - HOST: {DATABASES["default"]["HOST"]}, PORT: {DATABASES["default"]["PORT"]}, NAME: {DATABASES["default"]["NAME"]}\n')
+        sys.stdout.flush()
 
 
 DATABASE_ROUTERS = (
