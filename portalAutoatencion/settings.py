@@ -35,6 +35,8 @@ ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS', '*').split(',') if os.getenv('ALLOWED
 # En producción, se configura desde variables de entorno
 csrf_origins = os.getenv('CSRF_TRUSTED_ORIGINS', '')
 is_render = os.getenv('RENDER') is not None
+# Detectar si estamos en producción (Render, Railway, etc.) por la presencia de DATABASE_URL o dominio onrender.com
+is_production = bool(os.getenv('DATABASE_URL')) or 'onrender.com' in os.getenv('ALLOWED_HOSTS', '')
 
 # Inicializar lista de orígenes confiables
 CSRF_TRUSTED_ORIGINS = []
@@ -48,18 +50,20 @@ if csrf_origins:
         if origin.strip() and not origin.strip().endswith('*')
     ]
 
-# Si estamos en Render, asegurar que el dominio esté incluido
-if is_render:
+# Si estamos en producción (Render), asegurar que el dominio esté incluido
+if is_render or is_production:
+    # Intentar obtener el dominio desde variables de entorno o usar el por defecto
     render_domain = os.getenv('RENDER_EXTERNAL_URL') or 'https://studia-8dmp.onrender.com'
     if render_domain not in CSRF_TRUSTED_ORIGINS:
         CSRF_TRUSTED_ORIGINS.append(render_domain)
     # Logging para debug
     import sys
-    sys.stdout.write(f'[CSRF] Configurado para Render - Orígenes: {CSRF_TRUSTED_ORIGINS}\n')
+    sys.stdout.write(f'[CSRF] Configurado para producción - Orígenes: {CSRF_TRUSTED_ORIGINS}\n')
+    sys.stdout.write(f'[CSRF] is_render: {is_render}, is_production: {is_production}\n')
     sys.stdout.flush()
 
-# Si no hay orígenes configurados y no estamos en Render, usar valores por defecto de desarrollo
-if not CSRF_TRUSTED_ORIGINS and not is_render:
+# Si no hay orígenes configurados y no estamos en producción, usar valores por defecto de desarrollo
+if not CSRF_TRUSTED_ORIGINS and not is_production:
     CSRF_TRUSTED_ORIGINS = [
         'http://localhost:8000',
         'http://127.0.0.1:8000',
