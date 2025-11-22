@@ -162,11 +162,19 @@ if database_url and DJ_DATABASE_URL_AVAILABLE and not _is_build_process:
         'default': db_config
     }
 elif _is_build_process:
-    # Durante el build, usar una configuración dummy que no intente conectarse
+    # Durante el build, usar una configuración de PostgreSQL dummy
+    # django-tenants requiere PostgreSQL, pero no intentaremos conectarnos realmente
     DATABASES = {
         'default': {
-            'ENGINE': 'django.db.backends.sqlite3',
-            'NAME': ':memory:',
+            'ENGINE': 'django_tenants.postgresql_backend',
+            'NAME': 'build_dummy',
+            'USER': 'build_dummy',
+            'PASSWORD': 'build_dummy',
+            'HOST': '127.0.0.1',
+            'PORT': '5432',
+            'OPTIONS': {
+                'connect_timeout': 0.1,  # Timeout muy corto
+            }
         }
     }
 else:
