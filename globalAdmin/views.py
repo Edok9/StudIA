@@ -412,30 +412,9 @@ def tenant_impersonate(request, tenant_id):
     
     # Si el tenant es "DUOC UC", redirigir usando el parámetro ?tenant=DUOC%20UC
     if tenant.schema_name == 'DUOC UC' or tenant.nombre_empresa == 'DUOC UC':
-        from django.conf import settings
-        import os
-        
-        # Detectar si estamos en producción (Render)
-        is_production = bool(os.getenv('DATABASE_URL')) or 'onrender.com' in os.getenv('ALLOWED_HOSTS', '')
-        
-        if is_production:
-            # En producción, usar el dominio de Render
-            render_domain = os.getenv('RENDER_EXTERNAL_URL') or 'https://studia-8dmp.onrender.com'
-            # Asegurarse de que tenga el protocolo
-            if not render_domain.startswith('http'):
-                render_domain = f"https://{render_domain}"
-            # Extraer solo el dominio sin protocolo para construir la URL
-            domain = render_domain.replace('https://', '').replace('http://', '')
-            protocol = 'https'
-            host = domain
-        else:
-            # En desarrollo, usar el host del request
-            protocol = 'https' if request.is_secure() else 'http'
-            host = request.get_host()
-        
-        # Construir la URL con el parámetro tenant
+        # Usar directamente la URL de Render para DUOC UC
         tenant_param = quote(tenant.schema_name)
-        tenant_url = f"{protocol}://{host}/?tenant={tenant_param}"
+        tenant_url = f"https://studia-8dmp.onrender.com/?tenant={tenant_param}"
         messages.success(request, f'Redirigiendo a tenant: {tenant.nombre_empresa}')
         return redirect(tenant_url)
     
